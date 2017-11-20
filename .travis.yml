@@ -38,8 +38,14 @@ jobs:
           secure:     LUnFb+O2+4KXLHOBa2WSzXTz4mp8gq/RGMih/JGHJYzXG7cIGKIloyN1UYt+eIXFuO1rUG0LlaJfKaifclQYtOrZdbAue1aA7mAPyPHhS+OVcC9l8extIo/617UVodas35TbR8vKw5heuCWi4I7phcC51omTJgU/fUOqnO2/Ra5AOKM/os45LqHgg4o6tgKtWm/zVHs2DoyuLIs93Tze9PkNnIyEJTMAU2SL0dJRJGRlccPosNVD+wSf0XoWd4NeeW63mnDrqLoChFynTXvfAJJ2Yv+XpD2BwyuCk//Yh1iic6dRZ4bpREf5Hou9QiKZwqhsIRxHoK09g7zPqwurkw7QWLQ0I4E4IGBcn9lA03FLrv+N2haxWfoJO06yHGeNU4sgTkDTegEI1HeQnU0eqPsqY4MLtlY8sWyt3S6edcFr4H5sgeqSwjgeeaSx+KxxnXfjtxgPKbjyw32ws71cLrJa2JUsNUpGCc3EemVY6f8PKfSA4ApTS3veaTSFCWlmpasjBAGpw3/lrI2YmEAfjs6XkJ2/W5Oh82kyi1JeXFo4Jc/ECICujzX4mg6qf5UgLClRNjD5e0yMGSnHzWg6OFNKT2OnsazrV3PI20Y8tCg5O4sJslDURk/uBYDM6NMG7Y/NYwS+P4C9apYQMyMo1dwOhedzCN5JcofpwSrJr9I=
         file_glob: true
         file: dist/*
+        on:
+          branch: master
+          tags: true
       - provider: pypi
         user: ymagis
         password:
           secure: PPn5Yq4sr4fkKODPLRv/4Z1Ljk+KLb48nH7WHdYTUNuoKDEVQ/bQ9H4dyOmQM9JHE53p5gpWobT4DhVaB6GZOw5WycZEbP/Z24fsa3GJZoezARV6bYBFKGC6Y+qwjeh91tHBF0Iq6qMGNFn1J9BJ2YIdyDJxtgxOaHIXNR0wjc0GrUNQi1KIBGQWXcqU3oqd44Nr0tryTDiIgaiccZ2VJTGVh1by7RpPWIJrZVlOHWj/mELXQ4Ar0Jy2DZDKtctVJwfNK0H6eCxlJ7fg9RpplXqQ8OYERrIssWP3mkCUYyB0MOmZu/F1r1mfZ8pdWqnce6mMB4BIlQBb7xeSKwqTB34UzD3+WLm+2AYOXNLLQHuAjOojJ6diis6vqDYKPMcIOE1ezJILd5UKPEUS2t/+Fuvden2q+mXScupapxObKJzTl7KZnWZvgRmh7tN4m8rs6IbDRqAZbg/Dv4gk3LDCoLPwnRpkd/MCMQ5cgqBNmD27MXhMHgKeD7CoZshhzAtAEU3bvhh7RdjlidhdiQ/SnmX2s9PEzGSVWXzkkx4ON1/ezkA0wkD9POjmFDAYq7/eEfmE+7zpGlqPFZYTzoq4oa6six8ZKjrdd/QJP0Hq2Tn5FMyrABiu9ZO2w3PCLPCrQa417I4f+BXHGmSc+sG49y7i4qnKHw9c7aRdGzl6NQc=
         distributions: sdist bdist_wheel
+        on:
+          branch: master
+          tags: true
