@@ -1,0 +1,51 @@
+# Make sure we run container based worker
+sudo: false
+dist: trusty
+
+language: python
+python:
+- '2.7'
+- '3.6'
+
+install:
+- pip install pipenv
+- pipenv install
+- pipenv check
+
+# This belong to default stage 'test'
+script:
+- pipenv run python -m compileall clairmeta
+- pipenv run python -m unittest tests.test_xml_utils
+- pipenv run python -m unittest tests.test_profile
+- pipenv run python -m unittest tests.test_license
+- pipenv run python -m unittest tests.test_doctest
+
+# Stage conditions
+stages:
+  - name: test
+    if: type IN (pull_request) OR tag =~ ^1
+  - name: deploy
+    if: tag =~ ^1
+
+# Jobs
+jobs:
+  include:
+  - stage: deploy
+    script:
+    - echo "Deploying to GitHub releases ..."
+    - python setup.py sdist bdist_wheel --universal
+    deploy:
+      - provider: releases
+        skip_cleanup: true
+        api_key:
+          secure:   KODaZbqUUrg0Effnu5+6Qf4GwjDJ5AajsMCIyB6xNniEiOjgoA638S/hdQ3AB5ySekmqd/l+J3diJbw3oiZ4+FTMmULtXiyd760xoMeZkCkyfz6qeGJaa8C0oFSXfSKkVzj1lKrp2XejmsjnL0OTU+8SRVwAdJfF57tusyUmM4SUd9rIjFrbO817+cxLFd05Dheh9w5E4AyYGK1uoYbtvWUpTyDj1g0cY1gj42fYsZAidz1I6Co/VVb9GCyjwHkKAmUV4K7iCFm5J/OFCUuZQCphcd1MawIdjXuYfADxtWm2/OKxzjYRcCJ100lYbHozEluJ0gXEuSjSf0P4fhgH9l1Y7FH9Zg2DgrrbTiKD54sKKjQWaM4tdHb2FqWk0E8sar2v/su4zcwW5t36KerE50qelYQ5v7h1p9zBNrTcPvJaVtvGyd7hXlpwsmulyoPKtg+Dq3PVCI6rvk6+7sSk/CdlT54Ps/ZZ/vilJpagxVM8THhF  cetjnxbbC8swE1Tx2CeESoAt2R1UKpgkW1ZtOgE3BjHxwFK4Dp/fewg2XgL+oslgL1VHik65K1N291Hal1W9NgEVN1b0w+CmuMxKwA51pvaEXVdrEwDJc5ypHc0m5pOyWDDwBpBkgeSe2D+2t0GuNN3nm41VTgfW1ZW6omHbxzIPSheGFdheMpEYdLE=
+        file_glob: true
+        file: dist/*
+        on:
+          branch: master
+          tags: true
+  #     # - provider: pypi
+  #     #   user: "Your username"
+  #     #   password:
+  #     #     secure: "Your encrypted password" # Generate with travis encrypt --add deploy.password
+  #     #   distributions: "sdist bdist_wheel"

@@ -1,0 +1,22 @@
+engines:
+  fixme:
+    enabled: true
+  pep8:
+    enabled: true
+  radon:
+    enabled: true
+  duplication:
+    enabled: true
+    config:
+      languages:
+      - python:
+
+ratings:
+  paths:
+  - clairmeta/**
+
+exclude_paths:
+- pkg/**/*
+- clairmeta/xsd/*
+- clairmeta/settings.py
+- tests/*

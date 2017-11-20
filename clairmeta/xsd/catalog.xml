@@ -1,0 +1,39 @@
+<?xml version="1.0"?>
+<catalog xmlns="urn:oasis:names:tc:entity:xmlns:xml:catalog">
+  <group prefer="public" xml:base="">
+
+    <public publicId="http://www.digicine.com/PROTO-ASDCP-AM-20040311#" uri="PROTO-ASDCP-AM-20040311.xsd"/>
+    <public publicId="http://www.digicine.com/PROTO-ASDCP-PKL-20040311#" uri="PROTO-ASDCP-PKL-20040311.xsd"/>
+    <public publicId="http://www.digicine.com/PROTO-ASDCP-CPL-20040511#" uri="PROTO-ASDCP-CPL-20040511.xsd"/>
+    <system systemId="http://www.digicine.com/PROTO-ASDCP-CPL-20040511.xsd" uri="PROTO-ASDCP-CPL-20040511.xsd"/>
+    <public publicId="http://www.digicine.com/schemas/437-Y/2007/Main-Stereo-Picture-CPL" uri="437-Y-2007-Main-Stereo-Picture-CPL.xsd"/>
+    <system systemId="http://www.digicine.com/schemas/437-Y/2007/Main-Stereo-Picture-CPL.xsd" uri="437-Y-2007-Main-Stereo-Picture-CPL.xsd"/>
+    <public publicId="interop_subtitle" uri="DCSubtitle.v1.mattsson.xsd"/>
+
+    <public publicId="http://www.smpte-ra.org/schemas/429-9/2007/AM" uri="SMPTE-429-9-2007-AM.xsd"/>
+    <public publicId="http://www.smpte-ra.org/schemas/429-8/2007/PKL" uri="SMPTE-429-8-2006-PKL.xsd"/>
+    <!-- Always use CPL-Metadata extended schema to check SMPTE CPL -->
+    <public publicId="http://www.smpte-ra.org/schemas/429-7/2006/CPL" uri="SMPTE-429-16-2014-CPL-Metadata.xsd"/>
+    <public publicId="http://www.smpte-ra.org/schemas/429-16/2014/CPL-Metadata" uri="SMPTE-429-16-2014-CPL-Metadata.xsd"/>
+    <public publicId="http://www.smpte-ra.org/schemas/429-10/2008/Main-Stereo-Picture-CPL" uri="SMPTE-429-10-2008-Main-Stereo-Picture-CPL.xsd"/>
+    <public publicId="http://www.smpte-ra.org/schemas/428-7/2007/DCST" uri="DCDMSubtitle-2007.xsd"/>
+    <public publicId="http://www.smpte-ra.org/schemas/428-7/2010/DCST" uri="DCDMSubtitle-2010.xsd"/>
+    <public publicId="http://www.smpte-ra.org/schemas/428-7/2014/DCST" uri="DCDMSubtitle-2014.xsd"/>
+
+    <public publicId="http://www.w3.org/XML/1998/namespace" uri="xml.xsd"/>
+    <system systemId="http://www.w3.org/2001/03/xml.xsd" uri="xml.xsd"/>
+    <system systemId="http://www.w3.org/2001/xml.xsd" uri="xml.xsd"/>
+
+    <public publicId="http://www.w3.org/2001/XMLSchema" uri="XMLSchema.xsd"/>
+    <public publicId="http://www.w3.org/2001/XMLSchema-instance" uri="XMLSchema.xsd"/>
+    <system systemId="http://www.w3.org/2001/XMLSchema.xsd" uri="XMLSchema.xsd"/>
+
+    <public publicId="http://www.w3.org/2001/04/xmlenc#" uri="xenc-schema.xsd"/>
+    <system systemId="http://www.w3.org/TR/2002/REC-xmlenc-core-20021210/xenc-schema.xsd" uri="xenc-schema.xsd"/>
+
+    <public publicId="http://www.w3.org/2000/09/xmldsig#" uri="xmldsig-core-schema.xsd"/>
+    <public publicId="http://www.w3.org/TR/2002/REC-xmldsig-core-20020212/xmldsig-core-schema" uri="xmldsig-core-schema.xsd"/>
+    <system systemId="http://www.w3.org/TR/2002/REC-xmldsig-core-20020212/xmldsig-core-schema.xsd" uri="xmldsig-core-schema.xsd"/>
+
+  </group>
+</catalog>

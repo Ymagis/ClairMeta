@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Schema for Interop Asset Map namespace -->
+<!-- Assembled from mpeg_ii_am_spec.doc 2004-11-23 -->
+
+<xs:schema
+  targetNamespace="http://www.digicine.com/PROTO-ASDCP-AM-20040311#"
+  xmlns:xs="http://www.w3.org/2001/XMLSchema"
+  xmlns:cpl="http://www.digicine.com/PROTO-ASDCP-CPL-20040511#"
+  xmlns:am="http://www.digicine.com/PROTO-ASDCP-AM-20040311#"
+  elementFormDefault="qualified" attributeFormDefault="unqualified">
+
+<!--The following xs:import statements should not really be here, but are
+    provided so that XMLSpy will validate the schema itself, independently
+    of an instance of a Asset Map
+-->
+<xs:import namespace="http://www.digicine.com/PROTO-ASDCP-CPL-20040511#"
+    schemaLocation="http://www.digicine.com/PROTO-ASDCP-CPL-20040511.xsd"/>
+
+  <!-- Asset Map Type -->
+  <xs:element name="AssetMap" type="am:AssetMapType"/>
+    <xs:complexType name="AssetMapType">
+      <xs:sequence>
+        <xs:element name="Id" type="cpl:UUID"/>
+        <xs:element name="AnnotationText" type="cpl:UserText" minOccurs="0"/>
+        <xs:element name="VolumeCount" type="xs:positiveInteger"/>
+        <xs:element name="IssueDate" type="xs:dateTime"/>
+        <xs:element name="Issuer" type="cpl:UserText"/>
+        <xs:element name="Creator" type="cpl:UserText"/>
+        <xs:element name="AssetList">
+          <xs:complexType>
+            <xs:sequence>
+              <xs:element ref="am:Asset" maxOccurs="unbounded"/>
+            </xs:sequence>
+          </xs:complexType>
+        </xs:element>
+      </xs:sequence>
+    </xs:complexType>
+
+  <!-- Asset Type -->
+  <xs:element name="Asset" type="am:AssetType"/>
+  <xs:complexType name="AssetType">
+    <xs:sequence>
+      <xs:element name="Id" type="cpl:UUID"/>
+      <xs:element name="AnnotationText" type="cpl:UserText" minOccurs="0"/>
+      <xs:element name="PackingList" minOccurs="0"/>
+      <xs:element name="ChunkList">
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element ref="am:Chunk" maxOccurs="unbounded"/>
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+    </xs:sequence>
+  </xs:complexType>
+
+  <!-- Chunk Type -->
+  <xs:element name="Chunk" type="am:ChunkType"/>
+    <xs:complexType name="ChunkType">
+      <xs:sequence>
+        <xs:element name="Path" type="xs:string"/>
+        <xs:element name="VolumeIndex" type="xs:positiveInteger" minOccurs="0"/>
+        <xs:element name="Offset" type="xs:nonNegativeInteger" minOccurs="0"/>
+        <xs:element name="Length" type="xs:positiveInteger" minOccurs="0"/>
+      </xs:sequence>
+    </xs:complexType>
+
+</xs:schema>

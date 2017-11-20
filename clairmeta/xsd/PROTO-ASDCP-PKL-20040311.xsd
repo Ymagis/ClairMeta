@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Schema for Interop Asset Map namespace -->
+<!-- Assembled from mpeg_ii_am_spec.doc 2004-11-23 -->
+
+<xs:schema
+  targetNamespace="http://www.digicine.com/PROTO-ASDCP-PKL-20040311#"
+  xmlns:ds="http://www.w3.org/2000/09/xmldsig#"
+  xmlns:xs="http://www.w3.org/2001/XMLSchema"
+  xmlns:pkl="http://www.digicine.com/PROTO-ASDCP-PKL-20040311#"
+  xmlns:cpl="http://www.digicine.com/PROTO-ASDCP-CPL-20040511#"
+  elementFormDefault="qualified" attributeFormDefault="unqualified">
+
+<!--The following xs:import statements should not really be here, but are
+    provided so that XMLSpy will validate the schema itself, independently
+    of an instance of a Packing List
+-->
+<xs:import namespace="http://www.digicine.com/PROTO-ASDCP-CPL-20040511#"
+  schemaLocation="http://www.digicine.com/PROTO-ASDCP-CPL-20040511.xsd"/>
+<xs:import namespace="http://www.w3.org/2000/09/xmldsig#"
+  schemaLocation="http://www.w3.org/TR/2002/REC-xmldsig-core-20020212/xmldsig-core-schema.xsd"/>
+<xs:import namespace="http://www.w3.org/XML/1998/namespace"
+  schemaLocation="http://www.w3.org/2001/03/xml.xsd"/>
+
+<!-- Packing List Type -->
+  <xs:element name="PackingList" type="pkl:PackingListType"/>
+  <xs:complexType name="PackingListType">
+    <xs:sequence>
+      <xs:element name="Id" type="cpl:UUID"/>
+      <xs:element name="AnnotationText" type="cpl:UserText" minOccurs="0"/>
+      <xs:element name="IconId" type="cpl:UUID" minOccurs="0"/>
+      <xs:element name="IssueDate" type="xs:dateTime"/>
+      <xs:element name="Issuer" type="cpl:UserText"/>
+      <xs:element name="Creator" type="cpl:UserText"/>
+      <xs:element name="AssetList">
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element ref="pkl:Asset" maxOccurs="unbounded"/>
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+      <xs:element name="Signer" type="ds:KeyInfoType" minOccurs="0"/>
+      <xs:element ref="ds:Signature" minOccurs="0"/>
+    </xs:sequence>
+  </xs:complexType>
+
+<!-- Asset Type -->
+  <xs:element name="Asset" type="pkl:AssetType"/>
+  <xs:complexType name="AssetType">
+    <xs:sequence>
+      <xs:element name="Id" type="cpl:UUID"/>
+      <xs:element name="AnnotationText" type="cpl:UserText" minOccurs="0"/>
+      <xs:element name="Hash" type="xs:base64Binary" minOccurs="0"/>
+      <xs:element name="Size" type="xs:positiveInteger"/>
+      <xs:element name="Type" type="xs:string"/>
+      <xs:element name="OriginalFileName" type="xs:string" minOccurs="0"/>
+    </xs:sequence>
+  </xs:complexType>
+
+</xs:schema>
+

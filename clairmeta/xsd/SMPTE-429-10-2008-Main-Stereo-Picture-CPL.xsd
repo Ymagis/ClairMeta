@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xs:schema targetNamespace="http://www.smpte-ra.org/schemas/429-10/2008/Main-Stereo-Picture-CPL"
+  xmlns:xs="http://www.w3.org/2001/XMLSchema"
+  xmlns:cpl="http://www.smpte-ra.org/schemas/429-7/2006/CPL"
+  elementFormDefault="qualified" attributeFormDefault="unqualified">
+  <xs:import namespace="http://www.smpte-ra.org/schemas/429-7/2006/CPL"/>
+  <!--MainStereoscopicPicture-->
+  <xs:element name="MainStereoscopicPicture" type="cpl:PictureTrackFileAssetType"/>
+</xs:schema>
+

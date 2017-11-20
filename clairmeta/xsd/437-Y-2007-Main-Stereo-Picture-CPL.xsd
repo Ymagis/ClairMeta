@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xs:schema targetNamespace="http://www.digicine.com/schemas/437-Y/2007/Main-Stereo-Picture-CPL"
+  xmlns:xs="http://www.w3.org/2001/XMLSchema"
+  xmlns:cpl="http://www.digicine.com/PROTO-ASDCP-CPL-20040511#"
+  elementFormDefault="qualified" attributeFormDefault="unqualified">
+  <xs:import namespace="http://www.w3.org/XML/1998/namespace" schemaLocation="http://www.w3.org/2001/03/xml.xsd"/>
+  <xs:import namespace="http://www.digicine.com/PROTO-ASDCP-CPL-20040511#" schemaLocation="http://www.digicine.com/PROTO-ASDCP-CPL-20040511.xsd"/>
+  <!--MainStereoscopicPicture-->
+  <xs:element name="MainStereoscopicPicture" type="cpl:PictureTrackFileAssetType"/>
+</xs:schema>
+

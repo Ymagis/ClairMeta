@@ -1,0 +1,147 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xs:schema
+    xmlns:xs="http://www.w3.org/2001/XMLSchema"
+    targetNamespace="http://www.smpte-ra.org/schemas/429-16/2014/CPL-Metadata"
+    xmlns:cpl="http://www.smpte-ra.org/schemas/429-7/2006/CPL"
+    xmlns:meta="http://www.smpte-ra.org/schemas/429-16/2014/CPL-Metadata"
+    attributeFormDefault="unqualified"
+    elementFormDefault="qualified">
+
+    <xs:import namespace="http://www.smpte-ra.org/schemas/429-7/2006/CPL"
+        schemaLocation="SMPTE-429-7-2006-CPL.xsd"/>
+
+    <xs:element name="CompositionMetadataAsset" type="meta:CompositionMetadataAssetType"/>
+
+    <xs:complexType name="CompositionMetadataAssetType">
+        <xs:complexContent>
+            <xs:extension base="cpl:GenericAssetType">
+                <xs:sequence>
+                    <xs:element name="FullContentTitleText" type="cpl:UserText"/>
+                    <xs:element name="ReleaseTerritory" minOccurs="0">
+                        <xs:complexType>
+                            <xs:simpleContent>
+                                <xs:extension base="xs:string">
+                                    <xs:attribute default="http://www.smpte-ra.org/schemas/429-16/2014/CPL-Metadata#scope/release-territory/UNM49" name="scope" type="xs:anyURI"/>
+                                </xs:extension>
+                            </xs:simpleContent>
+                        </xs:complexType>
+                    </xs:element>
+                    <xs:element name="VersionNumber" default="1" minOccurs="0">
+                        <xs:complexType>
+                            <xs:simpleContent>
+                                <xs:extension base="xs:nonNegativeInteger">
+                                    <xs:attribute default="final" name="status" type="meta:StatusEnum"/>
+                                </xs:extension>
+                            </xs:simpleContent>
+                        </xs:complexType>
+                    </xs:element>
+                    <xs:element name="Chain" type="xs:string" minOccurs="0"/>
+                    <xs:element name="Distributor" type="xs:string" minOccurs="0"/>
+                    <xs:element name="Facility" type="xs:string" minOccurs="0"/>
+                    <xs:element minOccurs="0" name="AlternateContentVersionList">
+                        <xs:complexType>
+                            <xs:sequence>
+                                <xs:element maxOccurs="unbounded" minOccurs="1" name="ContentVersion" type="cpl:ContentVersionType"/>
+                            </xs:sequence>
+                        </xs:complexType>
+                    </xs:element>
+                    <xs:element minOccurs="0" name="Luminance">
+                        <xs:complexType>
+                            <xs:simpleContent>
+                                <xs:extension base="meta:PositiveDecimal">
+                                    <xs:attribute name="units" type="meta:LuminanceUnitEnum" use="required"/>
+                                </xs:extension>
+                            </xs:simpleContent>
+                        </xs:complexType>
+                    </xs:element>
+                    <xs:element name="MainSoundConfiguration" minOccurs="1" type="xs:string"/>
+                    <xs:element name="MainSoundSampleRate" minOccurs="1" type="cpl:Rational"/>
+                    <xs:element name="MainPictureStoredArea" minOccurs="1">
+                        <xs:complexType>
+                            <xs:sequence>
+                                <xs:element name="Width" type="xs:positiveInteger"/>
+                                <xs:element name="Height" type="xs:positiveInteger"/>
+                            </xs:sequence>
+                        </xs:complexType>
+                    </xs:element>
+                    <xs:element name="MainPictureActiveArea" minOccurs="1">
+                        <xs:complexType>
+                            <xs:sequence>
+                                <xs:element name="Width" type="xs:positiveInteger"/>
+                                <xs:element name="Height" type="xs:positiveInteger"/>
+                            </xs:sequence>
+                        </xs:complexType>
+                    </xs:element>
+                    <xs:element minOccurs="0" name="MainSubtitleLanguageList">
+                        <xs:simpleType>
+                            <xs:restriction base="meta:LanguageListType">
+                                <xs:minLength value="1"/>
+                            </xs:restriction>
+                        </xs:simpleType>
+                    </xs:element>
+                    <xs:element minOccurs="0" name="ExtensionMetadataList">
+                        <xs:complexType>
+                            <xs:sequence>
+                                <xs:element name="ExtensionMetadata" maxOccurs="unbounded" minOccurs="0" type="meta:ExtensionMetadataType"></xs:element>
+                            </xs:sequence>
+                        </xs:complexType>
+                    </xs:element>
+                    <xs:any maxOccurs="unbounded" minOccurs="0" namespace="##other" processContents="lax"/>
+                </xs:sequence>
+            </xs:extension>
+        </xs:complexContent>
+    </xs:complexType>
+
+    <xs:simpleType name="StatusEnum">
+        <xs:restriction base="xs:token">
+            <xs:enumeration value="final"/>
+            <xs:enumeration value="temp"/>
+            <xs:enumeration value="pre"/>
+        </xs:restriction>
+    </xs:simpleType>
+
+    <xs:simpleType name="LuminanceUnitEnum">
+        <xs:restriction base="xs:token">
+            <xs:enumeration value="foot-lambert"/>
+            <xs:enumeration value="candela-per-square-metre"/>
+        </xs:restriction>
+    </xs:simpleType>
+
+    <xs:simpleType name="PositiveDecimal">
+        <xs:restriction base="xs:decimal">
+            <xs:minExclusive value="0"/>
+        </xs:restriction>
+    </xs:simpleType>
+
+    <xs:simpleType name="LanguageListType">
+        <xs:restriction>
+            <xs:simpleType>
+                <xs:list itemType="xs:language"/>
+            </xs:simpleType>
+        </xs:restriction>
+    </xs:simpleType>
+
+    <xs:complexType name="ExtensionMetadataType">
+        <xs:sequence>
+            <xs:element name="Name" type="xs:string"/>
+            <xs:element minOccurs="0" name="PropertyList">
+                <xs:complexType>
+                    <xs:sequence>
+                        <xs:element name="Property" maxOccurs="unbounded">
+                            <xs:complexType>
+                                <xs:sequence>
+                                    <xs:element name="Name" type="xs:string"/>
+                                    <xs:element name="Value" type="xs:string"/>
+                                </xs:sequence>
+                            </xs:complexType>
+                        </xs:element>
+                    </xs:sequence>
+                </xs:complexType>
+            </xs:element>
+            <xs:any namespace="##other" maxOccurs="unbounded" minOccurs="0" processContents="lax"/>
+
+        </xs:sequence>
+        <xs:attribute name="scope" type="xs:anyURI" use="required"/>
+    </xs:complexType>
+
+</xs:schema>
