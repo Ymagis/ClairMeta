@@ -32,20 +32,17 @@ jobs:
   include:
   - stage: deploy
     script:
-    - echo "Deploying to GitHub releases ..."
+    - echo "Deploying..."
     - python setup.py sdist bdist_wheel --universal
     deploy:
       - provider: releases
         skip_cleanup: true
         api_key:
-          secure:   KODaZbqUUrg0Effnu5+6Qf4GwjDJ5AajsMCIyB6xNniEiOjgoA638S/hdQ3AB5ySekmqd/l+J3diJbw3oiZ4+FTMmULtXiyd760xoMeZkCkyfz6qeGJaa8C0oFSXfSKkVzj1lKrp2XejmsjnL0OTU+8SRVwAdJfF57tusyUmM4SUd9rIjFrbO817+cxLFd05Dheh9w5E4AyYGK1uoYbtvWUpTyDj1g0cY1gj42fYsZAidz1I6Co/VVb9GCyjwHkKAmUV4K7iCFm5J/OFCUuZQCphcd1MawIdjXuYfADxtWm2/OKxzjYRcCJ100lYbHozEluJ0gXEuSjSf0P4fhgH9l1Y7FH9Zg2DgrrbTiKD54sKKjQWaM4tdHb2FqWk0E8sar2v/su4zcwW5t36KerE50qelYQ5v7h1p9zBNrTcPvJaVtvGyd7hXlpwsmulyoPKtg+Dq3PVCI6rvk6+7sSk/CdlT54Ps/ZZ/vilJpagxVM8THhF  cetjnxbbC8swE1Tx2CeESoAt2R1UKpgkW1ZtOgE3BjHxwFK4Dp/fewg2XgL+oslgL1VHik65K1N291Hal1W9NgEVN1b0w+CmuMxKwA51pvaEXVdrEwDJc5ypHc0m5pOyWDDwBpBkgeSe2D+2t0GuNN3nm41VTgfW1ZW6omHbxzIPSheGFdheMpEYdLE=
+          secure:     LUnFb+O2+4KXLHOBa2WSzXTz4mp8gq/RGMih/JGHJYzXG7cIGKIloyN1UYt+eIXFuO1rUG0LlaJfKaifclQYtOrZdbAue1aA7mAPyPHhS+OVcC9l8extIo/617UVodas35TbR8vKw5heuCWi4I7phcC51omTJgU/fUOqnO2/Ra5AOKM/os45LqHgg4o6tgKtWm/zVHs2DoyuLIs93Tze9PkNnIyEJTMAU2SL0dJRJGRlccPosNVD+wSf0XoWd4NeeW63mnDrqLoChFynTXvfAJJ2Yv+XpD2BwyuCk//Yh1iic6dRZ4bpREf5Hou9QiKZwqhsIRxHoK09g7zPqwurkw7QWLQ0I4E4IGBcn9lA03FLrv+N2haxWfoJO06yHGeNU4sgTkDTegEI1HeQnU0eqPsqY4MLtlY8sWyt3S6edcFr4H5sgeqSwjgeeaSx+KxxnXfjtxgPKbjyw32ws71cLrJa2JUsNUpGCc3EemVY6f8PKfSA4ApTS3veaTSFCWlmpasjBAGpw3/lrI2YmEAfjs6XkJ2/W5Oh82kyi1JeXFo4Jc/ECICujzX4mg6qf5UgLClRNjD5e0yMGSnHzWg6OFNKT2OnsazrV3PI20Y8tCg5O4sJslDURk/uBYDM6NMG7Y/NYwS+P4C9apYQMyMo1dwOhedzCN5JcofpwSrJr9I=
         file_glob: true
         file: dist/*
-        on:
-          branch: master
-          tags: true
-  #     # - provider: pypi
-  #     #   user: "Your username"
-  #     #   password:
-  #     #     secure: "Your encrypted password" # Generate with travis encrypt --add deploy.password
-  #     #   distributions: "sdist bdist_wheel"
+      - provider: pypi
+        user: ymagis
+        password:
+          secure: PPn5Yq4sr4fkKODPLRv/4Z1Ljk+KLb48nH7WHdYTUNuoKDEVQ/bQ9H4dyOmQM9JHE53p5gpWobT4DhVaB6GZOw5WycZEbP/Z24fsa3GJZoezARV6bYBFKGC6Y+qwjeh91tHBF0Iq6qMGNFn1J9BJ2YIdyDJxtgxOaHIXNR0wjc0GrUNQi1KIBGQWXcqU3oqd44Nr0tryTDiIgaiccZ2VJTGVh1by7RpPWIJrZVlOHWj/mELXQ4Ar0Jy2DZDKtctVJwfNK0H6eCxlJ7fg9RpplXqQ8OYERrIssWP3mkCUYyB0MOmZu/F1r1mfZ8pdWqnce6mMB4BIlQBb7xeSKwqTB34UzD3+WLm+2AYOXNLLQHuAjOojJ6diis6vqDYKPMcIOE1ezJILd5UKPEUS2t/+Fuvden2q+mXScupapxObKJzTl7KZnWZvgRmh7tN4m8rs6IbDRqAZbg/Dv4gk3LDCoLPwnRpkd/MCMQ5cgqBNmD27MXhMHgKeD7CoZshhzAtAEU3bvhh7RdjlidhdiQ/SnmX2s9PEzGSVWXzkkx4ON1/ezkA0wkD9POjmFDAYq7/eEfmE+7zpGlqPFZYTzoq4oa6six8ZKjrdd/QJP0Hq2Tn5FMyrABiu9ZO2w3PCLPCrQa417I4f+BXHGmSc+sG49y7i4qnKHw9c7aRdGzl6NQc=
+        distributions: sdist bdist_wheel
