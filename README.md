@@ -1,4 +1,5 @@
 [![Build Status](https://travis-ci.org/Ymagis/ClairMeta.svg?branch=1.0.0b1)](https://travis-ci.org/Ymagis/ClairMeta)
+[![PyPI version](https://badge.fury.io/py/clairmeta.svg)](https://badge.fury.io/py/clairmeta)
 
 # Clairmeta
 
