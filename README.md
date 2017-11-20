@@ -1,3 +1,5 @@
+[![Build Status](https://travis-ci.org/Ymagis/ClairMeta.svg?branch=1.0.0b1)](https://travis-ci.org/Ymagis/ClairMeta)
+
 # Clairmeta
 
 Clairmeta is a python package for Digital Cinema Package (DCP) probing and checking.
