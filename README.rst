@@ -155,14 +155,17 @@ the settings file.
 Contributing
 ------------
 
--  To setup your environment, use pipenv : \``\` pip install pipenv
+-  To setup your environment, use pipenv :
 
 ::
 
-   git clone … cd clairmeta pipenv install [–two]
+   pip install pipenv
+   git clone https://github.com/Ymagis/ClairMeta.git
+   cd clairmeta
+   pipenv install [–two]
    pipenv check
    pipenv shell
-   ...
+   # Code...
    exit
 
 -  Open a Pull Request
