@@ -30,7 +30,7 @@ jobs:
   - stage: deploy
     script:
     - echo "Deploying..."
-    - python setup.py sdist bdist_wheel --universal
+    - python setup.py sdist bdist_wheel
     deploy:
       - provider: releases
         skip_cleanup: true
