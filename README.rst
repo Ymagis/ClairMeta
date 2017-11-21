@@ -144,15 +144,17 @@ Custom profile check :
 Logging
 ~~~~~~~
 
-All check results are logged to stdout and a rotating file specified in
-the settings file.
+Logging is customizable, see settings.py file or below. By default Clairmeta
+log to stdout and a rotated log file.
 
 ::
 
-    'filename': '~/Library/Logs/clairmeta.log',
-    'filesize': 1e6,
-    'filecount': 10,
-    'level': 'INFO',
+    'level': 'INFO'  # Minimum log level
+    'enable_console': True  # Enable / Disable stdout logging
+    'enable_file': True  # Enable / Disable file logging
+    'file_name': '/log/path/clairmeta.log'  # Log file absolute path
+    'file_size': 1e6  # Individual log file maximum size
+    'file_count': 10  # Number of files to rotate on
 
 Contributing
 ------------
