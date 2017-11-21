@@ -1,0 +1,2 @@
+include             LICENSE CONTRIBUTORS MANIFEST.in *.rst
+recursive-include   tests           *
