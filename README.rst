@@ -104,11 +104,13 @@ Profiles
 Check profile allow custom configuration of the DCP check process such
 as bypassing some unwanted tests or criticity specification. To
 implement a check profile, simply write a JSON file derived from this
-template (actual content listed below is for demonstration purpose only)
-: \* *criticality* key allow custom criticity level specification, check
-name can be incomplete to quickly ignore a bunch of tests, *default* is
-used if no other match where found. \* *bypass* key allow specific test
-bypassing, incomplete name are not allowed.
+template (actual content listed below is for demonstration purpose only) :
+
+-  *criticality* key allow custom criticity level specification, check
+   name can be incomplete to quickly ignore a bunch of tests, *default* is
+   used if no other match where found.
+-  *bypass* key allow specific test
+   bypassing, incomplete name are not allowed.
 
 ::
 
