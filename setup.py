@@ -34,7 +34,7 @@ setup(
         'Topic :: Multimedia :: Video',
         'Topic :: Software Development :: Libraries :: Python Modules',
 
-        'License :: OSI Approved :: MIT License',
+        'License :: OSI Approved :: BSD License',
 
         'Programming Language :: Python :: 2',
         'Programming Language :: Python :: 2.7',
