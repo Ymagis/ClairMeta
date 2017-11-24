@@ -58,7 +58,7 @@ class Checker(CheckerBase):
         if asset['Path'].endswith('.xml'):
             xml_path = os.path.join(self.dcp.path, asset['Path'])
         else:
-            xml_path = os.path.join(folder, asset['Path'][:-4])
+            xml_path = os.path.join(folder, os.path.splitext(asset['Path'])[0])
 
         return parse_xml(
             xml_path,
@@ -154,7 +154,7 @@ class Checker(CheckerBase):
             namespace = 'interop_subtitle'
             label = 'Interop'
         else:
-            path = os.path.join(folder, asset['Path'][:-4])
+            path = os.path.join(folder, os.path.splitext(asset['Path'])[0])
             namespace = asset['Probe']['NamespaceName']
             label = asset['Probe']['LabelSetType']
 
