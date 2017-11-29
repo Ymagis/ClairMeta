@@ -1,0 +1,46 @@
+#!/usr/bin/make -f
+
+# Uncomment this to turn on verbose mode .
+# export DH_VERBOSE=1
+
+config.status: configure
+	dh_testdir
+	./configure --prefix=/usr --with-expat=yes
+
+build: config.status
+	dh_testdir
+	$(MAKE) -j2
+
+clean:
+	dh_clean
+
+install: build
+	dh_testdir
+	dh_testroot
+	dh_prep
+	dh_installdirs
+	$(MAKE) DESTDIR=$(CURDIR)/debian/tmp install
+
+binary-indep: build install
+
+binary-arch : build install
+	dh_testdir
+	dh_testroot
+	dh_installchangelogs
+	dh_installdocs
+	dh_installexamples
+	dh_install
+	dh_installman
+	dh_link
+	dh_strip
+	dh_compress
+	dh_fixperms
+	dh_makeshlibs
+	dh_installdeb
+	dh_shlibdeps
+	dh_gencontrol
+	dh_md5sums
+	dh_builddeb
+
+binary : binary-indep binary-arch
+.PHONY : build clean binary-indep binary-arch binary install

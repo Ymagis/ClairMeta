@@ -1,11 +1,20 @@
-# Make sure we run container based worker
-sudo: false
+
+sudo: required
+services:
+  - docker
 dist: trusty
 
 language: python
 python:
 - '2.7'
 - '3.6'
+
+env:
+  global:
+    - BINTRAY_USER=ymagis
+    - BINTRAY_ORG=ymagis
+    - BINTRAY_REPO=Clairmeta
+    - secure: "vdZGrnQhrWx+8eUNg7aSBh8ukO9Onnm8SAfxxa8SxoHKeXnVvkYpJZFLevGF374e90hJrhbZG3LB0esb5C2J5gr2JrZ+Qpjta9i9mD2+rz3NuG3Y/JA1gKltNzbChNfWBcDoq6B02qsoRChZEScurndZJvwdFCQm1T8pKvn7/q8ubCHuY8XJHY5dcFhK6DMe/XGHB6em5LJHa8Kdr7OLsI7wWM9rvCr5SUMZo4VA7FJ8GD+wZqBkCiC0cBYga4iEFmSuemypxhma/Qj3Wm/QB5zqrmWtyXSgDsVdzdcU2KoTTw0LNNprTEytaHmtYDxpwqPnGIphtyNCEx/GOvqIQ5NoHZC+7YyM3h6k8d7M8uxB8cxsCqubCGgye+oohoeDEgekrQTUXDEi5S5NX+npUahD+BbVScPMWq0nKynAXMixds9xx9PXww7oyiTl0iEW1N8RHa4EG4hO84b4yZr0hqOlp4mVCcUe4nRhqOplQog9BZKXJQGF3sbnblVFkZWwKuE8w2VbmzhpPRfWjv4/ETVROD9LtOz/1UZ6f4zZ3R3bd61W8EdYq1UF5DvVobm3UXcnThloYkPqVIG5mSZFTSP8vgndvjQxEh9d9ywCYGKfpFBk4bMbAsd/0Z9OrTCdq/u7FO9YXhe8CQUZJNLZjFyXUDbGUz80xbi0awqYMvU="
 
 install:
 - pip install pipenv
@@ -23,10 +32,15 @@ stages:
     if: type IN (pull_request) OR tag =~ ^1
   - name: deploy
     if: tag =~ ^1
+  - name: packaging
+    if: tag =~ ^1
 
 # Jobs
 jobs:
   include:
+  - stage: packaging
+    script:
+    - /bin/bash .travis/build_env.sh
   - stage: deploy
     script:
     - echo "Deploying..."
