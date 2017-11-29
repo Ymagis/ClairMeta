@@ -9,12 +9,8 @@ and checking.
 This project status is **Beta**, the following needs to be done for the
 release :
 
--  Large scale tests on lots DCP (including D-Box, DVIs, OCAP,
-   CCAP, …)
+-  Large scale tests on lots DCP (including D-Box, DVIs, OCAP, CCAP, ...)
 -  Copyright free test materials for unittest
--  Proper packaging (we plan to support Ubuntu 14.04 / 16.04 at first), this
-   include clairmeta python package, all the dependent python package and
-   asdcplib.
 
 Features
 --------
@@ -53,21 +49,22 @@ Requirements :
    -  Should work on Windows, macOS, Linux
    -  Tested on : macOS 10.12
 
-Install asdcplib (macOS / Linux) :
-
-::
-
-    wget http://download.cinecert.com/asdcplib/asdcplib-2.7.19.tar.gz
-    tar xzf asdcplib-2.7.19.tar.gz
-    cd asdcplib-2.7.19
-    ./configure
-    make install
-
-Install clairmeta :
+Install from PyPI package :
 
 ::
 
     pip install clairmeta
+
+Install from Debian package :
+
+::
+
+    # For Ubuntu 14.04 trusty
+    echo "deb https://dl.bintray.com/ymagis/Clairmeta trusty main" | sudo tee -a /etc/apt/sources.list
+    # For Ubuntu 16.04 xenial
+    echo "deb https://dl.bintray.com/ymagis/Clairmeta xenial main" | sudo tee -a /etc/apt/sources.list
+
+    sudo apt-get install python3-clairmeta
 
 Usage
 -----
@@ -173,6 +170,7 @@ Contributing
    exit
 
 -  Open a Pull Request
+-  Open an Issue
 
 Changes
 -------
@@ -185,9 +183,6 @@ References
 
 The following sources / software were used :
 
--  dcp_inspect : https://github.com/wolfgangw/backports, including the
-   DCSubtitles XSD Schema
--  packageparser : url packageparser
 -  asdcp-lib : http://www.cinecert.com/asdcplib/
 -  sox : http://sox.sourceforge.net/
 -  mediainfo : https://mediaarea.net/
