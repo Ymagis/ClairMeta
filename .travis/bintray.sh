@@ -46,7 +46,7 @@ create_package() {
     \"desc_url\": \"auto\",
     \"labels\": [\"python3\"],
     \"licenses\": [\"BSD 3-Clause\"],
-    \"vcs_url\": https://github.com/Ymagis/ClairMeta
+    \"vcs_url\": \"https://github.com/Ymagis/ClairMeta\"
     }"
   fi
 
