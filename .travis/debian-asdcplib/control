@@ -1,0 +1,20 @@
+Source: asdcplib
+Priority: extra
+Maintainer: CineCert <asdcplib@cinecert.com>
+Uploaders: Ymagis <support.sol@ymagis.com>
+Build-Depends: debhelper (>= 7), autotools-dev, libssl-dev, libexpat-dev
+Standards-Version: 3.8.3
+Section: libs
+Homepage: http://www.cinecert.com/asdcplib/
+
+Package: asdcplib
+Section: libs
+Architecture: any
+Depends: ${shlibs:Depends}, ${misc:Depends}
+Description:  AS-DCP File Access Library
+ asdcplib is an open source implementation of SMPTE and the MXF Interop
+ "Sound & Picture Track File" format. It was originally developed with
+ support from DCI. Development is currently supported by CineCert and other
+ d-cinema manufacturers. See the bundled README file for more information.
+ asdcplib is implemented in C++ and builds on Win32 and most unix platforms
+ that support GCC.
