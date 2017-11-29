@@ -45,7 +45,7 @@ create_package() {
     \"desc\": \"auto\",
     \"desc_url\": \"auto\",
     \"labels\": [\"python3\"],
-    \"licenses\": [\"BSD-3-Clause\"]
+    \"licenses\": [\"BSD 3-Clause\"]
     }"
   fi
 
