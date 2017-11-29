@@ -44,7 +44,8 @@ create_package() {
     \"name\": \"${PCK_NAME}\",
     \"desc\": \"auto\",
     \"desc_url\": \"auto\",
-    \"labels\": [\"bash\", \"example\"]
+    \"labels\": [\"python3\"],
+    \"licenses\": [\"BSD-3-Clause\"]
     }"
   fi
 
