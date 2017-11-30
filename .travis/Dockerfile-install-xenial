@@ -4,7 +4,7 @@ RUN apt-get update && apt-get install -y apt-transport-https
 
 ENV DCP="/dcp/ECL-SINGLE-CPL_TST_S_EN-EN_UK-U_51_2K_DI_20160622_ECL_SMPTE_VF/"
 
-CMD echo "deb https://dl.bintray.com/ymagis/Clairmeta xenial main" | tee -a /etc/apt/sources.list \
+CMD echo "deb https://dl.bintray.com/ymagis/Clairmeta xenial main" | tee /etc/apt/sources.list.d/clairmeta.list \
  && apt-get update \
  && apt-get install -y --allow-unauthenticated python3-clairmeta \
  && python3.5 -m clairmeta.cli check -type dcp ${DCP}
