@@ -29,4 +29,3 @@ docker run -it \
   -e "BINTRAY_TOKEN=${BINTRAY_TOKEN}" \
   -e "DISTRIBUTION=artful" \
   clairmeta/build_artful
-  
