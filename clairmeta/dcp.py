@@ -212,7 +212,8 @@ class DCP(object):
         }
 
         # Remove namespace and attributes key from final result
-        self.probe_dict = remove_key_dict(self.probe_dict, ['__xmlns__'])
+        self.probe_dict = remove_key_dict(
+            self.probe_dict, ['__xmlns__', '@xmlns'])
         self._parsed = True
         return self.probe_dict
 

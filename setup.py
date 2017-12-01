@@ -52,7 +52,7 @@ setup(
     install_requires=[
         'lxml',
         'dicttoxml',
-        'xmltodict==0.10.2',
+        'xmltodict',
         'python-magic',
         'python-dateutil',
         'six',
