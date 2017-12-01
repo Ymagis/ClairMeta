@@ -60,10 +60,13 @@ Install from Debian package :
 ::
 
     # For Ubuntu 14.04 trusty
-    echo "deb https://dl.bintray.com/ymagis/Clairmeta trusty main" | sudo tee -a /etc/apt/sources.list
+    echo "deb https://dl.bintray.com/ymagis/Clairmeta trusty main" | sudo tee /etc/apt/sources.list.d/clairmeta.list
     # For Ubuntu 16.04 xenial
-    echo "deb https://dl.bintray.com/ymagis/Clairmeta xenial main" | sudo tee -a /etc/apt/sources.list
+    echo "deb https://dl.bintray.com/ymagis/Clairmeta xenial main" | sudo tee /etc/apt/sources.list.d/clairmeta.list
+    # For Ubuntu 17.10 artful
+    echo "deb https://dl.bintray.com/ymagis/Clairmeta artful main" | sudo tee /etc/apt/sources.list.d/clairmeta.list
 
+    sudo apt-get update
     sudo apt-get install python3-clairmeta
 
 Usage
