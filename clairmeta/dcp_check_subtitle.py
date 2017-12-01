@@ -240,9 +240,12 @@ class Checker(CheckerBase):
         font_format = magic.from_file(path)
         allowed_formats = DCP_SETTINGS['subtitle']['font_formats']
 
-        if font_format not in allowed_formats:
-            raise CheckException("Subtitle font format not valid : {}".format(
-                font_format))
+        for f in allowed_formats:
+            if font_format in f:
+                return
+
+        raise CheckException("Subtitle font format not valid : {}".format(
+            font_format))
 
     def check_subtitle_cpl_font_glyph(self, playlist, asset, folder):
         """ Check if font can render all glyphs (parsing the text used
