@@ -2,10 +2,6 @@
 
 set -x
 
-echo $BINTRAY_USER
-echo $BINTRAY_ORG
-echo $BINTRAY_REPO
-
 mkdir /deb
 cd /tmp
 
@@ -46,5 +42,5 @@ py2deb -r /deb --name-prefix=python3 -y -- cffi>=1.7
 # Bintray packages deployment
 for DEB in /deb/*.deb
 do
-  /build_src/bintray.sh $BINTRAY_USER $BINTRAY_ORG $BINTRAY_TOKEN $BINTRAY_REPO $DEB $DISTRIBUTION
+  /build_src/bintray.sh $DEB
 done

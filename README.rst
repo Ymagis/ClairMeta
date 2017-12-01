@@ -49,22 +49,34 @@ Requirements :
    -  Should work on Windows, macOS, Linux
    -  Tested on : macOS 10.12
 
-Install from PyPI package :
+-  External (non-python) dependencies :
+
+   -  libmagic
+   -  asdcplib
+   -  mediainfo (opt)
+   -  sox (opt)
+
+Install from PyPI package (reminder : this does not install external dependencies):
 
 ::
 
     pip install clairmeta
 
-Install from Debian package :
+Install from Debian package (all requirements will be automatically installed):
 
 ::
 
-    # For Ubuntu 14.04 trusty
-    echo "deb https://dl.bintray.com/ymagis/Clairmeta trusty main" | sudo tee /etc/apt/sources.list.d/clairmeta.list
-    # For Ubuntu 16.04 xenial
-    echo "deb https://dl.bintray.com/ymagis/Clairmeta xenial main" | sudo tee /etc/apt/sources.list.d/clairmeta.list
-    # For Ubuntu 17.10 artful
-    echo "deb https://dl.bintray.com/ymagis/Clairmeta artful main" | sudo tee /etc/apt/sources.list.d/clairmeta.list
+    # Optional : add Bintray public key
+    apt-get install dirmngr
+    gpg --keyserver hkp://keyserver.ubuntu.com:80 --recv 379CE192D401AB61
+    gpg --export --armor 379CE192D401AB61 | apt-key add -
+
+    # Add Clairmeta repository to apt sources
+    # Replace <distro> appropriately
+    # Ubuntu 14.04 : use trusty
+    # Ubuntu 16.04 : use xenial
+    # Ubuntu 17.04 : use artful
+    echo "deb https://dl.bintray.com/ymagis/Clairmeta <distro> main" | sudo tee /etc/apt/sources.list.d/clairmeta.list
 
     sudo apt-get update
     sudo apt-get install python3-clairmeta
