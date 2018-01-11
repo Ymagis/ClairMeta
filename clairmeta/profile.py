@@ -4,6 +4,7 @@
 import six
 import json
 import os
+import copy
 
 
 DCP_CHECK_PROFILE = {
@@ -23,6 +24,11 @@ DCP_CHECK_PROFILE = {
     'bypass': [],
     'log_level': 'INFO',
 }
+
+
+def get_default_profile():
+    """ Returns the default DCP checking profile """
+    return copy.deepcopy(DCP_CHECK_PROFILE)
 
 
 def load_profile(file_path):
