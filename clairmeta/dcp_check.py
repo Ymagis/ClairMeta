@@ -57,14 +57,17 @@ class DCPChecker(CheckerBase):
             for d in dirnames:
                 fullpath = os.path.join(dirpath, d)
                 if not os.listdir(fullpath):
-                    list_empty_dir.append(fullpath)
+                    list_empty_dir.append(
+                        os.path.relpath(fullpath, self.dcp.path))
 
         if list_empty_dir:
             raise CheckException("Empty directories detected : {}".format(
                 list_empty_dir))
 
     def check_dcp_hidden_files(self):
-        hidden_files = [f for f in self.dcp._list_files if f.startswith('.')]
+        hidden_files = [
+            os.path.relpath(f, self.dcp.path)
+            for f in self.dcp._list_files if f.startswith('.')]
         if hidden_files:
             raise CheckException("Hidden files detected : {}".format(
                 hidden_files))
@@ -76,12 +79,13 @@ class DCPChecker(CheckerBase):
         list_asset_path += self.dcp._list_vol_path
         list_asset_path += self.dcp._list_am_path
 
-        foreign_files = [
-            a for a in self.dcp._list_files
+        self.dcp.foreign_files = [
+            os.path.relpath(a, self.dcp.path)
+            for a in self.dcp._list_files
             if a not in list_asset_path]
-        if foreign_files:
+        if self.dcp.foreign_files:
             raise CheckException("Foreign files detected : {}".format(
-                foreign_files))
+                self.dcp.foreign_files))
 
     def check_dcp_multiple_am_or_vol(self):
         restricted_lists = {

@@ -39,6 +39,7 @@ class DCP(object):
         self.path = os.path.normpath(path)
         self.schema = 'Unknown'
         self.package_type = 'Unknown'
+        self.foreign_files = []
         self.size = folder_size(path)
         self.log = get_log()
 
