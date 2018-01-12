@@ -4,7 +4,7 @@
 from datetime import datetime
 
 from clairmeta.dcp_utils import list_cpl_assets
-from clairmeta.check_isdcf import parse_isdcf_string
+from clairmeta.utils.isdcf import parse_isdcf_string
 from clairmeta.dcp_check import CheckerBase, CheckException
 from clairmeta.settings import DCP_SETTINGS
 
@@ -34,30 +34,30 @@ class Checker(CheckerBase):
 
     def check_dcnc_field_redband(self, playlist, fields):
         """ See Appendix 3. """
-        is_trailer = fields['content_type']['Type'] == 'TLR'
-        redband = fields['content_type']['RedBand']
+        is_trailer = fields['ContentType']['Type'] == 'TLR'
+        redband = fields['ContentType']['RedBand']
         if not is_trailer and redband is not None:
             raise CheckException(
                 "RedBand qualifier is only for trailer content")
 
     def check_dcnc_field_dimension(self, playlist, fields):
-        is_3D = fields['standard'].get('Dimension') is not None
-        dimension_content = fields['content_type'].get('Dimension')
+        is_3D = fields['Standard'].get('Dimension') is not None
+        dimension_content = fields['ContentType'].get('Dimension')
         if is_3D and dimension_content is None:
             raise CheckException("Content Type should specifiy 2D version or "
                                  "3D version for 3D Movie")
 
     def check_dcnc_field_aspect_ratio(self, playlist, fields):
         """ See Appendix 7. """
-        is_trailer = fields['content_type']['Type'] == 'TLR'
-        iar_qualifier = fields['projector_aspect_ratio']['ImageAspectRatio']
+        is_trailer = fields['ContentType']['Type'] == 'TLR'
+        iar_qualifier = fields['ProjectorAspectRatio']['ImageAspectRatio']
         if is_trailer and iar_qualifier is not None:
             raise CheckException("Trailer content should not contain "
                                  "ImageAspectRatio qualifier")
 
     def check_dcnc_field_date(self, playlist, fields):
         """ Basic date check """
-        date_str = fields['date']['Value']
+        date_str = fields['Date']['Value']
         date = datetime.strptime(date_str, '%Y%m%d')
         now = datetime.now()
         if date > now:
@@ -65,8 +65,8 @@ class Checker(CheckerBase):
 
     def check_dcnc_field_package_type(self, playlist, fields):
         """ Basic date check """
-        pkg_type = fields['package_type']['Type']
-        pkg_version = fields['package_type']['Version']
+        pkg_type = fields['PackageType']['Type']
+        pkg_version = fields['PackageType']['Version']
         if pkg_type == 'OV' and pkg_version is not None:
             raise CheckException("OV Package can't include a version number "
                                  "in the package type field")
@@ -74,8 +74,8 @@ class Checker(CheckerBase):
     def check_dcnc_field_claim_framerate(self, playlist, fields):
         cpl_node = playlist['Info']['CompositionPlaylist']
 
-        content_type = fields['content_type']
-        content_rate = content_type['FrameRate']
+        ContentType = fields['ContentType']
+        content_rate = ContentType['FrameRate']
         cpl_rate = str(cpl_node['EditRate'])
         if content_rate and cpl_rate != "Mixed" and content_rate != cpl_rate:
             raise CheckException(
@@ -85,8 +85,8 @@ class Checker(CheckerBase):
     def check_dcnc_field_claim_dimension(self, playlist, fields):
         cpl_node = playlist['Info']['CompositionPlaylist']
 
-        content_type = fields['content_type']
-        dimension = content_type['Dimension']
+        ContentType = fields['ContentType']
+        dimension = ContentType['Dimension']
         cpl_stereo = cpl_node['Stereoscopic']
         is_stereo_map = {
             '2D': False,
@@ -100,7 +100,7 @@ class Checker(CheckerBase):
     def check_dcnc_field_claim_aspectratio(self, playlist, fields):
         cpl_node = playlist['Info']['CompositionPlaylist']
 
-        ar_str = fields['projector_aspect_ratio']['AspectRatio']
+        ar_str = fields['ProjectorAspectRatio']['AspectRatio']
         ar = DCP_SETTINGS['picture']['aspect_ratio'].get(ar_str)
         cpl_ar = cpl_node['ScreenAspectRatio']
         if ar and cpl_ar != "Mixed" and ar['ratio'] != cpl_ar:
@@ -111,7 +111,7 @@ class Checker(CheckerBase):
     def check_dcnc_field_claim_subtitle(self, playlist, fields):
         cpl_node = playlist['Info']['CompositionPlaylist']
 
-        subtitle = fields['language']['Subtitle']
+        subtitle = fields['Language']['Subtitle']
         if subtitle != cpl_node['Subtitle']:
             raise CheckException(
                 "ContentTitle suggest Subtitle but CPL have none")
@@ -122,7 +122,7 @@ class Checker(CheckerBase):
         # tracks).
         # TODO : SMPTE 428-12 add SoundField UL structure that could be used
         # to have a more meanigful check
-        audio_format = fields['audio_type']['Channels']
+        audio_format = fields['AudioType']['Channels']
         audio_map = DCP_SETTINGS['sound']['format_channels']
         sounds = list(list_cpl_assets(
             playlist,
@@ -140,7 +140,7 @@ class Checker(CheckerBase):
                     " {} channels".format(audio_format, asset_cc))
 
     def check_dcnc_field_claim_immersive_sound(self, playlist, fields):
-        immersive = fields['audio_type']['ImmersiveSound']
+        immersive = fields['AudioType']['ImmersiveSound']
         auxdatas = list(list_cpl_assets(
             playlist,
             filters=['AuxData'],
@@ -162,7 +162,7 @@ class Checker(CheckerBase):
 
     def check_dcnc_field_claim_resolution(self, playlist, fields):
         resolution_map = DCP_SETTINGS['picture']['resolutions']
-        resolution = fields['resolution']['Value']
+        resolution = fields['Resolution']['Value']
 
         mxf_res = playlist['Info']['CompositionPlaylist']['Resolution']
         detect_res = mxf_res != 'Unknown' and mxf_res != 'Mixed'
@@ -174,7 +174,7 @@ class Checker(CheckerBase):
                     "is {}".format(resolution, mxf_res))
 
     def check_dcnc_field_claim_standard(self, playlist, fields):
-        standard = fields['standard']['Schema']
+        standard = fields['Standard']['Schema']
         if standard and standard != self.dcp.schema:
             raise CheckException("ContentTitle claims {} but DCP is not")
 
@@ -182,7 +182,7 @@ class Checker(CheckerBase):
         # TODO : this check don't work for multi-CPL packages
         pass
 
-        package = fields['package_type']['Type']
+        package = fields['PackageType']['Type']
         dcp_package = self.dcp.package_type
         if package and dcp_package != package:
             raise CheckException(
