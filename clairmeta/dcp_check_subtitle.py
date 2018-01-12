@@ -60,6 +60,9 @@ class Checker(CheckerBase):
         else:
             xml_path = os.path.join(folder, os.path.splitext(asset['Path'])[0])
 
+        if not os.path.exists(xml_path):
+            return
+
         return parse_xml(
             xml_path,
             namespaces=DCP_SETTINGS['xmlns'],
@@ -167,6 +170,8 @@ class Checker(CheckerBase):
 
     def check_subtitle_cpl_reel_number(self, playlist, asset, folder):
         st_dict = self.get_subtitle_xml(asset, folder)
+        if not st_dict:
+            return
         _, asset = asset
 
         reel_no = self.get_subtitle_elem(st_dict, 'ReelNumber')
@@ -178,6 +183,8 @@ class Checker(CheckerBase):
 
     def check_subtitle_cpl_language(self, playlist, asset, folder):
         st_dict = self.get_subtitle_xml(asset, folder)
+        if not st_dict:
+            return
         _, asset = asset
 
         st_lang = self.get_subtitle_elem(st_dict, 'Language')
@@ -202,6 +209,8 @@ class Checker(CheckerBase):
 
     def check_subtitle_cpl_font_ref(self, playlist, asset, folder):
         st_dict = self.get_subtitle_xml(asset, folder)
+        if not st_dict:
+            return
 
         if self.dcp.schema == 'SMPTE':
             font_id = self.get_subtitle_elem(st_dict, 'LoadFont@ID')
@@ -218,6 +227,8 @@ class Checker(CheckerBase):
 
     def check_subtitle_cpl_font(self, playlist, asset, folder):
         st_dict = self.get_subtitle_xml(asset, folder)
+        if not st_dict:
+            return
         path, uri = self.get_font_path(st_dict, folder)
 
         if not os.path.exists(path):
@@ -225,6 +236,8 @@ class Checker(CheckerBase):
 
     def check_subtitle_cpl_font_size(self, playlist, asset, folder):
         st_dict = self.get_subtitle_xml(asset, folder)
+        if not st_dict:
+            return
         path, uri = self.get_font_path(st_dict, folder)
         font_size = os.path.getsize(path)
         font_max_size = DCP_SETTINGS['subtitle']['font_max_size']
@@ -236,6 +249,8 @@ class Checker(CheckerBase):
 
     def check_subtitle_cpl_font_format(self, playlist, asset, folder):
         st_dict = self.get_subtitle_xml(asset, folder)
+        if not st_dict:
+            return
         path, uri = self.get_font_path(st_dict, folder)
         font_format = magic.from_file(path)
         allowed_formats = DCP_SETTINGS['subtitle']['font_formats']
@@ -257,6 +272,8 @@ class Checker(CheckerBase):
 
     def check_subtitle_cpl_st_timing(self, playlist, asset, folder):
         st_dict = self.get_subtitle_xml(asset, folder)
+        if not st_dict:
+            return
         subtitles = keys_by_name_dict(st_dict, 'Subtitle')
         editrate = self.get_subtitle_editrate(asset, st_dict)
 
@@ -283,6 +300,8 @@ class Checker(CheckerBase):
 
     def check_subtitle_cpl_duration(self, playlist, asset, folder):
         st_dict = self.get_subtitle_xml(asset, folder)
+        if not st_dict:
+            return
         st_rate = self.get_subtitle_editrate(asset, st_dict)
         subtitles = keys_by_name_dict(st_dict, 'Subtitle')
         _, asset = asset
@@ -309,6 +328,8 @@ class Checker(CheckerBase):
 
     def check_subtitle_cpl_editrate(self, playlist, asset, folder):
         st_dict = self.get_subtitle_xml(asset, folder)
+        if not st_dict:
+            return
         st_rate = self.get_subtitle_editrate(asset, st_dict)
         _, asset = asset
         cpl_rate = asset['EditRate']
@@ -321,6 +342,8 @@ class Checker(CheckerBase):
 
     def check_subtitle_cpl_uuid(self, playlist, asset, folder):
         st_dict = self.get_subtitle_xml(asset, folder)
+        if not st_dict:
+            return
         st_uuid = self.get_subtitle_uuid(st_dict)
         _, asset = asset
         cpl_uuid = asset['Id']
@@ -333,6 +356,8 @@ class Checker(CheckerBase):
 
     def check_subtitle_cpl_content(self, playlist, asset, folder):
         st_dict = self.get_subtitle_xml(asset, folder)
+        if not st_dict:
+            return
         subtitles = keys_by_name_dict(st_dict, 'Subtitle')
 
         for st in subtitles[0]:
@@ -349,6 +374,8 @@ class Checker(CheckerBase):
             VAlign="bottom", VPosition="0" : some char like 'g' will be cut
         """
         st_dict = self.get_subtitle_xml(asset, folder)
+        if not st_dict:
+            return
         subs = keys_by_name_dict(st_dict, 'Subtitle')
         flat_subs = [item for sublist in subs for item in sublist]
 
