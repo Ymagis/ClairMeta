@@ -67,7 +67,8 @@ class DCPChecker(CheckerBase):
     def check_dcp_hidden_files(self):
         hidden_files = [
             os.path.relpath(f, self.dcp.path)
-            for f in self.dcp._list_files if f.startswith('.')]
+            for f in self.dcp._list_files
+            if os.path.basename(f).startswith('.')]
         if hidden_files:
             raise CheckException("Hidden files detected : {}".format(
                 hidden_files))
