@@ -93,7 +93,6 @@ DEFAULTS = {
     'VisionImpaired': False,
     'ImmersiveSound': False,
     'MotionSimulator': False,
-    'Dimension': '2D',
 }
 
 
