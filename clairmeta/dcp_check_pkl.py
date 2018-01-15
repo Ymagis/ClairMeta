@@ -57,15 +57,16 @@ class Checker(CheckerBase):
         if not path or not os.path.exists(path):
             return
 
-        mime_type = mime_type.split(';')[0]
-        mime_type = re.sub(r'x-\w+-', '', mime_type)
-        actual_type = magic.from_file(path, mime=True)
-        actual_type = re.sub(r'x-\w+-', '', actual_type)
-
-        if actual_type != mime_type:
-            raise CheckException(
-                "Mime Type mismatch, expected (from PKL) {} but found {}"
-                "".format(mime_type, actual_type))
+        # Temporary deactivate MIME Type check
+        # mime_type = mime_type.split(';')[0]
+        # mime_type = re.sub(r'x-\w+-', '', mime_type)
+        # actual_type = magic.from_file(path, mime=True)
+        # actual_type = re.sub(r'x-\w+-', '', actual_type)
+        #
+        # if actual_type != mime_type:
+        #     raise CheckException(
+        #         "Mime Type mismatch, expected (from PKL) {} but found {}"
+        #         "".format(mime_type, actual_type))
 
     def check_assets_pkl_size(self, pkl, asset):
         _, path, asset = asset
