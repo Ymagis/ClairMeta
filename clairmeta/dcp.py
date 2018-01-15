@@ -43,6 +43,7 @@ class DCP(object):
         self.size = folder_size(path)
         self.log = get_log()
 
+        self._probeb = False
         self._parsed = False
 
     def init_package_files(self):
@@ -119,8 +120,6 @@ class DCP(object):
 
         self.cpl_find_pkl()
         self.cpl_link_assets()
-        self.cpl_probe_assets()
-        self.cpl_parse_metadata()
 
     def cpl_find_pkl(self):
         """ Find PKL that reference the CPL. """
@@ -180,7 +179,7 @@ class DCP(object):
         """ List of DCP CompositionPlayList Dictionary. """
         return self._list_cpl
 
-    def parse(self):
+    def parse(self, probe=True):
         """ Parse the DCP and Probe its assets. """
         if self._parsed:
             return self.probe_dict
@@ -194,6 +193,12 @@ class DCP(object):
         self.init_volindex()
         self.init_pkl()
         self.init_cpl()
+
+        if probe:
+            self.cpl_probe_assets()
+            self._probeb = True
+
+        self.cpl_parse_metadata()
 
         seconds_elapsed = time.time() - start
         self.log.info("Total time : {:.2f} seconds".format(seconds_elapsed))
@@ -231,7 +236,7 @@ class DCP(object):
                     criticity.
 
         """
-        if not self._parsed:
+        if not self._parsed or not self._probeb:
             self.parse()
 
         checker = DCPChecker(self, profile, ov_path)
