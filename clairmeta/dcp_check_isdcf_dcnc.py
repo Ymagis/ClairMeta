@@ -185,12 +185,11 @@ class Checker(CheckerBase):
         if standard and standard != self.dcp.schema:
             raise CheckException("ContentTitle claims {} but DCP is not")
 
-    def check_dcnc_field_claim_packagetype(self, playlist, fields):
-        # TODO : this check don't work for multi-CPL packages
-        pass
-
-        package = fields['PackageType'].get('Type')
-        dcp_package = self.dcp.package_type
-        if package and dcp_package != package:
-            raise CheckException(
-                "ContentTitle claims {} but DCP is not".format(package))
+    # TODO : this check don't work for multi-CPL packages
+    # def check_dcnc_field_claim_packagetype(self, playlist, fields):
+    #     """ DCP type (OV / VF) coherence check. """
+    #     package = fields['PackageType'].get('Type')
+    #     dcp_package = self.dcp.package_type
+    #     if package and dcp_package != package:
+    #         raise CheckException(
+    #             "ContentTitle claims {} but DCP is not".format(package))

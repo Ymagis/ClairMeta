@@ -51,25 +51,26 @@ class Checker(CheckerBase):
         if uuid not in self.dcp._list_asset.keys():
             raise CheckException("Not present in Assetmap")
 
-    def check_assets_pkl_type(self, pkl, asset):
-        _, path, asset = asset
-        mime_type = asset['Type']
-
-        if mime_type == "":
-            raise CheckException("Empty Type")
-        if not path or not os.path.exists(path):
-            return
-
-        # Temporary deactivate MIME Type check
-        # mime_type = mime_type.split(';')[0]
-        # mime_type = re.sub(r'x-\w+-', '', mime_type)
-        # actual_type = magic.from_file(path, mime=True)
-        # actual_type = re.sub(r'x-\w+-', '', actual_type)
-        #
-        # if actual_type != mime_type:
-        #     raise CheckException(
-        #         "Mime Type mismatch, expected (from PKL) {} but found {}"
-        #         "".format(mime_type, actual_type))
+    # TODO : MIME Type might not be worth checking (too versatile)
+    # def check_assets_pkl_type(self, pkl, asset):
+    #     """ PKL assets MimeType check. """
+    #     _, path, asset = asset
+    #     mime_type = asset['Type']
+    #
+    #     if mime_type == "":
+    #         raise CheckException("Empty Type")
+    #     if not path or not os.path.exists(path):
+    #         return
+    #
+    #     mime_type = mime_type.split(';')[0]
+    #     mime_type = re.sub(r'x-\w+-', '', mime_type)
+    #     actual_type = magic.from_file(path, mime=True)
+    #     actual_type = re.sub(r'x-\w+-', '', actual_type)
+    #
+    #     if actual_type != mime_type:
+    #         raise CheckException(
+    #             "Mime Type mismatch, expected (from PKL) {} but found {}"
+    #             "".format(mime_type, actual_type))
 
     def check_assets_pkl_size(self, pkl, asset):
         """ PKL assets size check. """
