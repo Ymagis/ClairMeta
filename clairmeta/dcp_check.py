@@ -52,6 +52,7 @@ class DCPChecker(CheckerBase):
                     module_path, str(e)))
 
     def check_dcp_empty_dir(self):
+        """ Empty directory detection. """
         list_empty_dir = []
         for dirpath, dirnames, filenames in os.walk(self.dcp.path):
             for d in dirnames:
@@ -65,6 +66,7 @@ class DCPChecker(CheckerBase):
                 list_empty_dir))
 
     def check_dcp_hidden_files(self):
+        """ Hidden files detection. """
         hidden_files = [
             os.path.relpath(f, self.dcp.path)
             for f in self.dcp._list_files
@@ -74,6 +76,7 @@ class DCPChecker(CheckerBase):
                 hidden_files))
 
     def check_dcp_foreign_files(self):
+        """ Foreign files detection (not listed in AssetMap). """
         list_asset_path = [
             os.path.join(self.dcp.path, a)
             for a in self.dcp._list_asset.values()]
@@ -89,6 +92,7 @@ class DCPChecker(CheckerBase):
                 self.dcp.foreign_files))
 
     def check_dcp_multiple_am_or_vol(self):
+        """ Only one AssetMap and VolIndex shall be present. """
         restricted_lists = {
             'VolIndex': self.dcp._list_vol,
             'Assetmap': self.dcp._list_am,
@@ -101,7 +105,7 @@ class DCPChecker(CheckerBase):
                 raise CheckException("Multiple {} files found".format(k))
 
     def check_dcp_link_ov(self):
-        """ Relink VF with OV """
+        """ VF package shall reference assets present in OV. """
         if not self.ov_path:
             return
 

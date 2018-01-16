@@ -137,6 +137,7 @@ class Checker(CheckerBase):
         return os.path.join(folder, font_uri), font_uri
 
     def check_subtitle_cpl_format(self, playlist, asset, folder):
+        """ Subtitle format (related to DCP Standard) check. """
         _, asset = asset
         extension_by_schema = {
             'Interop': '.xml',
@@ -149,6 +150,7 @@ class Checker(CheckerBase):
                 self.dcp.schema))
 
     def check_subtitle_cpl_xml(self, playlist, asset, folder):
+        """ Subtitle XML file syntax and structure validation. """
         _, asset = asset
         asset_path = asset['Path']
 
@@ -169,6 +171,7 @@ class Checker(CheckerBase):
         check_xml(path, namespace, label, self.dcp.schema)
 
     def check_subtitle_cpl_reel_number(self, playlist, asset, folder):
+        """ Subtitle reel number coherence with CPL. """
         st_dict = self.get_subtitle_xml(asset, folder)
         if not st_dict:
             return
@@ -182,6 +185,7 @@ class Checker(CheckerBase):
                                  "used in Reel {}".format(reel_no, reel_cpl))
 
     def check_subtitle_cpl_language(self, playlist, asset, folder):
+        """ Subtitle language coherence with CPL. """
         st_dict = self.get_subtitle_xml(asset, folder)
         if not st_dict:
             return
@@ -208,6 +212,7 @@ class Checker(CheckerBase):
                     cpl_lang_obj.name, st_lang_obj.name))
 
     def check_subtitle_cpl_font_ref(self, playlist, asset, folder):
+        """ Subtitle font references check. """
         st_dict = self.get_subtitle_xml(asset, folder)
         if not st_dict:
             return
@@ -226,6 +231,7 @@ class Checker(CheckerBase):
                         ref, font_id))
 
     def check_subtitle_cpl_font(self, playlist, asset, folder):
+        """ Subtitle font file exists. """
         st_dict = self.get_subtitle_xml(asset, folder)
         if not st_dict:
             return
@@ -235,6 +241,7 @@ class Checker(CheckerBase):
             raise CheckException("Subtitle missing font file : {}".format(uri))
 
     def check_subtitle_cpl_font_size(self, playlist, asset, folder):
+        """ Subtitle maximum font size. """
         st_dict = self.get_subtitle_xml(asset, folder)
         if not st_dict:
             return
@@ -248,6 +255,7 @@ class Checker(CheckerBase):
                     human_size(font_max_size), human_size(font_size)))
 
     def check_subtitle_cpl_font_format(self, playlist, asset, folder):
+        """ Subtitle font format validation. """
         st_dict = self.get_subtitle_xml(asset, folder)
         if not st_dict:
             return
@@ -262,15 +270,15 @@ class Checker(CheckerBase):
         raise CheckException("Subtitle font format not valid : {}".format(
             font_format))
 
-    def check_subtitle_cpl_font_glyph(self, playlist, asset, folder):
-        """ Check if font can render all glyphs (parsing the text used
-            in subtitles to have the list of glyphs).
-
-            Note : To be implemented.
-        """
-        pass
+    # def check_subtitle_cpl_font_glyph(self, playlist, asset, folder):
+    #     """ Check if font can render all glyphs (parsing the text used
+    #         in subtitles to have the list of glyphs).
+    #
+    #         Note : To be implemented.
+    #     """
 
     def check_subtitle_cpl_st_timing(self, playlist, asset, folder):
+        """ Subtitle individual duration / fade time check. """
         st_dict = self.get_subtitle_xml(asset, folder)
         if not st_dict:
             return
@@ -299,6 +307,7 @@ class Checker(CheckerBase):
                         st_idx))
 
     def check_subtitle_cpl_duration(self, playlist, asset, folder):
+        """ Subtitle duration coherence with CPL. """
         st_dict = self.get_subtitle_xml(asset, folder)
         if not st_dict:
             return
@@ -327,6 +336,7 @@ class Checker(CheckerBase):
                     reel_cpl))
 
     def check_subtitle_cpl_editrate(self, playlist, asset, folder):
+        """ Subtitle editrate coherence with CPL. """
         st_dict = self.get_subtitle_xml(asset, folder)
         if not st_dict:
             return
@@ -341,6 +351,7 @@ class Checker(CheckerBase):
                     "{}".format(st_rate, cpl_rate))
 
     def check_subtitle_cpl_uuid(self, playlist, asset, folder):
+        """ Subtitle UUID coherence with CPL. """
         st_dict = self.get_subtitle_xml(asset, folder)
         if not st_dict:
             return
@@ -355,6 +366,7 @@ class Checker(CheckerBase):
                     "{}".format(st_uuid, cpl_uuid))
 
     def check_subtitle_cpl_content(self, playlist, asset, folder):
+        """ Subtitle individual structure check. """
         st_dict = self.get_subtitle_xml(asset, folder)
         if not st_dict:
             return
@@ -369,7 +381,8 @@ class Checker(CheckerBase):
                     "".format(st['Subtitle@SpotNumber']))
 
     def check_subtitle_cpl_position(self, playlist, asset, folder):
-        """ Check subtitles vertical position (represent characters baseline)
+        """ Subtitles vertical position (out of screen) check.
+
             VAlign="top", VPosition="0" : out of the top of the screen
             VAlign="bottom", VPosition="0" : some char like 'g' will be cut
         """
@@ -393,9 +406,9 @@ class Checker(CheckerBase):
                         "Subtitle {} is nearly out of screen (bottom), some "
                         "characters will be cut".format(st_idx))
 
-    def check_subtitle_cpl_image(self, playlist, asset, folder):
-        """ Check if image exists and if it's a valid PNG.
-
-            Note : To be implemented.
-        """
-        pass
+    # def check_subtitle_cpl_image(self, playlist, asset, folder):
+    #     """ Check if image exists and if it's a valid PNG.
+    #
+    #         Note : To be implemented.
+    #     """
+    #     pass

@@ -26,6 +26,7 @@ class Checker(CheckerBase):
         return self.check_executions
 
     def check_atmos_cpl_channels(self, playlist, asset):
+        """ Atmos maximum channels count. """
         _, asset = asset
         max_atmos = DCP_SETTINGS['atmos']['max_channel_count']
         max_cc = asset['Probe']['MaxChannelCount']
@@ -36,6 +37,7 @@ class Checker(CheckerBase):
                 .format(max_cc, max_atmos))
 
     def check_atmos_cpl_objects(self, playlist, asset):
+        """ Atmos maximum objects count. """
         _, asset = asset
         max_atmos = DCP_SETTINGS['atmos']['max_object_count']
         max_obj = asset['Probe']['MaxObjectCount']

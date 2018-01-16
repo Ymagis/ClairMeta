@@ -23,7 +23,7 @@ class Checker(CheckerBase):
         return self.check_executions
 
     def check_dcnc_compliance(self, playlist):
-        """ Strict ISDCF DCNC check """
+        """ Digital Cinema Naming Convention compliance (9.3). """
         cpl_node = playlist['Info']['CompositionPlaylist']
         ct = cpl_node['ContentTitleText']
         fields, errors = parse_isdcf_string(ct)
@@ -33,7 +33,7 @@ class Checker(CheckerBase):
         return fields
 
     def check_dcnc_field_redband(self, playlist, fields):
-        """ See Appendix 3. """
+        """ RedBand qualifier is restricted to Trailer. """
         is_trailer = fields['ContentType'].get('Type') == 'TLR'
         redband = fields['ContentType'].get('RedBand')
         if not is_trailer and redband:
@@ -41,14 +41,15 @@ class Checker(CheckerBase):
                 "RedBand qualifier is only for trailer content")
 
     def check_dcnc_field_dimension(self, playlist, fields):
+        """ 3D content shall specify 2D or 3D version. """
         is_3D = fields['Standard'].get('Dimension') == '3D'
         dimension_content = fields['ContentType'].get('Dimension')
         if is_3D and dimension_content == '':
-            raise CheckException("Content Type should specifiy 2D version or "
+            raise CheckException("Content Type should specify 2D version or "
                                  "3D version for 3D Movie")
 
     def check_dcnc_field_aspect_ratio(self, playlist, fields):
-        """ See Appendix 7. """
+        """ ImageAspectRatio qualifier forbidden for Trailer. """
         is_trailer = fields['ContentType'].get('Type') == 'TLR'
         iar_qualifier = fields['ProjectorAspectRatio'].get('ImageAspectRatio')
         if is_trailer and iar_qualifier != '':
@@ -56,7 +57,7 @@ class Checker(CheckerBase):
                                  "ImageAspectRatio qualifier")
 
     def check_dcnc_field_date(self, playlist, fields):
-        """ Basic date check """
+        """ Composition Date validation. """
         date_str = fields['Date'].get('Value')
         date = datetime.strptime(date_str, '%Y%m%d')
         now = datetime.now()
@@ -64,7 +65,7 @@ class Checker(CheckerBase):
             raise CheckException("Date suggest a composition from the future")
 
     def check_dcnc_field_package_type(self, playlist, fields):
-        """ Basic date check """
+        """ Version qualifier is forbidden for OV package. """
         pkg_type = fields['PackageType'].get('Type')
         pkg_version = fields['PackageType'].get('Version')
         if pkg_type == 'OV' and pkg_version != '':
@@ -72,6 +73,7 @@ class Checker(CheckerBase):
                                  "in the package type field")
 
     def check_dcnc_field_claim_framerate(self, playlist, fields):
+        """ FrameRate from CPL and ContentTitleText shall match. """
         cpl_node = playlist['Info']['CompositionPlaylist']
 
         content_rate = fields['ContentType'].get('FrameRate')
@@ -82,6 +84,7 @@ class Checker(CheckerBase):
                     content_rate, cpl_rate))
 
     def check_dcnc_field_claim_dimension(self, playlist, fields):
+        """ Dimension from CPL and ContentTitleText shall match. """
         cpl_node = playlist['Info']['CompositionPlaylist']
 
         dimension = fields['ContentType'].get('Dimension')
@@ -96,6 +99,7 @@ class Checker(CheckerBase):
                 "ContentTitle suggest {} but CPL is not".format(dimension))
 
     def check_dcnc_field_claim_aspectratio(self, playlist, fields):
+        """ AspectRatio from CPL and ContentTitleText shall match. """
         cpl_node = playlist['Info']['CompositionPlaylist']
 
         ar_str = fields['ProjectorAspectRatio'].get('AspectRatio')
@@ -107,6 +111,7 @@ class Checker(CheckerBase):
                     ar['ratio'], cpl_ar))
 
     def check_dcnc_field_claim_subtitle(self, playlist, fields):
+        """ Subtitle (presence) from CPL and ContentTitleText shall match. """
         cpl_node = playlist['Info']['CompositionPlaylist']
 
         subtitle = fields['Language'].get('Subtitle')
@@ -115,7 +120,8 @@ class Checker(CheckerBase):
                 "ContentTitle suggest Subtitle but CPL have none")
 
     def check_dcnc_field_claim_audio(self, playlist, fields):
-        # Note : MXF track count don't seems to be related to the actual
+        """ Audio format from CPL and ContentTitleText shall match. """
+        # NOTE : MXF track count don't seems to be related to the actual
         # number of audio channels (there could be metadata and/or reserved
         # tracks).
         # TODO : SMPTE 428-12 add SoundField UL structure that could be used
@@ -138,6 +144,7 @@ class Checker(CheckerBase):
                     " {} channels".format(audio_format, asset_cc))
 
     def check_dcnc_field_claim_immersive_sound(self, playlist, fields):
+        """ Immersive audio format imply Auxiliary track in CPL. """
         immersive = fields['AudioType'].get('ImmersiveSound')
         auxdatas = list(list_cpl_assets(
             playlist,
@@ -159,6 +166,7 @@ class Checker(CheckerBase):
                                      " but CPL is not".format(immersive))
 
     def check_dcnc_field_claim_resolution(self, playlist, fields):
+        """ Picture resolution from CPL and ContentTitleText shall match.  """
         resolution_map = DCP_SETTINGS['picture']['resolutions']
         resolution = fields['Resolution'].get('Value')
 
@@ -172,6 +180,7 @@ class Checker(CheckerBase):
                     "is {}".format(resolution, mxf_res))
 
     def check_dcnc_field_claim_standard(self, playlist, fields):
+        """ DCP Standard coherence check. """
         standard = fields['Standard'].get('Schema')
         if standard and standard != self.dcp.schema:
             raise CheckException("ContentTitle claims {} but DCP is not")

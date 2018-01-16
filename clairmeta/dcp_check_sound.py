@@ -25,6 +25,7 @@ class Checker(CheckerBase):
         return self.check_executions
 
     def check_sound_cpl_channels(self, playlist, asset):
+        """ Sound max channels count. """
         channels = DCP_SETTINGS['sound']['max_channel_count']
         _, asset = asset
         cc = asset['Probe']['ChannelCount']
@@ -35,6 +36,7 @@ class Checker(CheckerBase):
                 "".format(channels, cc))
 
     def check_sound_cpl_format(self, playlist, asset):
+        """ Sound channels count coherence with format. """
         configurations = DCP_SETTINGS['sound']['configuration_channels']
         _, asset = asset
         cf = asset['Probe']['ChannelFormat']
@@ -48,6 +50,7 @@ class Checker(CheckerBase):
                     "channels, got {}".format(label, min_cc, max_cc, cc))
 
     def check_sound_cpl_sampling(self, playlist, asset):
+        """ Sound sampling rate check. """
         rates = DCP_SETTINGS['sound']['sampling_rate']
         _, asset = asset
         sr = asset['Probe']['AudioSamplingRate']
@@ -58,6 +61,7 @@ class Checker(CheckerBase):
                     rates, sr))
 
     def check_sound_cpl_quantization(self, playlist, asset):
+        """ Sound quantization check. """
         bitdepth = DCP_SETTINGS['sound']['quantization']
         _, asset = asset
         depth = asset['Probe']['QuantizationBits']
@@ -68,6 +72,7 @@ class Checker(CheckerBase):
                     bitdepth, depth))
 
     def check_sound_cpl_blockalign(self, playlist, asset):
+        """ Sound block alignement check. """
         align = DCP_SETTINGS['sound']['quantization'] / 8
         _, asset = asset
         al = asset['Probe']['BlockAlign']

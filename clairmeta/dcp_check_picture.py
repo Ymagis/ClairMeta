@@ -36,6 +36,7 @@ class Checker(CheckerBase):
         return dci_bitrate
 
     def check_picture_cpl_resolution(self, playlist, asset):
+        """ Picture resolution DCI compliance. """
         dci_resolutions = [
             DCP_SETTINGS['picture']['resolutions']['2K'],
             DCP_SETTINGS['picture']['resolutions']['4K']
@@ -50,10 +51,7 @@ class Checker(CheckerBase):
                 raise CheckException("Picture have non-DCI Resolution")
 
     def check_picture_cpl_encoding(self, playlist, asset):
-        """ SMPTE 429-2
-            There shall be 5 wavelet transform levels for 2K picture essence.
-            There shall be 6 wavelet transform levels for 4K picture essence.
-        """
+        """ Picture wavelet transform levels SMPTE compliance. """
         resolutions = DCP_SETTINGS['picture']['resolutions']
         levels_map = {
             '2K': DCP_SETTINGS['picture']['dwt_levels_2k'],
@@ -78,6 +76,7 @@ class Checker(CheckerBase):
                     " found".format(levels_map[resolution_name], levels))
 
     def check_picture_cpl_max_bitrate(self, playlist, asset):
+        """ Picture maximum bitrate DCI compliance. """
         tolerance = DCP_SETTINGS['picture']['bitrate_tolerance']
 
         _, asset = asset
@@ -92,6 +91,7 @@ class Checker(CheckerBase):
                         t_bitrate, max_bitrate))
 
     def check_picture_cpl_avg_bitrate(self, playlist, asset):
+        """ Picture average bitrate DCI compliance. """
         margin = DCP_SETTINGS['picture']['average_bitrate_margin']
 
         _, asset = asset
@@ -106,6 +106,7 @@ class Checker(CheckerBase):
                     ": {} Mb/s".format(t_bitrate, avg_bitrate))
 
     def check_picture_cpl_framerate(self, playlist, asset):
+        """ Picture framerate DCI / HFR check. """
         settings = DCP_SETTINGS['picture']
         editrate_stereo_map = {
             True: settings['min_stereo_high_editrate'],
@@ -128,6 +129,7 @@ class Checker(CheckerBase):
                     editrate_stereo_map[is_stereo]))
 
     def check_picture_cpl_editrate_framerate(self, playlist, asset):
+        """ Picture editrate / framerate coherence check. """
         _, asset = asset
         editrate = asset['EditRate']
         framerate = asset['FrameRate']

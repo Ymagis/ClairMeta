@@ -32,6 +32,7 @@ class Checker(CheckerBase):
         return self.check_executions
 
     def check_pkl_xml(self, pkl):
+        """ PKL XML syntax and structure check. """
         pkl_node = pkl['Info']['PackingList']
         check_xml(
             pkl['FilePath'],
@@ -40,9 +41,11 @@ class Checker(CheckerBase):
             self.dcp.schema)
 
     def check_pkl_issuedate(self, pkl):
+        """ PKL Issue Date validation. """
         check_issuedate(pkl['Info']['PackingList']['IssueDate'])
 
     def check_assets_pkl_referenced_by_assetamp(self, pkl, asset):
+        """ PKL assets shall be present in AssetMap. """
         uuid, _, _ = asset
         # Note : dcp._list_asset is directly extracted from Assetmap
         if uuid not in self.dcp._list_asset.keys():
@@ -69,6 +72,7 @@ class Checker(CheckerBase):
         #         "".format(mime_type, actual_type))
 
     def check_assets_pkl_size(self, pkl, asset):
+        """ PKL assets size check. """
         _, path, asset = asset
         if not path or not os.path.exists(path):
             return
@@ -82,6 +86,7 @@ class Checker(CheckerBase):
                     asset_size, actual_size))
 
     def check_assets_pkl_hash(self, pkl, asset):
+        """ PKL assets hash check. """
         _, path, asset = asset
         if not path or not os.path.exists(path):
             return
