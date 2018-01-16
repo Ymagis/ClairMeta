@@ -84,3 +84,15 @@ def load_profile(file_path):
                     file_path, k, v))
 
     return profile
+
+
+def save_profile(profile, file_path):
+    """ Save a check profile to json config file.
+
+        Args:
+            profile (dict): Check profile to save.
+            file_path (str): Config file (json) absolute path.
+
+    """
+    with open(file_path, 'w') as f:
+        json.dump(profile, f)
