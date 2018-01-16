@@ -25,14 +25,18 @@ class DCPChecker(CheckerBase):
 
         """
         super(DCPChecker, self).__init__(dcp, profile)
-
         set_level(profile['log_level'])
         self.ov_path = ov_path
+
+    def check(self):
+        """ Execute the complete check process. """
         self.run_checks()
         self.make_report()
         self.dump_report()
+        return self.get_valid(), self.check_report
 
     def list_checks(self):
+        """ List all available checks. """
         all_checks = {}
         all_checks['General'] = self.find_check('dcp')
 

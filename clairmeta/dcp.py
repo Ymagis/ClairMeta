@@ -240,4 +240,4 @@ class DCP(object):
             self.parse()
 
         checker = DCPChecker(self, profile, ov_path)
-        return checker.get_valid(), checker.check_report
+        return checker.check()
