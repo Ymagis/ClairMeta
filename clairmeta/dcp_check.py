@@ -7,6 +7,7 @@ import importlib
 
 from clairmeta.settings import DCP_CHECK_SETTINGS
 from clairmeta.logger import set_level
+from clairmeta.profile import get_default_profile
 from clairmeta.dcp_utils import list_cpl_assets, cpl_probe_asset
 from clairmeta.dcp_check_base import CheckerBase, CheckException
 
@@ -14,7 +15,7 @@ from clairmeta.dcp_check_base import CheckerBase, CheckException
 class DCPChecker(CheckerBase):
     """ Digital Cinema Package checker. """
 
-    def __init__(self, dcp, profile, ov_path=None):
+    def __init__(self, dcp, profile=get_default_profile(), ov_path=None):
         """ DCPChecker constructor.
 
             Args:
