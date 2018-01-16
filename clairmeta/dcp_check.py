@@ -31,6 +31,36 @@ class DCPChecker(CheckerBase):
         self.make_report()
         self.dump_report()
 
+    def list_checks(self):
+        all_checks = {}
+        all_checks['General'] = self.find_check('dcp')
+
+        prefix = DCP_CHECK_SETTINGS['module_prefix']
+        for k, v in six.iteritems(DCP_CHECK_SETTINGS['modules']):
+            try:
+                module_path = 'clairmeta.' + prefix + k
+                module_vol = importlib.import_module(module_path)
+                checker = module_vol.Checker(self.dcp, self.check_profile)
+                all_checks[v] = checker.find_check('')
+            except (ImportError, Exception) as e:
+                self.check_log.critical("Import error {} : {}".format(
+                    module_path, str(e)))
+
+        res = {}
+        for k, v in six.iteritems(all_checks):
+            checks = []
+            for check in v:
+                docstring = check.__doc__
+                if docstring:
+                    desc = docstring.splitlines()[0].strip()
+                else:
+                    desc= ""
+
+                checks.append((check.__name__, desc))
+            res[k] = checks
+
+        return res
+
     def run_checks(self):
         """ Execute all checks. """
         self.check_log.info("Checking DCP : {}".format(self.dcp.path))
@@ -41,7 +71,7 @@ class DCPChecker(CheckerBase):
 
         # Run external modules tests
         prefix = DCP_CHECK_SETTINGS['module_prefix']
-        for module in DCP_CHECK_SETTINGS['modules']:
+        for module, _ in six.iteritems(DCP_CHECK_SETTINGS['modules']):
             try:
                 module_path = 'clairmeta.' + prefix + module
                 module_vol = importlib.import_module(module_path)

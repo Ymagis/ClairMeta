@@ -115,18 +115,18 @@ DCP_CHECK_SETTINGS = {
     # List of check modules for DCP check, these modules will be imported
     # dynamically during the check process.
     'module_prefix': 'dcp_check_',
-    'modules': [
-        'vol',
-        'am',
-        'pkl',
-        'cpl',
-        'sign',
-        'isdcf_dcnc',
-        'picture',
-        'sound',
-        'subtitle',
-        'atmos',
-    ]
+    'modules': {
+        'vol': 'VolIndex checks',
+        'am': 'AssetMap checks',
+        'pkl': 'PackingList checks',
+        'cpl': 'CompositionPlayList checks',
+        'sign': 'Digital signature checks',
+        'isdcf_dcnc': 'Naming Convention checks',
+        'picture': 'Picture essence checks',
+        'sound': 'Sound essence checks',
+        'subtitle': 'Subtitle essence checks',
+        'atmos': 'Atmos essence checks',
+    }
 }
 
 IMP_SETTINGS = {
