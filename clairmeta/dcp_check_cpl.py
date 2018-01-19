@@ -175,6 +175,16 @@ class Checker(CheckerBase):
 
             cpl_position += assets[0]['Duration']
 
+    def check_assets_cpl_missing_from_vf(self, playlist, asset):
+        """ CPL assets referencing external package. """
+        _, asset = asset
+        uuid = asset['Id']
+        is_vf_asset = uuid not in self.dcp._list_asset
+        is_relinked_from_ov = 'Probe' in asset
+
+        if is_vf_asset and not is_relinked_from_ov:
+            raise CheckException("Asset reference OV package")
+
     def check_assets_cpl_schema(self, playlist, asset):
         """ CPL assets schema check. """
         _, asset = asset
