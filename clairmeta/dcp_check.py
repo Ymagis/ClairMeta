@@ -74,6 +74,8 @@ class DCPChecker(CheckerBase):
         dcp_checks = self.find_check('dcp')
         [self.run_check(c) for c in dcp_checks]
 
+        self.setup_dcp_link_ov()
+
         # Run external modules tests
         prefix = DCP_CHECK_SETTINGS['module_prefix']
         for module, _ in six.iteritems(DCP_CHECK_SETTINGS['modules']):
@@ -139,38 +141,45 @@ class DCPChecker(CheckerBase):
             if len(v) > 1:
                 raise CheckException("Multiple {} files found".format(k))
 
-    def check_dcp_link_ov(self):
-        """ VF package shall reference assets present in OV. """
+    def setup_dcp_link_ov(self):
+        """ Setup the link VF to OV check and run for each assets . """
         if not self.ov_path:
             return
 
+        self.run_check(self.check_link_ov_coherence)
+        for cpl in self.dcp._list_cpl:
+            for essence, asset in list_cpl_assets(cpl):
+                self.run_check(self.check_link_ov_asset, asset, essence)
+
+    def check_link_ov_coherence(self):
+        """ Relink OV/VF sanity checks. """
         if self.ov_path and self.dcp.package_type != 'VF':
             raise CheckException("Package checked must be a VF")
 
-        # Probe OV package
         from clairmeta.dcp import DCP
-        ov_dcp = DCP(self.ov_path)
-        ov_dcp_dict = ov_dcp.parse()
-        if ov_dcp.package_type != 'OV':
+        self.ov_dcp = DCP(self.ov_path)
+        self.ov_dcp.parse()
+        if self.ov_dcp.package_type != 'OV':
             raise CheckException("Package referenced must be a OV")
 
-        # Check that OV contains all referenced asset from VF
-        # Probe those assets for later checks
-        for cpl in self.dcp._list_cpl:
-            for essence, asset in list_cpl_assets(cpl):
-                if 'Path' not in asset:
-                    uuid = asset['Id']
-                    path_ov = ov_dcp_dict['asset_list'].get(uuid)
+    def check_link_ov_asset(self, asset, essence):
+        """ VF package shall reference assets present in OV. """
+        ov_dcp_dict = self.ov_dcp.parse()
 
-                    if not path_ov:
-                        raise CheckException(
-                            "Missing asset from OV : {}".format(uuid))
+        if 'Path' not in asset:
+            uuid = asset['Id']
+            path_ov = ov_dcp_dict['asset_list'].get(uuid)
 
-                    asset_path = os.path.join(ov_dcp.path, path_ov)
-                    if not os.path.exists(asset_path):
-                        raise CheckException(
-                            "Missing asset from OV (MXF not found) : {}"
-                            "".format(path_ov))
+            if not path_ov:
+                raise CheckException(
+                    "Missing asset from OV : {}".format(uuid))
 
-                    asset['Path'] = asset_path
-                    cpl_probe_asset(asset, essence, asset_path)
+            asset_path = os.path.join(self.ov_dcp.path, path_ov)
+            if not os.path.exists(asset_path):
+                raise CheckException(
+                    "Missing asset from OV (MXF not found) : {}"
+                    "".format(path_ov))
+
+            # Probe asset for later checks
+            asset['Path'] = asset_path
+            cpl_probe_asset(asset, essence, asset_path)
