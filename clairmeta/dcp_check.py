@@ -59,7 +59,7 @@ class DCPChecker(CheckerBase):
                 if docstring:
                     desc = docstring.splitlines()[0].strip()
                 else:
-                    desc= ""
+                    desc = ""
 
                 checks.append((check.__name__, desc))
             res[k] = checks
