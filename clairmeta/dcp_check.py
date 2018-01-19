@@ -39,6 +39,7 @@ class DCPChecker(CheckerBase):
         """ List all available checks. """
         all_checks = {}
         all_checks['General'] = self.find_check('dcp')
+        all_checks['General'] += self.find_check('link_ov')
 
         prefix = DCP_CHECK_SETTINGS['module_prefix']
         for k, v in six.iteritems(DCP_CHECK_SETTINGS['modules']):
