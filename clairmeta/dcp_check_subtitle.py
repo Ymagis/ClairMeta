@@ -129,12 +129,17 @@ class Checker(CheckerBase):
         return f_s, f_d
 
     def get_font_path(self, xml_dict, folder):
+        uri, path = None, None
+
         if self.dcp.schema == 'SMPTE':
             font_uri = self.get_subtitle_elem(xml_dict, 'LoadFont')
         else:
             font_uri = self.get_subtitle_elem(xml_dict, 'LoadFont@URI')
 
-        return os.path.join(folder, font_uri), font_uri
+        if font_uri:
+            path = os.path.join(folder, font_uri), font_uri
+
+        return path, uri
 
     def check_subtitle_cpl_format(self, playlist, asset, folder):
         """ Subtitle format (related to DCP Standard) check. """
@@ -236,6 +241,8 @@ class Checker(CheckerBase):
         if not st_dict:
             return
         path, uri = self.get_font_path(st_dict, folder)
+        if not path:
+            return
 
         if not os.path.exists(path):
             raise CheckException("Subtitle missing font file : {}".format(uri))
@@ -246,6 +253,9 @@ class Checker(CheckerBase):
         if not st_dict:
             return
         path, uri = self.get_font_path(st_dict, folder)
+        if not path:
+            return
+
         font_size = os.path.getsize(path)
         font_max_size = DCP_SETTINGS['subtitle']['font_max_size']
 
@@ -260,6 +270,9 @@ class Checker(CheckerBase):
         if not st_dict:
             return
         path, uri = self.get_font_path(st_dict, folder)
+        if not path:
+            return
+
         font_format = magic.from_file(path)
         allowed_formats = DCP_SETTINGS['subtitle']['font_formats']
 
