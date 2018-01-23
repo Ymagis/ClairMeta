@@ -406,6 +406,7 @@ class Checker(CheckerBase):
         st_dict = self.get_subtitle_xml(asset, folder)
         if not st_dict:
             return
+
         subs = keys_by_name_dict(st_dict, 'Subtitle')
         flat_subs = [item for sublist in subs for item in sublist]
 
@@ -423,9 +424,18 @@ class Checker(CheckerBase):
                         "Subtitle {} is nearly out of screen (bottom), some "
                         "characters will be cut".format(st_idx))
 
-    # def check_subtitle_cpl_image(self, playlist, asset, folder):
-    #     """ Check if image exists and if it's a valid PNG.
-    #
-    #         Note : To be implemented.
-    #     """
-    #     pass
+    def check_subtitle_cpl_image(self, playlist, asset, folder):
+        """ Subtitle image element must reference a valid PNG file. """
+        st_dict = self.get_subtitle_xml(asset, folder)
+        if not st_dict:
+            return
+        # TODO : Implement the test for SMPTE
+        if self.dcp.schema != 'Interop':
+            return
+
+        imgs = keys_by_name_dict(st_dict, 'Image')
+        for img in imgs:
+            if not os.path.exists(os.path.join(folder, img)):
+                raise CheckException("Subtitle image reference {} not found "
+                    "in folder {}".format(
+                        img, os.path.relpath(folder, self.dcp.path)))
