@@ -137,7 +137,7 @@ class Checker(CheckerBase):
             font_uri = self.get_subtitle_elem(xml_dict, 'LoadFont@URI')
 
         if font_uri:
-            path = os.path.join(folder, font_uri), font_uri
+            path = os.path.join(folder, font_uri)
 
         return path, uri
 
