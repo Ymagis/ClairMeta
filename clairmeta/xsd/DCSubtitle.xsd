@@ -172,10 +172,10 @@
                 </xs:restriction>
             </xs:simpleType>
         </xs:attribute>
-        <xs:attribute name="Spacing" use="optional" default="0.0">
+        <xs:attribute name="Spacing" use="optional" default="0em">
             <xs:simpleType>
-                <xs:restriction base="xs:decimal">
-                    <xs:minInclusive value="-1.0"/>
+                <xs:restriction base="xs:string">
+                    <xs:pattern value="-?(\d+|\d+\.\d+)em"/>
                 </xs:restriction>
             </xs:simpleType>
         </xs:attribute>
