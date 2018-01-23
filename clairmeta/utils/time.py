@@ -4,6 +4,10 @@
 import six
 
 
+def compare_ratio(a, b, precision=0.05):
+    return abs(a-b) <= precision
+
+
 def format_ratio(in_str, separator='/'):
     """ Convert a string representing a rational value to a decimal value.
 

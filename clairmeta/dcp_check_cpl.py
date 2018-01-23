@@ -5,6 +5,7 @@ import six
 
 from clairmeta.utils.sys import all_keys_in_dict
 from clairmeta.utils.uuid import check_uuid, extract_uuid, RFC4122_RE
+from clairmeta.utils.time import compare_ratio
 from clairmeta.dcp_check import CheckerBase, CheckException
 from clairmeta.dcp_check_utils import check_xml, check_issuedate, compare_uuid
 from clairmeta.dcp_utils import list_cpl_assets
@@ -258,10 +259,14 @@ class Checker(CheckerBase):
         if 'Probe' in asset:
             for k, v in six.iteritems(metadata_map):
                 if k in asset and v in asset['Probe']:
-                    if asset[k] != asset['Probe'][v]:
-                        raise CheckException(
-                            "{} metadata mismatch, CPL claims {} but MXF {}"
-                            .format(k, asset[k], asset['Probe'][v]))
+                    cpl_val = asset[k]
+                    mxf_val = asset['Probe'][v]
+                    is_float = type(cpl_val) is float or type(mxf_val) is float
+                    if (is_float and not compare_ratio(cpl_val, mxf_val)
+                        or not is_float and cpl_val != mxf_val):
+                            raise CheckException(
+                                "{} metadata mismatch, CPL claims {} but MXF {}"
+                                .format(k, cpl_val, mxf_val))
                 if k in asset and v not in asset['Probe']:
                     raise CheckException("Missing MXF Metadata {}".format(v))
                 if k not in asset and v in asset['Probe']:
