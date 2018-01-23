@@ -295,6 +295,7 @@ class Checker(CheckerBase):
         st_dict = self.get_subtitle_xml(asset, folder)
         if not st_dict:
             return
+
         subtitles = keys_by_name_dict(st_dict, 'Subtitle')
         editrate = self.get_subtitle_editrate(asset, st_dict)
 
@@ -324,6 +325,7 @@ class Checker(CheckerBase):
         st_dict = self.get_subtitle_xml(asset, folder)
         if not st_dict:
             return
+
         st_rate = self.get_subtitle_editrate(asset, st_dict)
         subtitles = keys_by_name_dict(st_dict, 'Subtitle')
         _, asset = asset
@@ -353,6 +355,7 @@ class Checker(CheckerBase):
         st_dict = self.get_subtitle_xml(asset, folder)
         if not st_dict:
             return
+
         st_rate = self.get_subtitle_editrate(asset, st_dict)
         _, asset = asset
         cpl_rate = asset['EditRate']
@@ -368,6 +371,7 @@ class Checker(CheckerBase):
         st_dict = self.get_subtitle_xml(asset, folder)
         if not st_dict:
             return
+
         st_uuid = self.get_subtitle_uuid(st_dict)
         _, asset = asset
         cpl_uuid = asset['Id']
@@ -383,8 +387,8 @@ class Checker(CheckerBase):
         st_dict = self.get_subtitle_xml(asset, folder)
         if not st_dict:
             return
-        subtitles = keys_by_name_dict(st_dict, 'Subtitle')
 
+        subtitles = keys_by_name_dict(st_dict, 'Subtitle')
         for st in subtitles[0]:
             has_image = keys_by_name_dict(st, 'Image')
             has_text = keys_by_name_dict(st, 'Text')
