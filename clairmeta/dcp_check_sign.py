@@ -41,6 +41,12 @@ class Checker(CheckerBase):
         self.context_revoked_certificates_id = []
         self.context_revoked_public_keys = []
 
+        # Interop DCP can be signed with SMPTE compliant certificate
+        self.certif_sig_algorithm_map = {
+            'SMPTE': ['sha256WithRSAEncryption'],
+            'Interop': ['sha256WithRSAEncryption', 'sha1WithRSAEncryption']
+        }
+
         self.sig_algorithm_map = {
             'SMPTE': 'sha256WithRSAEncryption',
             'Interop': 'sha1WithRSAEncryption'
@@ -293,12 +299,12 @@ class Checker(CheckerBase):
         """ Certificate signature algorithm check. """
         # 10. Signature Algorithm
         signature_algorithm = cert.get_signature_algorithm().decode("utf-8")
+        expected = self.certif_sig_algorithm_map[self.dcp.schema]
 
-        if self.sig_algorithm_map[self.dcp.schema] != signature_algorithm:
+        if signature_algorithm not in expected:
             raise CheckException(
                 "Invalid Signature Algorithm, expected {} but got {}".format(
-                    self.sig_algorithm_map[self.dcp.schema],
-                    signature_algorithm))
+                    ",".join(expected), signature_algorithm))
 
     def check_certif_rsa_validity(self, cert, index):
         """ Certificate characteristics (RSA 2048, 65537 exp) check. """
