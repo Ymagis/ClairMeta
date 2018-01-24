@@ -17,6 +17,9 @@ class Checker(CheckerBase):
         super(Checker, self).__init__(dcp, profile)
 
     def run_checks(self):
+        # Accumulate hash by UUID, useful for multi PKL package
+        self.hash_map = {}
+
         for source in self.dcp._list_pkl:
             checks = self.find_check('pkl')
             [self.run_check(check, source, message=source['FileName'])
@@ -93,9 +96,11 @@ class Checker(CheckerBase):
             return
 
         asset_hash = asset['Hash']
-        actual_hash = shaone_b64(path)
+        asset_id = asset['Id']
+        if asset_id not in self.hash_map:
+            self.hash_map[asset_id] = shaone_b64(path)
 
-        if actual_hash != asset_hash:
+        if self.hash_map[asset_id] != asset_hash:
             raise CheckException(
                 "Corrupt file, expected hash {} but got {}".format(
-                    asset_hash, actual_hash))
+                    asset_hash, self.hash_map[asset_id]))
