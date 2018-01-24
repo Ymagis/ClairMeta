@@ -10,12 +10,14 @@ from clairmeta.logger import set_level
 from clairmeta.profile import get_default_profile
 from clairmeta.dcp_utils import list_cpl_assets, cpl_probe_asset
 from clairmeta.dcp_check_base import CheckerBase, CheckException
+from clairmeta.utils.file import console_progress_bar
 
 
 class DCPChecker(CheckerBase):
     """ Digital Cinema Package checker. """
 
-    def __init__(self, dcp, profile=get_default_profile(), ov_path=None):
+    def __init__(self, dcp, profile=get_default_profile(), ov_path=None,
+        hash_callback=console_progress_bar):
         """ DCPChecker constructor.
 
             Args:
@@ -27,6 +29,23 @@ class DCPChecker(CheckerBase):
         super(DCPChecker, self).__init__(dcp, profile)
         set_level(profile['log_level'])
         self.ov_path = ov_path
+        self.hash_callback = hash_callback
+
+        self.check_modules = {}
+        self.load_modules()
+
+    def load_modules(self):
+        prefix = DCP_CHECK_SETTINGS['module_prefix']
+        for k, v in six.iteritems(DCP_CHECK_SETTINGS['modules']):
+            try:
+                module_path = 'clairmeta.' + prefix + k
+                module_vol = importlib.import_module(module_path)
+                checker = module_vol.Checker(self.dcp, self.check_profile)
+                checker.hash_callback = self.hash_callback
+                self.check_modules[v] = checker
+            except (ImportError, Exception) as e:
+                self.check_log.critical("Import error {} : {}".format(
+                    module_path, str(e)))
 
     def check(self):
         """ Execute the complete check process. """
@@ -41,16 +60,8 @@ class DCPChecker(CheckerBase):
         all_checks['General'] = self.find_check('dcp')
         all_checks['General'] += self.find_check('link_ov')
 
-        prefix = DCP_CHECK_SETTINGS['module_prefix']
-        for k, v in six.iteritems(DCP_CHECK_SETTINGS['modules']):
-            try:
-                module_path = 'clairmeta.' + prefix + k
-                module_vol = importlib.import_module(module_path)
-                checker = module_vol.Checker(self.dcp, self.check_profile)
-                all_checks[v] = checker.find_check('')
-            except (ImportError, Exception) as e:
-                self.check_log.critical("Import error {} : {}".format(
-                    module_path, str(e)))
+        for desc, checker in six.iteritems(self.check_modules):
+            all_checks[desc] = checker.find_check('')
 
         res = {}
         for k, v in six.iteritems(all_checks):
@@ -74,20 +85,11 @@ class DCPChecker(CheckerBase):
         # Run own tests
         dcp_checks = self.find_check('dcp')
         [self.run_check(c) for c in dcp_checks]
-
         self.setup_dcp_link_ov()
 
         # Run external modules tests
-        prefix = DCP_CHECK_SETTINGS['module_prefix']
-        for module, _ in six.iteritems(DCP_CHECK_SETTINGS['modules']):
-            try:
-                module_path = 'clairmeta.' + prefix + module
-                module_vol = importlib.import_module(module_path)
-                checker = module_vol.Checker(self.dcp, self.check_profile)
-                self.check_executions += checker.run_checks()
-            except (ImportError, Exception) as e:
-                self.check_log.critical("Import error {} : {}".format(
-                    module_path, str(e)))
+        for _, checker in six.iteritems(self.check_modules):
+            self.check_executions += checker.run_checks()
 
     def check_dcp_empty_dir(self):
         """ Empty directory detection. """

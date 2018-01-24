@@ -14,7 +14,7 @@ from clairmeta.dcp_utils import (list_am_assets, list_pkl_assets,
 from clairmeta.dcp_check import DCPChecker
 from clairmeta.utils.xml import parse_xml
 from clairmeta.utils.sys import remove_key_dict
-from clairmeta.utils.file import folder_size, human_size
+from clairmeta.utils.file import folder_size, human_size, console_progress_bar
 from clairmeta.settings import DCP_SETTINGS
 from clairmeta.profile import DCP_CHECK_PROFILE
 
@@ -225,7 +225,8 @@ class DCP(object):
         self._parsed = True
         return self.probe_dict
 
-    def check(self, profile=DCP_CHECK_PROFILE, ov_path=None):
+    def check(self, profile=DCP_CHECK_PROFILE, ov_path=None,
+        hash_callback=console_progress_bar):
         """ Check validity.
 
             Args:
@@ -241,5 +242,7 @@ class DCP(object):
         if not self._parsed or not self._probeb:
             self.parse()
 
-        checker = DCPChecker(self, profile, ov_path)
+        checker = DCPChecker(
+            self, profile=profile, ov_path=ov_path,
+            hash_callback=hash_callback)
         return checker.check()
