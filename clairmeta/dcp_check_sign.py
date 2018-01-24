@@ -437,6 +437,14 @@ class Checker(CheckerBase):
             if self.context_trusted_certificates:
                 raise CheckException("Trusted list check not implemented")
 
+    def check_sign_chain_coherence_signature_algorithm(self, source):
+        """ Certificates chain coherence. """
+        sign_alg_set = set(
+            [c.get_signature_algorithm() for c in self.cert_list])
+        if len(sign_alg_set) > 1:
+            raise CheckException("Certificate chain contains certificates "
+                "signed with different algorithm")
+
     def check_sign_signature_algorithm(self, source):
         """ XML signature algorithm check. """
         # Additionnal. XML coherence checks
