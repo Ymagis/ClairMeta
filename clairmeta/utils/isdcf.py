@@ -37,7 +37,7 @@ RULES = {
             '(-(?P<Dimension>(2D|3D)))?'
             '(-(?P<MasteringLuminance>\d+fl))?'
             '(-(?P<FrameRate>\d+))?'
-            '(-(?P<DolbyVision>DVIs))?'
+            '(-(?P<DolbyVision>DVis))?'
             '$)',
         'ProjectorAspectRatio':
             r'(^'
