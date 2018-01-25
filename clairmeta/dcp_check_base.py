@@ -44,6 +44,7 @@ class CheckerBase(object):
         self.check_log = get_log()
         self.check_executions = []
         self.check_report = {}
+        self.hash_callback = None
 
     def find_check_criticality(self, name):
         """ Find criticity of a particular check (using profile).

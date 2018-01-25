@@ -18,6 +18,7 @@ class Checker(CheckerBase):
         return self.check_executions
 
     def check_vol_xml(self, vol):
+        """ VolIndex XML syntax and structure check. """
         check_xml(
             vol['FilePath'],
             vol['Info']['VolumeIndex']['__xmlns__'],
@@ -25,6 +26,7 @@ class Checker(CheckerBase):
             self.dcp.schema)
 
     def check_vol_name(self, vol):
+        """ VolIndex file name respect DCP standard. """
         schema = vol['Info']['VolumeIndex']['Schema']
         mandatory_name = {
             'Interop': 'VOLINDEX',

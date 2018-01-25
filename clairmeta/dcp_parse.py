@@ -4,6 +4,7 @@
 import os
 import six
 
+from clairmeta.utils.isdcf import parse_isdcf_string
 from clairmeta.utils.xml import parse_xml
 from clairmeta.utils.time import frame_to_tc, format_ratio
 from clairmeta.utils.sys import all_keys_in_dict
@@ -83,9 +84,17 @@ def cpl_parse(path):
 
     if cpl:
         cpl_node = cpl['Info']['CompositionPlaylist']
+        cpl_dcnc_parse(cpl_node)
         cpl_reels_parse(cpl_node)
 
     return cpl
+
+
+def cpl_dcnc_parse(cpl_node):
+    """ Extract information from ContentTitle """
+    fields, errors = parse_isdcf_string(cpl_node.get('ContentTitleText'))
+    if not errors:
+        cpl_node["NamingConvention"] = fields
 
 
 def cpl_reels_parse(cpl_node):
@@ -116,7 +125,8 @@ def cpl_reels_parse(cpl_node):
             'AuxData': 'AuxData',
             'MainSubtitle': 'Subtitle',
             'MainMarkers': 'Markers',
-            'CompositionMetadataAsset': 'Metadata'
+            'CompositionMetadataAsset': 'Metadata',
+            'ClosedCaption': 'ClosedCaption'
         }
 
         # Generic asset parsing

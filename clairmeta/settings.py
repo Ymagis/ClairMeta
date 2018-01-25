@@ -34,6 +34,7 @@ DCP_SETTINGS = {
         'smpte_subtitles_2007': 'http://www.smpte-ra.org/schemas/428-7/2007/DCST',
         'smpte_subtitles_2010': 'http://www.smpte-ra.org/schemas/428-7/2010/DCST',
         'smpte_subtitles_2014': 'http://www.smpte-ra.org/schemas/428-7/2014/DCST',
+        'smpte_tt': 'http://www.smpte-ra.org/schemas/429-12/2008/TT',
         'smpte_etm': 'http://www.smpte-ra.org/schemas/430-3/2006/ETM',
         'smpte_kdm': 'http://www.smpte-ra.org/schemas/430-1/2006/KDM',
         'atmos': 'http://www.dolby.com/schemas/2012/AD',
@@ -45,6 +46,7 @@ DCP_SETTINGS = {
         'enveloped_sig': 'http://www.w3.org/2000/09/xmldsig#enveloped-signature',
         'c14n': 'http://www.w3.org/TR/2001/REC-xml-c14n-20010315',
         'sha1': 'http://www.w3.org/2000/09/xmldsig#sha1',
+        'dolby_edr': 'http://www.dolby.com/schemas/2014/EDR-Metadata',
     },
     'picture': {
         'resolutions': {
@@ -115,18 +117,18 @@ DCP_CHECK_SETTINGS = {
     # List of check modules for DCP check, these modules will be imported
     # dynamically during the check process.
     'module_prefix': 'dcp_check_',
-    'modules': [
-        'vol',
-        'am',
-        'pkl',
-        'cpl',
-        'sign',
-        'isdcf_dcnc',
-        'picture',
-        'sound',
-        'subtitle',
-        'atmos',
-    ]
+    'modules': {
+        'vol': 'VolIndex checks',
+        'am': 'AssetMap checks',
+        'pkl': 'PackingList checks',
+        'cpl': 'CompositionPlayList checks',
+        'sign': 'Digital signature checks',
+        'isdcf_dcnc': 'Naming Convention checks',
+        'picture': 'Picture essence checks',
+        'sound': 'Sound essence checks',
+        'subtitle': 'Subtitle essence checks',
+        'atmos': 'Atmos essence checks',
+    }
 }
 
 IMP_SETTINGS = {

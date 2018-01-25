@@ -4,6 +4,7 @@
 import six
 import json
 import os
+import copy
 
 
 DCP_CHECK_PROFILE = {
@@ -14,15 +15,25 @@ DCP_CHECK_PROFILE = {
     'criticality': {
         'default': 'ERROR',
         'check_dcnc_': 'WARNING',
+        'check_cpl_contenttitle_annotationtext_match': 'WARNING',
+        'check_cpl_contenttitle_pklannotationtext_match': 'WARNING',
         'check_cpl_reel_duration_picture_subtitles': 'WARNING',
+        'check_assets_cpl_missing_from_vf': 'WARNING',
+        'check_certif_multi_role' : 'WARNING',
         'check_picture_cpl_avg_bitrate': 'WARNING',
         'check_picture_cpl_resolution': 'WARNING',
+        'check_subtitle_cpl_reel_number': 'WARNING',
     },
     # Checker options
     # Bypass is a list of check names (function names)
     'bypass': [],
     'log_level': 'INFO',
 }
+
+
+def get_default_profile():
+    """ Returns the default DCP checking profile """
+    return copy.deepcopy(DCP_CHECK_PROFILE)
 
 
 def load_profile(file_path):
@@ -77,3 +88,15 @@ def load_profile(file_path):
                     file_path, k, v))
 
     return profile
+
+
+def save_profile(profile, file_path):
+    """ Save a check profile to json config file.
+
+        Args:
+            profile (dict): Check profile to save.
+            file_path (str): Config file (json) absolute path.
+
+    """
+    with open(file_path, 'w') as f:
+        json.dump(profile, f)

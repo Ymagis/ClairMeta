@@ -14,7 +14,7 @@ from clairmeta.dcp_utils import (list_am_assets, list_pkl_assets,
 from clairmeta.dcp_check import DCPChecker
 from clairmeta.utils.xml import parse_xml
 from clairmeta.utils.sys import remove_key_dict
-from clairmeta.utils.file import folder_size, human_size
+from clairmeta.utils.file import folder_size, human_size, console_progress_bar
 from clairmeta.settings import DCP_SETTINGS
 from clairmeta.profile import DCP_CHECK_PROFILE
 
@@ -39,9 +39,11 @@ class DCP(object):
         self.path = os.path.normpath(path)
         self.schema = 'Unknown'
         self.package_type = 'Unknown'
+        self.foreign_files = []
         self.size = folder_size(path)
         self.log = get_log()
 
+        self._probeb = False
         self._parsed = False
 
     def init_package_files(self):
@@ -118,8 +120,6 @@ class DCP(object):
 
         self.cpl_find_pkl()
         self.cpl_link_assets()
-        self.cpl_probe_assets()
-        self.cpl_parse_metadata()
 
     def cpl_find_pkl(self):
         """ Find PKL that reference the CPL. """
@@ -136,6 +136,8 @@ class DCP(object):
 
     def cpl_link_assets(self):
         """ Link assets for each reel with actual files in the package. """
+        # TODO : For Multi CPL package, what to choose if there are both
+        # OV / VF?
         self.package_type = 'OV'
 
         for cpl in self._list_cpl:
@@ -179,7 +181,7 @@ class DCP(object):
         """ List of DCP CompositionPlayList Dictionary. """
         return self._list_cpl
 
-    def parse(self):
+    def parse(self, probe=True):
         """ Parse the DCP and Probe its assets. """
         if self._parsed:
             return self.probe_dict
@@ -193,6 +195,12 @@ class DCP(object):
         self.init_volindex()
         self.init_pkl()
         self.init_cpl()
+
+        if probe:
+            self.cpl_probe_assets()
+            self._probeb = True
+
+        self.cpl_parse_metadata()
 
         seconds_elapsed = time.time() - start
         self.log.info("Total time : {:.2f} seconds".format(seconds_elapsed))
@@ -217,7 +225,8 @@ class DCP(object):
         self._parsed = True
         return self.probe_dict
 
-    def check(self, profile=DCP_CHECK_PROFILE, ov_path=None):
+    def check(self, profile=DCP_CHECK_PROFILE, ov_path=None,
+        hash_callback=console_progress_bar):
         """ Check validity.
 
             Args:
@@ -230,8 +239,10 @@ class DCP(object):
                     criticity.
 
         """
-        if not self._parsed:
+        if not self._parsed or not self._probeb:
             self.parse()
 
-        checker = DCPChecker(self, profile, ov_path)
-        return checker.get_valid(), checker.check_report
+        checker = DCPChecker(
+            self, profile=profile, ov_path=ov_path,
+            hash_callback=hash_callback)
+        return checker.check()

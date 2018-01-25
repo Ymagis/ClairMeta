@@ -17,6 +17,9 @@ class Checker(CheckerBase):
         super(Checker, self).__init__(dcp, profile)
 
     def run_checks(self):
+        # Accumulate hash by UUID, useful for multi PKL package
+        self.hash_map = {}
+
         for source in self.dcp._list_pkl:
             checks = self.find_check('pkl')
             [self.run_check(check, source, message=source['FileName'])
@@ -32,6 +35,7 @@ class Checker(CheckerBase):
         return self.check_executions
 
     def check_pkl_xml(self, pkl):
+        """ PKL XML syntax and structure check. """
         pkl_node = pkl['Info']['PackingList']
         check_xml(
             pkl['FilePath'],
@@ -40,34 +44,39 @@ class Checker(CheckerBase):
             self.dcp.schema)
 
     def check_pkl_issuedate(self, pkl):
+        """ PKL Issue Date validation. """
         check_issuedate(pkl['Info']['PackingList']['IssueDate'])
 
     def check_assets_pkl_referenced_by_assetamp(self, pkl, asset):
+        """ PKL assets shall be present in AssetMap. """
         uuid, _, _ = asset
         # Note : dcp._list_asset is directly extracted from Assetmap
         if uuid not in self.dcp._list_asset.keys():
             raise CheckException("Not present in Assetmap")
 
-    def check_assets_pkl_type(self, pkl, asset):
-        _, path, asset = asset
-        mime_type = asset['Type']
-
-        if mime_type == "":
-            raise CheckException("Empty Type")
-        if not path or not os.path.exists(path):
-            return
-
-        mime_type = mime_type.split(';')[0]
-        mime_type = re.sub(r'x-\w+-', '', mime_type)
-        actual_type = magic.from_file(path, mime=True)
-        actual_type = re.sub(r'x-\w+-', '', actual_type)
-
-        if actual_type != mime_type:
-            raise CheckException(
-                "Mime Type mismatch, expected (from PKL) {} but found {}"
-                "".format(mime_type, actual_type))
+    # TODO : MIME Type might not be worth checking (too versatile)
+    # def check_assets_pkl_type(self, pkl, asset):
+    #     """ PKL assets MimeType check. """
+    #     _, path, asset = asset
+    #     mime_type = asset['Type']
+    #
+    #     if mime_type == "":
+    #         raise CheckException("Empty Type")
+    #     if not path or not os.path.exists(path):
+    #         return
+    #
+    #     mime_type = mime_type.split(';')[0]
+    #     mime_type = re.sub(r'x-\w+-', '', mime_type)
+    #     actual_type = magic.from_file(path, mime=True)
+    #     actual_type = re.sub(r'x-\w+-', '', actual_type)
+    #
+    #     if actual_type != mime_type:
+    #         raise CheckException(
+    #             "Mime Type mismatch, expected (from PKL) {} but found {}"
+    #             "".format(mime_type, actual_type))
 
     def check_assets_pkl_size(self, pkl, asset):
+        """ PKL assets size check. """
         _, path, asset = asset
         if not path or not os.path.exists(path):
             return
@@ -81,14 +90,17 @@ class Checker(CheckerBase):
                     asset_size, actual_size))
 
     def check_assets_pkl_hash(self, pkl, asset):
+        """ PKL assets hash check. """
         _, path, asset = asset
         if not path or not os.path.exists(path):
             return
 
         asset_hash = asset['Hash']
-        actual_hash = shaone_b64(path)
+        asset_id = asset['Id']
+        if asset_id not in self.hash_map:
+            self.hash_map[asset_id] = shaone_b64(path, self.hash_callback)
 
-        if actual_hash != asset_hash:
+        if self.hash_map[asset_id] != asset_hash:
             raise CheckException(
                 "Corrupt file, expected hash {} but got {}".format(
-                    asset_hash, actual_hash))
+                    asset_hash, self.hash_map[asset_id]))
