@@ -34,6 +34,7 @@ DCP_SETTINGS = {
         'smpte_subtitles_2007': 'http://www.smpte-ra.org/schemas/428-7/2007/DCST',
         'smpte_subtitles_2010': 'http://www.smpte-ra.org/schemas/428-7/2010/DCST',
         'smpte_subtitles_2014': 'http://www.smpte-ra.org/schemas/428-7/2014/DCST',
+        'smpte_tt': 'http://www.smpte-ra.org/schemas/429-12/2008/TT',
         'smpte_etm': 'http://www.smpte-ra.org/schemas/430-3/2006/ETM',
         'smpte_kdm': 'http://www.smpte-ra.org/schemas/430-1/2006/KDM',
         'atmos': 'http://www.dolby.com/schemas/2012/AD',
