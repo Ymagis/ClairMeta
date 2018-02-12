@@ -87,7 +87,7 @@ class Checker(CheckerBase):
 
             if max_bitrate > t_bitrate:
                 raise CheckException(
-                    "Exceed DCI bitrate ({} Mb/s) : {} Mb/s".format(
+                    "Exceed DCI maximum bitrate ({} Mb/s) : {} Mb/s".format(
                         t_bitrate, max_bitrate))
 
     def check_picture_cpl_avg_bitrate(self, playlist, asset):
