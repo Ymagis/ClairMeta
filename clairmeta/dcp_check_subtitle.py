@@ -467,6 +467,6 @@ class Checker(CheckerBase):
         imgs = keys_by_name_dict(st_dict, 'Image')
         for img in imgs:
             if not os.path.exists(os.path.join(folder, img)):
-                raise CheckException("Subtitle image reference {} not found "
-                    "in folder {}".format(
-                        img, os.path.relpath(folder, self.dcp.path)))
+                raise CheckException(
+                    "Subtitle image reference {} not found in folder {}"
+                    "".format(img, os.path.relpath(folder, self.dcp.path)))
