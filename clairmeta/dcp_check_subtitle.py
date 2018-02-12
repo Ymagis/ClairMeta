@@ -88,27 +88,58 @@ class Checker(CheckerBase):
 
         return tc_rate
 
-    def st_tc_frames(self, tc, edit_rate):
-        """ Convert DCSubtitle hh:mm:ss:ttt or hh:mm:ss.sss timecode to frame.
+    def ticks_to_frame(self, tick, edit_rate):
+        tick = int(tick)
+        time_base = 1.0 / edit_rate
+        return int((tick * 0.004) // time_base)
 
-            DLP Cinema Subtitle Spec :
+    def st_tc_frames(self, tc, edit_rate):
+        """ Convert TimeCode to frame count.
+
+            Interop DCSubtitle :
+            Format is either hh:mm:ss:ttt or hh:mm:ss.sss or ttt
+            (for fade up / down).
+
             The time is specified in the format, HH:MM:SS:TTT where HH = hours,
             MM = minutes, SS = seconds, and TTT = ticks. A "tick" is defined as
             4 msec and has a range of 0 to 249. This definition of tick was
             chosen because it will allow frame accurate timing at multiple
             frame rates, without specifying the display frame rate in the
             subtitle file.
+
+            Alternatively, time may be specified in the format
+            HH:MM:SS.sss where HH = hours, MM = minutes, SS =
+            seconds, and sss = decimal fractions of a second. In
+            this format, 01:12:42.5 would indicate 1 hour, 12
+            minutes, 42 and 1/2 seconds. This definition of time was
+            chosen because it will allow frame accurate timing at
+            multiple frame rates, without specifying the display
+            frame rate in the subtitle file.
+
+            SMPTE :
+            Format is always HH:MM:SS:E+, where E+ is the edit unit ie. an
+            integer between 0 and TimeCodeRate - 1, typically 2 or 3 digits.
+
         """
-        tick_pattern = r'\d{2}:\d{2}:\d{2}:(?P<Tick>\d{3})$'
-        # sec_pattern = r'\d{2}:\d{2}:\d{2}\.\d{3}$'
-        if re.match(tick_pattern, tc):
-            ticks = int(re.match(tick_pattern, tc).groupdict()['Tick'])
-            time_base = 1.0 / edit_rate
-            frame = int((ticks * 0.004) // time_base)
-            tc_corrected = re.sub(r':\d{3}$', ':{:02d}'.format(frame), tc)
-            return tc_to_frame(tc_corrected, edit_rate)
-        else:
-            return tc_to_frame(tc, edit_rate)
+        tc = str(tc)
+        tick_simple_pattern = r'^\d{1,3}$'
+        tick_pattern = r'^\d{2}:\d{2}:\d{2}:(?P<Tick>\d{2,3})$'
+        fract_pattern = r'^\d{2}:\d{2}:\d{2}\.(?P<Fract>\d{1,3})$'
+
+        if self.dcp.schema == 'Interop':
+            if re.match(tick_simple_pattern, tc):
+                frame = self.ticks_to_frame(tc, edit_rate)
+                tc = '00:00:00:{:02d}'.format(frame)
+            elif re.match(tick_pattern, tc):
+                ticks = int(re.match(tick_pattern, tc).groupdict()['Tick'])
+                frame = self.ticks_to_frame(ticks, edit_rate)
+                tc = re.sub(r':\d{3}$', ':{:02d}'.format(frame), tc)
+            elif re.match(fract_pattern, tc):
+                fract = int(re.match(fract_pattern, tc).groupdict()['Fract'])
+                frame = int(float("0.{}".format(fract)) * edit_rate)
+                tc = re.sub(r'\.\d{1,3}$', ':{:02d}'.format(frame), tc)
+
+        return tc_to_frame(tc, edit_rate)
 
     def get_subtitle_uuid(self, xml_dict):
         if self.dcp.schema == 'SMPTE':
@@ -122,7 +153,7 @@ class Checker(CheckerBase):
         f_s = st.get('Subtitle@FadeUpTime')
         f_d = st.get('Subtitle@FadeDownTime')
 
-        if self.dcp.schema == 'SMPTE' and all([f_s, f_d]):
+        if all([f_s, f_d]):
             f_s = self.st_tc_frames(f_s, editrate)
             f_d = self.st_tc_frames(f_d, editrate)
 
