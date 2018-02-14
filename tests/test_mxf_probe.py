@@ -7,18 +7,6 @@ import os
 from clairmeta.utils.probe import probe_mxf
 
 
-ROOT_PATH = os.environ.get(
-    "CLAIRMETA_UNITTESTS_MEDIA_PROCESS", '/mnt/UNIT_TEST/MXF')
-
-VIDEO_3D_OVER_250 = os.path.join(ROOT_PATH, 'picture_over_250_mb.mxf')
-AUDIO_IPO = os.path.join(ROOT_PATH, 'audio_iop.mxf')
-AUDIO_IMF = os.path.join(ROOT_PATH, 'audio_imf.mxf')
-AUDIO_SMPTE = os.path.join(ROOT_PATH, 'audio_smpte.mxf')
-ATMOS_SMPTE = os.path.join(ROOT_PATH, 'atmos.mxf')
-SUBTITLE_SMPTE = os.path.join(ROOT_PATH, 'subtitle_smpte.mxf')
-FAKE = os.path.join(ROOT_PATH, 'null')
-
-
 class TestAssetProbe(unittest.TestCase):
 
     def get_path(self, name):
