@@ -11,6 +11,7 @@ import dicttoxml
 import pprint
 
 from clairmeta import DCP, DSM, DCDM
+from clairmeta.logger import disable_log
 from clairmeta.info import __version__
 from clairmeta.profile import load_profile, DCP_CHECK_PROFILE
 from clairmeta.utils.xml import prettyprint_xml
@@ -48,6 +49,7 @@ def cli_check(args):
 
 def cli_probe(args):
     try:
+        disable_log()
         obj_type = package_type_map[args.type]
         res = obj_type(args.path).parse()
 
