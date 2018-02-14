@@ -52,20 +52,23 @@ class DCDM(object):
         for dirpath, dirnames, filenames in os.walk(self.path):
             if not filenames:
                 continue
+            filenames = [f for f in filenames if not f.startswith('.')]
+            f = filenames[0]
 
-            probe = probe_mediainfo(os.path.join(dirpath, filenames[0]))
+            probe = probe_mediainfo(os.path.join(dirpath, f))
             img = probe['Probe']['ProbeImage']
 
             # Note : Metadata are not reliable but we can at least check
             # for 3 channels colorspace.
             if img["Color_space"] not in ["RGB", "XYZ"]:
-                raise ValueError("DCDM invalid colorspace detected : {}"
-                                 .format(img["Color_space"]))
+                raise ValueError(" {} : invalid colorspace detected {}"
+                                 .format(f, img["Color_space"]))
             if img["Bit_depth"] != "16 bits":
-                raise ValueError("DCDM invalid bitdepth detected : {}"
-                                 .format(img["Bit_depth"]))
-            if img["Compression_mode"] != "Lossless":
-                raise ValueError("DCDM invalid compression detected : {}"
-                                 .format(img["Compression_mode"]))
+                raise ValueError("{} : invalid bitdepth detected {}"
+                                 .format(f, img["Bit_depth"]))
+            if "Compression_mode" in img:
+                if img["Compression_mode"] != "Lossless":
+                    raise ValueError("{} : invalid compression detected {}"
+                                     .format(f, img["Compression_mode"]))
 
         return True
