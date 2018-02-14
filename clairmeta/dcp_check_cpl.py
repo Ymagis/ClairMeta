@@ -262,11 +262,13 @@ class Checker(CheckerBase):
                     cpl_val = asset[k]
                     mxf_val = asset['Probe'][v]
                     is_float = type(cpl_val) is float or type(mxf_val) is float
-                    if (is_float and not compare_ratio(cpl_val, mxf_val)
-                        or not is_float and cpl_val != mxf_val):
-                            raise CheckException(
-                                "{} metadata mismatch, CPL claims {} but MXF {}"
-                                .format(k, cpl_val, mxf_val))
+
+                    matching = is_float and compare_ratio(cpl_val, mxf_val)
+                    matching = matching or not is_float and cpl_val == mxf_val
+                    if not matching:
+                        raise CheckException(
+                            "{} metadata mismatch, CPL claims {} but MXF {}"
+                            .format(k, cpl_val, mxf_val))
                 if k in asset and v not in asset['Probe']:
                     raise CheckException("Missing MXF Metadata {}".format(v))
                 if k not in asset and v in asset['Probe']:
