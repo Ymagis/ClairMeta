@@ -57,6 +57,21 @@ def human_size(nbytes):
 
 
 @contextlib.contextmanager
+def temporary_file(prefix="tmp", suffix=""):
+    """ Context managed temporary file.
+
+        Yields:
+            str: Absolute path of the temporary file.
+
+    """
+    try:
+        handle, filepath = tempfile.mkstemp(prefix=prefix, suffix=suffix)
+        yield filepath
+    finally:
+        os.remove(filepath)
+
+
+@contextlib.contextmanager
 def temporary_dir():
     """ Context managed temporary directory.
 
