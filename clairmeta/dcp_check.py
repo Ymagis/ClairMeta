@@ -16,8 +16,10 @@ from clairmeta.utils.file import console_progress_bar
 class DCPChecker(CheckerBase):
     """ Digital Cinema Package checker. """
 
-    def __init__(self, dcp, profile=get_default_profile(), ov_path=None,
-        hash_callback=console_progress_bar):
+    def __init__(
+        self, dcp, profile=get_default_profile(), ov_path=None,
+        hash_callback=console_progress_bar
+    ):
         """ DCPChecker constructor.
 
             Args:

@@ -225,8 +225,10 @@ class DCP(object):
         self._parsed = True
         return self.probe_dict
 
-    def check(self, profile=DCP_CHECK_PROFILE, ov_path=None,
-        hash_callback=console_progress_bar):
+    def check(
+        self, profile=DCP_CHECK_PROFILE, ov_path=None,
+        hash_callback=console_progress_bar
+    ):
         """ Check validity.
 
             Args:
