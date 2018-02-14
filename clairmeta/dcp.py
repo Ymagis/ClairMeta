@@ -244,7 +244,7 @@ class DCP(object):
         if not self._parsed or not self._probeb:
             self.parse()
 
-        checker = DCPChecker(
+        self._checker = DCPChecker(
             self, profile=profile, ov_path=ov_path,
             hash_callback=hash_callback)
-        return checker.check()
+        return self._checker.check()
