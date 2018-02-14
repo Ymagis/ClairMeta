@@ -63,8 +63,9 @@ class DCP(object):
         """ Build a list of package XML files having a specific root node. """
         xml_list = []
         candidates = [
-            f for f in self._list_files if
-            f.endswith('.xml') and os.path.dirname(f) == self.path]
+            f for f in self._list_files
+            if f.endswith('.xml') and not f.startswith('.')
+            and os.path.dirname(f) == self.path]
 
         for c in candidates:
             nodes = parse_xml(c, namespaces=DCP_SETTINGS['xmlns'])
