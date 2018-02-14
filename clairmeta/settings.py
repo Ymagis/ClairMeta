@@ -67,6 +67,7 @@ DCP_SETTINGS = {
         # These are in Mb/s
         'max_bitrate': 250,
         'max_hfr_bitrate': 500,
+        'max_dvi_bitrate': 400,
         # We allow a small offset above DCI specification :
         # asdcplib use a method of computation that can only give an
         # approximation (worst case scenario) of the actual max bitrate.

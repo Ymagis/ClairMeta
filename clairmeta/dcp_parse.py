@@ -80,7 +80,9 @@ def pkl_parse(path):
 
 def cpl_parse(path):
     """ Parse DCP CPL """
-    cpl = generic_parse(path, "CompositionPlaylist", ("Reel",))
+    cpl = generic_parse(
+        path, "CompositionPlaylist",
+        ("Reel", "ExtensionMetadataList", "PropertyList"))
 
     if cpl:
         cpl_node = cpl['Info']['CompositionPlaylist']
@@ -104,6 +106,7 @@ def cpl_reels_parse(cpl_node):
 
     global_editrate = 0
     total_frame_duration = 0
+    is_dvi = False
 
     for pos, in_reel in enumerate(in_reels, 1):
 
@@ -178,8 +181,19 @@ def cpl_reels_parse(cpl_node):
                     marker_list["Label"]: marker_list["Offset"]
                 }]
 
+        if 'Metadata' in out_reel['Assets']:
+            meta = out_reel['Assets']['Metadata']
+            exts = meta.get('ExtensionMetadataList', [])
+            for ext in exts:
+                ext_desc = ext.get('ExtensionMetadata', {})
+                ext_name = ext_desc.get('Name')
+                # DolbyVision
+                if ext_name == 'Dolby EDR':
+                    is_dvi = True
+
         out_reels.append(out_reel)
 
+    cpl_node['DolbyVision'] = is_dvi
     cpl_node['ReelList'] = out_reels
     cpl_node['TotalDuration'] = total_frame_duration
     cpl_node['TotalTimeCodeDuration'] = frame_to_tc(

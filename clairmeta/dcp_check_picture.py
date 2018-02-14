@@ -9,6 +9,7 @@ from clairmeta.settings import DCP_SETTINGS
 
 
 class Checker(CheckerBase):
+
     def __init__(self, dcp, profile):
         super(Checker, self).__init__(dcp, profile)
 
@@ -24,15 +25,22 @@ class Checker(CheckerBase):
 
         return self.check_executions
 
-    def get_picture_max_bitrate(self, asset):
+    def get_picture_max_bitrate(self, playlist, asset):
         settings = DCP_SETTINGS['picture']
-        bitrate_hfr_map = {
-            True: settings['max_hfr_bitrate'],
-            False: settings['max_bitrate']
+        bitrate_map = {
+            'DCI': settings['max_bitrate'],
+            'HFR': settings['max_hfr_bitrate'],
+            'DVI': settings['max_dvi_bitrate'],
         }
 
-        is_hfr = asset.get('HighFrameRate', False)
-        dci_bitrate = bitrate_hfr_map[is_hfr]
+        is_dvi = playlist['Info']['CompositionPlaylist']['DolbyVision']
+        if is_dvi:
+            dci_bitrate = bitrate_map['DVI']
+        else:
+            is_hfr = asset.get('HighFrameRate', False)
+            label = 'HFR' if is_hfr else 'DCI'
+            dci_bitrate = bitrate_map[label]
+
         return dci_bitrate
 
     def check_picture_cpl_resolution(self, playlist, asset):
@@ -82,7 +90,7 @@ class Checker(CheckerBase):
         _, asset = asset
         if 'Probe' in asset:
             max_bitrate = asset['Probe']['MaxBitRate']
-            dci_bitrate = self.get_picture_max_bitrate(asset)
+            dci_bitrate = self.get_picture_max_bitrate(playlist, asset)
             t_bitrate = dci_bitrate + tolerance
 
             if max_bitrate > t_bitrate:
@@ -97,7 +105,7 @@ class Checker(CheckerBase):
         _, asset = asset
         if 'Probe' in asset:
             avg_bitrate = asset['Probe']['AverageBitRate']
-            dci_bitrate = self.get_picture_max_bitrate(asset)
+            dci_bitrate = self.get_picture_max_bitrate(playlist, asset)
             t_bitrate = dci_bitrate - (dci_bitrate * margin) / 100.0
 
             if avg_bitrate > t_bitrate:
