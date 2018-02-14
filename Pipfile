@@ -7,6 +7,8 @@ name = "pypi"
 
 [dev-packages]
 
+coverage = "*"
+nose = "*"
 
 
 [packages]
