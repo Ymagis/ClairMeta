@@ -147,6 +147,8 @@ def cpl_extract_characteristics(cpl):
 
     # These check the presence of certain essence in the CPL
     presence_keys = {
+        'Picture': [],
+        'Sound': [],
         'Subtitle': [],
         'AuxData': [],
         'Markers': [],
