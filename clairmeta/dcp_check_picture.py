@@ -54,24 +54,25 @@ class Checker(CheckerBase):
     def check_picture_cpl_resolution(self, playlist, asset):
         """ Picture resolution DCI compliance. """
         dci_resolutions = [
-            DCP_SETTINGS['picture']['resolutions']['2K'],
-            DCP_SETTINGS['picture']['resolutions']['4K']
+            self.settings['resolutions']['2K'] +
+            self.settings['resolutions']['4K']
         ]
 
         _, asset = asset
         if 'Probe' in asset:
             resolution = asset['Probe']['Resolution']
-            is_dci_res = any([resolution in res for res in dci_resolutions])
+            is_dci_res = any(
+                [resolution in res for res in dci_resolutions])
 
             if not is_dci_res:
                 raise CheckException("Picture have non-DCI Resolution")
 
     def check_picture_cpl_encoding(self, playlist, asset):
         """ Picture wavelet transform levels SMPTE compliance. """
-        resolutions = DCP_SETTINGS['picture']['resolutions']
+        resolutions = self.settings['resolutions']
         levels_map = {
-            '2K': DCP_SETTINGS['picture']['dwt_levels_2k'],
-            '4K': DCP_SETTINGS['picture']['dwt_levels_4k'],
+            '2K': self.settings['dwt_levels_2k'],
+            '4K': self.settings['dwt_levels_4k'],
         }
 
         _, asset = asset
@@ -93,7 +94,7 @@ class Checker(CheckerBase):
 
     def check_picture_cpl_max_bitrate(self, playlist, asset):
         """ Picture maximum bitrate DCI compliance. """
-        tolerance = DCP_SETTINGS['picture']['bitrate_tolerance']
+        tolerance = self.settings['bitrate_tolerance']
 
         _, asset = asset
         if 'Probe' in asset:
@@ -108,7 +109,7 @@ class Checker(CheckerBase):
 
     def check_picture_cpl_avg_bitrate(self, playlist, asset):
         """ Picture average bitrate DCI compliance. """
-        margin = DCP_SETTINGS['picture']['average_bitrate_margin']
+        margin = self.settings['average_bitrate_margin']
 
         _, asset = asset
         if 'Probe' in asset:
