@@ -148,16 +148,9 @@ def cpl_reels_parse(cpl_node):
             picture = out_reel['Assets']['Picture']
             settings = DCP_SETTINGS['picture']
 
-            editrate_stereo_map = {
-                True: settings['min_stereo_high_editrate'],
-                False: settings['min_mono_high_editrate']
-            }
-
-            editrate_r = float(picture["EditRate"])
-            is_stereo = 'MainStereoscopicPicture' in assetlist
-            is_hfr = editrate_r >= editrate_stereo_map[is_stereo]
-            picture['Stereoscopic'] = is_stereo
-            picture['HighFrameRate'] = is_hfr
+            editrate_r = float(picture['EditRate'])
+            picture['Stereoscopic'] = 'MainStereoscopicPicture' in assetlist
+            picture['HighFrameRate'] = editrate_r >= settings['min_hfr_editrate']
             picture['FrameRate'] = format_ratio(picture.get('FrameRate'))
 
             picture["ScreenAspectRatio"] = format_ratio(

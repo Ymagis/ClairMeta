@@ -61,6 +61,8 @@ DCP_SETTINGS = {
             'S': {'ratio': 2.39, 'resolutions': ['2048x858', '4096x1716']},
             'C': {'ratio': 1.90, 'resolutions': ['2048x1080', '4096x2160']},
         },
+        # For metadata tagging, decoupled from bitrate thresholds
+        'min_hfr_editrate': 48,
         # As stated in http://www.dcimovies.com/Recommended_Practice/
         'min_stereo_high_editrate': 48,
         'min_mono_high_editrate': 60,
