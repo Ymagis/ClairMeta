@@ -3,6 +3,7 @@
 
 import six
 
+from clairmeta.utils.time import compare_ratio
 from clairmeta.dcp_check import CheckerBase, CheckException
 from clairmeta.dcp_utils import list_cpl_assets
 from clairmeta.settings import DCP_SETTINGS
@@ -123,27 +124,50 @@ class Checker(CheckerBase):
                     ": {} Mb/s".format(t_bitrate, avg_bitrate))
 
     def check_picture_cpl_framerate(self, playlist, asset):
-        """ Picture framerate DCI / HFR check. """
-        settings = DCP_SETTINGS['picture']
-        editrate_stereo_map = {
-            True: settings['min_stereo_high_editrate'],
-            False: settings['min_mono_high_editrate']
-        }
-
+        """ Picture framerate DCI compliance. """
         _, asset = asset
-        framerate = asset['FrameRate']
-        is_hfr = asset['HighFrameRate']
-        is_stereo = asset['Stereoscopic']
 
-        if is_hfr and framerate < editrate_stereo_map[is_stereo]:
-            raise CheckException(
-                "Invalid HFR FrameRate, minimum is {} FPS".format(
-                    editrate_stereo_map[is_stereo]))
+        if 'Probe' in asset:
+            resolution = asset['Probe']['Resolution']
+            editrate = asset['EditRate']
+            dimension = '3D' if asset['Stereoscopic'] else '2D'
+            editrate_map = self.settings['editrates']
 
-        if not is_hfr and framerate > editrate_stereo_map[is_stereo]:
+            if resolution in self.settings['resolutions']['2K']:
+                if editrate not in editrate_map['2K'][dimension]:
+                    raise CheckException(
+                        'Invalid EditRate {} for 2K {} content'
+                        .format(editrate, dimension))
+            elif resolution in self.settings['resolutions']['4K']:
+                if editrate not in editrate_map['4K'][dimension]:
+                    raise CheckException(
+                        'Invalid EditRate {} for 4K {} content'
+                        .format(editrate, dimension))
+
+    def check_picture_cpl_archival_framerate(self, playlist, asset):
+        """ Picture archival framerate. """
+        _, asset = asset
+        editrate = asset['EditRate']
+        archival_editrates = self.settings['editrates_archival']
+
+        for archival_editrate in archival_editrates:
+            if compare_ratio(editrate, archival_editrate):
+                raise CheckException(
+                    "Archival EditRate {} may not play safely on all hardware"
+                    .format(editrate))
+
+    def check_picture_cpl_hfr_framerate(self, playlist, asset):
+        """ Picture HFR capable (Series II) framerate. """
+        _, asset = asset
+        editrate = asset['EditRate']
+        dimension = '3D' if asset['Stereoscopic'] else '2D'
+        series2_map = self.settings['editrates_min_series2']
+
+        if editrate >= series2_map[dimension]:
             raise CheckException(
-                "Invalid DCI FrameRate, maximum is {} FPS".format(
-                    editrate_stereo_map[is_stereo]))
+                "EditRate {} require an HFR capable projection server "
+                "(Series II), may not play safely on all hardware".format(
+                    editrate))
 
     def check_picture_cpl_editrate_framerate(self, playlist, asset):
         """ Picture editrate / framerate coherence check. """

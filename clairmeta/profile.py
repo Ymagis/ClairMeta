@@ -23,6 +23,8 @@ DCP_CHECK_PROFILE = {
         'check_picture_cpl_avg_bitrate': 'WARNING',
         'check_picture_cpl_resolution': 'WARNING',
         'check_subtitle_cpl_reel_number': 'WARNING',
+        'check_picture_cpl_archival_framerate': 'WARNING',
+        'check_picture_cpl_hfr_framerate': 'WARNING',
     },
     # Checker options
     # Bypass is a list of check names (function names)

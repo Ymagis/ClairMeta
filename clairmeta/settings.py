@@ -49,11 +49,24 @@ DCP_SETTINGS = {
         'dolby_edr': 'http://www.dolby.com/schemas/2014/EDR-Metadata',
     },
     'picture': {
+        # Standard resolutions
         'resolutions': {
             '2K': ['1998x1080', '2048x858', '2048x1080'],
             '4K': ['3996x2160', '4096x1716', '4096x2160'],
             'HD': ['1920x1080'],
             'UHD': ['3840x2160'],
+        },
+        # Standard editrate
+        'editrates': {
+            '2K': {'2D': [24, 25, 30, 48, 50, 60], '3D': [24, 25, 30, 48, 50, 60]},
+            '4K': {'2D': [24, 25, 30], '3D': []},
+        },
+        # Archival editrate
+        'editrates_archival': [16, 200.0/11, 20, 240.0/11],
+        # HFR capable quipements (projection servers)
+        'editrates_min_series2': {
+            '2D': 96,
+            '3D': 48,
         },
         # Standard aspect ratio
         'aspect_ratio': {
@@ -64,17 +77,24 @@ DCP_SETTINGS = {
         # For metadata tagging, decoupled from bitrate thresholds
         'min_hfr_editrate': 48,
         # As stated in http://www.dcimovies.com/Recommended_Practice/
-        'min_stereo_high_editrate': 48,
-        'min_mono_high_editrate': 60,
         # These are in Mb/s
-        'max_bitrate': 250,
+        # Note : asdcplib use a 400Mb/s threshold for HFR, why ?
+        'max_dci_bitrate': 250,
         'max_hfr_bitrate': 500,
         'max_dvi_bitrate': 400,
+        'min_editrate_hfr_bitrate': {
+            '2K': {'2D': 60, '3D': 48},
+            '4K': {'2D': 48, '3D': 0}
+        },
         # We allow a small offset above DCI specification :
         # asdcplib use a method of computation that can only give an
         # approximation (worst case scenario) of the actual max bitrate.
         # asdcplib basically find the biggest frame in the whole track and
         # multiply it by the editrate.
+        # Note : DCI specification seems to limit individual j2c frame size,
+        # the method used by asdcplib should be valid is this regard, it seems
+        # that the observed bitrate between 250 and 250.05 are due to the
+        # encryption overhead in the KLV packaging.
         'bitrate_tolerance': 0.05,
         # This is a percentage below max_bitrate
         'average_bitrate_margin': 2.0,
