@@ -9,6 +9,7 @@ from clairmeta.utils.xml import parse_xml
 from clairmeta.utils.time import frame_to_tc, format_ratio
 from clairmeta.utils.sys import all_keys_in_dict
 from clairmeta.settings import DCP_SETTINGS
+from clairmeta.logger import get_log
 
 
 def discover_schema(node):
@@ -34,22 +35,25 @@ def generic_parse(
     namespaces=DCP_SETTINGS['xmlns']
 ):
     """ Parse an XML and returns a Python Dictionary """
-    res_dict = parse_xml(
-        path,
-        namespaces=namespaces,
-        force_list=force_list)
+    try:
+        res_dict = parse_xml(
+            path,
+            namespaces=namespaces,
+            force_list=force_list)
 
-    if res_dict and root_name in res_dict:
-        node = res_dict[root_name]
-        discover_schema(node)
+        if res_dict and root_name in res_dict:
+            node = res_dict[root_name]
+            discover_schema(node)
 
-        return {
-            'FileName': os.path.basename(path),
-            'FilePath': path,
-            'Info': {
-                root_name: node
+            return {
+                'FileName': os.path.basename(path),
+                'FilePath': path,
+                'Info': {
+                    root_name: node
+                }
             }
-        }
+    except Exception as e:
+        get_log().info("Error parsing XML {} : {}".format(path, str(e)))
 
 
 def assetmap_parse(path):
