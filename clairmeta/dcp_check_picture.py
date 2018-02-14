@@ -12,6 +12,7 @@ class Checker(CheckerBase):
 
     def __init__(self, dcp, profile):
         super(Checker, self).__init__(dcp, profile)
+        self.settings = DCP_SETTINGS['picture']
 
     def run_checks(self):
         for source in self.dcp._list_cpl:
@@ -26,22 +27,29 @@ class Checker(CheckerBase):
         return self.check_executions
 
     def get_picture_max_bitrate(self, playlist, asset):
-        settings = DCP_SETTINGS['picture']
         bitrate_map = {
-            'DCI': settings['max_bitrate'],
-            'HFR': settings['max_hfr_bitrate'],
-            'DVI': settings['max_dvi_bitrate'],
+            'DCI': self.settings['max_dci_bitrate'],
+            'HFR': self.settings['max_hfr_bitrate'],
+            'DVI': self.settings['max_dvi_bitrate'],
         }
 
-        is_dvi = playlist['Info']['CompositionPlaylist']['DolbyVision']
-        if is_dvi:
-            dci_bitrate = bitrate_map['DVI']
-        else:
-            is_hfr = asset.get('HighFrameRate', False)
-            label = 'HFR' if is_hfr else 'DCI'
-            dci_bitrate = bitrate_map[label]
+        resolution = asset['Probe']['Resolution']
+        editrate = asset['Probe']['EditRate']
+        dimension = '3D' if asset['Stereoscopic'] else '2D'
+        hfr_threshold = self.settings['min_editrate_hfr_bitrate']
 
-        return dci_bitrate
+        bitrate = 'DCI'
+
+        if playlist['Info']['CompositionPlaylist']['DolbyVision']:
+            bitrate = 'DVI'
+        elif resolution in self.settings['resolutions']['2K']:
+            hfr_bitrate = editrate >= hfr_threshold['2K'][dimension]
+            bitrate = 'HFR' if hfr_bitrate else 'DCI'
+        elif resolution in self.settings['resolutions']['4K']:
+            hfr_bitrate = editrate >= hfr_threshold['4K'][dimension]
+            bitrate = 'HFR' if hfr_bitrate else 'DCI'
+
+        return bitrate_map[bitrate]
 
     def check_picture_cpl_resolution(self, playlist, asset):
         """ Picture resolution DCI compliance. """
