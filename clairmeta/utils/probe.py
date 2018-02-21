@@ -25,10 +25,6 @@ def check_command(name):
         Returns:
             True if command ``name`` was found on the system.
 
-        Note:
-            This rely on the 'type' command to be available and effectively
-            restrict to the use of Unix like OS.
-
     """
     return which(name) is not None
 
