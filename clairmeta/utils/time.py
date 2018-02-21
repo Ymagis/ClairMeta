@@ -5,6 +5,7 @@ import six
 
 
 def compare_ratio(a, b, precision=0.05):
+    """ Compare decimal numbers up to a given precision. """
     return abs(a-b) <= precision
 
 
