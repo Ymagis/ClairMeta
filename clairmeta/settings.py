@@ -15,6 +15,7 @@ DCP_SETTINGS = {
     'naming_convention': '9.3',
     # Recognized XML namespaces
     'xmlns': {
+        'xml': 'http://www.w3.org/XML/1998/namespace',
         'xmldsig': 'http://www.w3.org/2000/09/xmldsig#',
         'cpl_metadata_href': 'http://isdcf.com/schemas/draft/2011/cpl-metadata',
         'interop_pkl': 'http://www.digicine.com/PROTO-ASDCP-PKL-20040311#',
