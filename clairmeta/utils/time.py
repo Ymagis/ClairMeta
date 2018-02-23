@@ -18,7 +18,8 @@ def format_ratio(in_str, separator='/'):
                 denominator, if not found in ``in_str`` whitespace is used.
 
         Returns:
-            An integer or float value with 2 digits precision.
+            An integer or float value with 2 digits precision or ``in_str`` if
+            formating has failed.
 
         >>> format_ratio('48000/1')
         48000
@@ -26,6 +27,8 @@ def format_ratio(in_str, separator='/'):
         24
         >>> format_ratio('24000 1001')
         23.98
+        >>> format_ratio('1,77')
+        '1,77'
         >>> format_ratio(1.77)
         1.77
 
@@ -33,18 +36,21 @@ def format_ratio(in_str, separator='/'):
     if not isinstance(in_str, six.string_types):
         return in_str
 
-    sep = separator if separator in in_str else ' '
-    ratio = in_str.split(sep)
+    try:
+        sep = separator if separator in in_str else ' '
+        ratio = in_str.split(sep)
 
-    if len(ratio) == 2:
-        ratio = round(float(ratio[0]) / float(ratio[1]), 2)
-    else:
-        ratio = float(ratio[0])
+        if len(ratio) == 2:
+            ratio = round(float(ratio[0]) / float(ratio[1]), 2)
+        else:
+            ratio = float(ratio[0])
 
-    if ratio.is_integer():
-        ratio = int(ratio)
+        if ratio.is_integer():
+            ratio = int(ratio)
 
-    return ratio
+        return ratio
+    except ValueError:
+        return in_str
 
 
 def frame_to_tc(edit_count, edit_rate):
