@@ -107,14 +107,19 @@ def parse_isdcf_string(str):
         Args:
             str (str): ContentTitle to check.
 
-        Raises:
-            CheckException: Basic parsing failed.
+        Returns:
+            Tuple consisting of a dictionary of all extracted fiels and a list
+            of errors.
 
     """
     fields_dict = {}
     error_list = []
-    fields_list = str.split('_')
 
+    if not isinstance(str, six.string_types):
+        error_list.append("ContentTitle invalid type")
+        return fields_dict, error_list
+
+    fields_list = str.split('_')
     if len(fields_list) != 12:
         error_list.append("ContentTitle must have 12 parts, {} found".format(
             len(fields_list)))
