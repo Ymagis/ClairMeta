@@ -201,6 +201,9 @@ class CplTest(ParserTestBase):
         self.assertEqual(cpl['Info']['CompositionPlaylist']['FrameRate'], 96)
         self.assertEqual(cpl['Info']['CompositionPlaylist']['EditRate'], 48)
 
+    def test_cpl_missing_fields(self):
+        self.parse_and_check_schema('CPL_SMPTE_MISSING_FIELDS.xml', 'SMPTE')
+
     def test_cpl_assetmap(self):
         with self.assertRaises(AssertionError):
             self.parse_and_check_schema('ASSETMAP_IOP', 'Unknown')

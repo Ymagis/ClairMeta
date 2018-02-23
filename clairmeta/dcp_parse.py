@@ -150,19 +150,18 @@ def cpl_reels_parse(cpl_node):
 
         if 'Picture' in out_reel['Assets']:
             picture = out_reel['Assets']['Picture']
-            settings = DCP_SETTINGS['picture']
 
-            editrate_r = float(picture['EditRate'])
+            editrate_r = float(picture.get('EditRate', 0))
             picture['Stereoscopic'] = 'MainStereoscopicPicture' in assetlist
-            picture['HighFrameRate'] = editrate_r >= settings['min_hfr_editrate']
+            min_hfr_editrate = DCP_SETTINGS['picture']['min_hfr_editrate']
+            picture['HighFrameRate'] = editrate_r >= min_hfr_editrate
             picture['FrameRate'] = format_ratio(picture.get('FrameRate'))
-
             picture["ScreenAspectRatio"] = format_ratio(
-                picture['ScreenAspectRatio'])
+                picture.get('ScreenAspectRatio'))
 
             # Picture track is the reference for EditRate / Duration
-            global_editrate = picture.get('EditRate')
-            total_frame_duration += picture['Duration']
+            global_editrate = editrate_r
+            total_frame_duration += picture.get('Duration', 0)
 
         if 'Markers' in out_reel['Assets']:
             marker = out_reel['Assets']['Markers']
