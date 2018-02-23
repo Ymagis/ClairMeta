@@ -5,6 +5,7 @@
 .*.swo
 .DS_Store
 
+tests/resources/
 build*/
 dist
 clairmeta.egg-info
