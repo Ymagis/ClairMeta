@@ -68,12 +68,16 @@ def post_parse_node(path, key, value):
         ('mykey', 42)
         >>> post_parse_node([], 'mykey', None)
         ('mykey', '')
+        >>> post_parse_node([], '@namespace:attr', 'value')
+        ('@namespace:attr', 'value')
 
     """
     # Remove namespace prefix, split 1 time from the end
     # Namespace can contains multiples ':' : http://my/namespace:key
+    # Ignore namespace prefix for attributes
+    is_attribute = key.startswith('@')
     tag_split = key.rsplit(':', 1)
-    if len(tag_split) == 2:
+    if not is_attribute and len(tag_split) == 2:
         ns = tag_split[0]
         key = tag_split[1]
 

@@ -9,6 +9,7 @@ from clairmeta.utils.xml import parse_xml
 from clairmeta.utils.time import frame_to_tc, format_ratio
 from clairmeta.utils.sys import all_keys_in_dict
 from clairmeta.settings import DCP_SETTINGS
+from clairmeta.logger import get_log
 
 
 def discover_schema(node):
@@ -34,22 +35,25 @@ def generic_parse(
     namespaces=DCP_SETTINGS['xmlns']
 ):
     """ Parse an XML and returns a Python Dictionary """
-    res_dict = parse_xml(
-        path,
-        namespaces=namespaces,
-        force_list=force_list)
+    try:
+        res_dict = parse_xml(
+            path,
+            namespaces=namespaces,
+            force_list=force_list)
 
-    if res_dict and root_name in res_dict:
-        node = res_dict[root_name]
-        discover_schema(node)
+        if res_dict and root_name in res_dict:
+            node = res_dict[root_name]
+            discover_schema(node)
 
-        return {
-            'FileName': os.path.basename(path),
-            'FilePath': path,
-            'Info': {
-                root_name: node
+            return {
+                'FileName': os.path.basename(path),
+                'FilePath': path,
+                'Info': {
+                    root_name: node
+                }
             }
-        }
+    except Exception as e:
+        get_log().info("Error parsing XML {} : {}".format(path, str(e)))
 
 
 def assetmap_parse(path):
@@ -80,7 +84,9 @@ def pkl_parse(path):
 
 def cpl_parse(path):
     """ Parse DCP CPL """
-    cpl = generic_parse(path, "CompositionPlaylist", ("Reel",))
+    cpl = generic_parse(
+        path, "CompositionPlaylist",
+        ("Reel", "ExtensionMetadataList", "PropertyList"))
 
     if cpl:
         cpl_node = cpl['Info']['CompositionPlaylist']
@@ -104,6 +110,7 @@ def cpl_reels_parse(cpl_node):
 
     global_editrate = 0
     total_frame_duration = 0
+    is_dvi = False
 
     for pos, in_reel in enumerate(in_reels, 1):
 
@@ -143,26 +150,18 @@ def cpl_reels_parse(cpl_node):
 
         if 'Picture' in out_reel['Assets']:
             picture = out_reel['Assets']['Picture']
-            settings = DCP_SETTINGS['picture']
 
-            editrate_stereo_map = {
-                True: settings['min_stereo_high_editrate'],
-                False: settings['min_mono_high_editrate']
-            }
-
-            editrate_r = float(picture["EditRate"])
-            is_stereo = 'MainStereoscopicPicture' in assetlist
-            is_hfr = editrate_r >= editrate_stereo_map[is_stereo]
-            picture['Stereoscopic'] = is_stereo
-            picture['HighFrameRate'] = is_hfr
+            editrate_r = float(picture.get('EditRate', 0))
+            picture['Stereoscopic'] = 'MainStereoscopicPicture' in assetlist
+            min_hfr_editrate = DCP_SETTINGS['picture']['min_hfr_editrate']
+            picture['HighFrameRate'] = editrate_r >= min_hfr_editrate
             picture['FrameRate'] = format_ratio(picture.get('FrameRate'))
-
             picture["ScreenAspectRatio"] = format_ratio(
-                picture['ScreenAspectRatio'])
+                picture.get('ScreenAspectRatio'))
 
             # Picture track is the reference for EditRate / Duration
-            global_editrate = picture.get('EditRate')
-            total_frame_duration += picture['Duration']
+            global_editrate = editrate_r
+            total_frame_duration += picture.get('Duration', 0)
 
         if 'Markers' in out_reel['Assets']:
             marker = out_reel['Assets']['Markers']
@@ -178,8 +177,19 @@ def cpl_reels_parse(cpl_node):
                     marker_list["Label"]: marker_list["Offset"]
                 }]
 
+        if 'Metadata' in out_reel['Assets']:
+            meta = out_reel['Assets']['Metadata']
+            exts = meta.get('ExtensionMetadataList', [])
+            for ext in exts:
+                ext_desc = ext.get('ExtensionMetadata', {})
+                ext_name = ext_desc.get('Name')
+                # DolbyVision
+                if ext_name == 'Dolby EDR':
+                    is_dvi = True
+
         out_reels.append(out_reel)
 
+    cpl_node['DolbyVision'] = is_dvi
     cpl_node['ReelList'] = out_reels
     cpl_node['TotalDuration'] = total_frame_duration
     cpl_node['TotalTimeCodeDuration'] = frame_to_tc(

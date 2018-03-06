@@ -63,8 +63,9 @@ class DCP(object):
         """ Build a list of package XML files having a specific root node. """
         xml_list = []
         candidates = [
-            f for f in self._list_files if
-            f.endswith('.xml') and os.path.dirname(f) == self.path]
+            f for f in self._list_files
+            if f.endswith('.xml') and not f.startswith('.')
+            and os.path.dirname(f) == self.path]
 
         for c in candidates:
             nodes = parse_xml(c, namespaces=DCP_SETTINGS['xmlns'])
@@ -225,8 +226,10 @@ class DCP(object):
         self._parsed = True
         return self.probe_dict
 
-    def check(self, profile=DCP_CHECK_PROFILE, ov_path=None,
-        hash_callback=console_progress_bar):
+    def check(
+        self, profile=DCP_CHECK_PROFILE, ov_path=None,
+        hash_callback=console_progress_bar
+    ):
         """ Check validity.
 
             Args:
@@ -242,7 +245,7 @@ class DCP(object):
         if not self._parsed or not self._probeb:
             self.parse()
 
-        checker = DCPChecker(
+        self._checker = DCPChecker(
             self, profile=profile, ov_path=ov_path,
             hash_callback=hash_callback)
-        return checker.check()
+        return self._checker.check()

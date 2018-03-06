@@ -15,6 +15,11 @@ class Checker(CheckerBase):
     def __init__(self, dcp, profile):
         super(Checker, self).__init__(dcp, profile)
 
+        self.mxf_schema_map = {
+            'Interop': 'MXFInterop',
+            'SMPTE': 'SMPTE',
+        }
+
     def run_checks(self):
         for source in self.dcp._list_cpl:
             checks = self.find_check('cpl')
@@ -186,20 +191,25 @@ class Checker(CheckerBase):
         if is_vf_asset and not is_relinked_from_ov:
             raise CheckException("Asset reference OV package")
 
-    def check_assets_cpl_schema(self, playlist, asset):
-        """ CPL assets schema check. """
+    def check_assets_cpl_labels(self, playlist, asset):
+        """ CPL assets labels check. """
         _, asset = asset
-        mxf_schema_map = {
-            'Interop': 'MXFInterop',
-            'SMPTE': 'SMPTE',
-        }
 
         if 'Probe' in asset:
             label = asset['Probe'].get('LabelSetType')
-            if label and mxf_schema_map[self.dcp.schema] != label:
+            if label and label not in self.mxf_schema_map.values():
+                raise CheckException("MXF Label invalid : {}".format(label))
+
+    def check_assets_cpl_labels_schema(self, playlist, asset):
+        """ CPL assets labels / schema coherence check. """
+        _, asset = asset
+
+        if 'Probe' in asset:
+            label = asset['Probe'].get('LabelSetType')
+            if label and self.mxf_schema_map[self.dcp.schema] != label:
                 raise CheckException(
-                    "MXF Label invalid, got {} but expected {}".format(
-                        label, mxf_schema_map[self.dcp.schema]))
+                    "MXF Label incoherent, got {} but expected {}".format(
+                        label, self.mxf_schema_map[self.dcp.schema]))
 
     def check_assets_cpl_uuid(self, playlist, asset):
         """ CPL assets UUID RFC4122 compliance. """
@@ -262,11 +272,13 @@ class Checker(CheckerBase):
                     cpl_val = asset[k]
                     mxf_val = asset['Probe'][v]
                     is_float = type(cpl_val) is float or type(mxf_val) is float
-                    if (is_float and not compare_ratio(cpl_val, mxf_val)
-                        or not is_float and cpl_val != mxf_val):
-                            raise CheckException(
-                                "{} metadata mismatch, CPL claims {} but MXF {}"
-                                .format(k, cpl_val, mxf_val))
+
+                    matching = is_float and compare_ratio(cpl_val, mxf_val)
+                    matching = matching or not is_float and cpl_val == mxf_val
+                    if not matching:
+                        raise CheckException(
+                            "{} metadata mismatch, CPL claims {} but MXF {}"
+                            .format(k, cpl_val, mxf_val))
                 if k in asset and v not in asset['Probe']:
                     raise CheckException("Missing MXF Metadata {}".format(v))
                 if k not in asset and v in asset['Probe']:

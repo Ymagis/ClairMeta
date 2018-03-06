@@ -5,8 +5,10 @@
 .*.swo
 .DS_Store
 
+tests/resources/
 build*/
 dist
 clairmeta.egg-info
 __pycache__
 .pybuild
+.coverage

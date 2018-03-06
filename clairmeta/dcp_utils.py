@@ -139,7 +139,7 @@ def cpl_extract_characteristics(cpl):
     }
 
     # These are per essence (picture, sound, ...) coherence keys, this means
-    # keys won't get merge.
+    # keys won't get merged.
     essence_keys = {
         'Sound.Language': [],
         'Subtitle.Language': []
@@ -147,6 +147,8 @@ def cpl_extract_characteristics(cpl):
 
     # These check the presence of certain essence in the CPL
     presence_keys = {
+        'Picture': [],
+        'Sound': [],
         'Subtitle': [],
         'AuxData': [],
         'Markers': [],

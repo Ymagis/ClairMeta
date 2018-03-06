@@ -7,6 +7,8 @@ name = "pypi"
 
 [dev-packages]
 
+coverage = "*"
+nose = "*"
 
 
 [packages]
@@ -20,3 +22,4 @@ six = "*"
 pyopenssl = "*"
 pycountry = "*"
 shutilwhich = "*"
+cryptography = "*"

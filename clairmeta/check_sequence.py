@@ -97,24 +97,26 @@ def check_sequence_folder(dirpath, filenames, allowed_extensions):
         sequence_idx.append(current_idx)
 
         if current_filename != filename:
-            raise ValueError('filename difference : {} not equal {}'
+            raise ValueError('{} : filename difference, expected {}'
                              .format(current_filename, filename))
         if current_ext != extension:
-            raise ValueError('file extension difference: {} not equal {}'
-                             .format(current_ext, extension))
+            raise ValueError('{} : file extension difference, expected {}'
+                             .format(current_filename, extension))
         if current_description != description:
-            raise ValueError('file description difference: {} not equal {}'
-                             .format(current_description, description))
+            raise ValueError(
+                '{} : file description difference got {} but expected {}'
+                .format(current_filename, current_description, description))
         if current_filesize != filesize:
-            raise ValueError('file size difference: {} not equal {}'
-                             .format(current_filesize, filesize))
+            raise ValueError(
+                '{} : file size difference got {} but expected {}'
+                .format(current_filename, current_filesize, filesize))
 
     # Check for jump in sequence (ie. missing frame(s))
     sequence_idx.sort()
     for idx, fno in enumerate(sequence_idx, sequence_idx[0]):
         if idx != fno:
-            raise ValueError("file sequence jump found, file {} not found"
-                             .format(idx))
+            raise ValueError(
+                'file sequence jump found, file {} not found'.format(idx))
 
 
 def parse_name(filename, regex=IMAGENO_REGEX):
@@ -139,12 +141,12 @@ def parse_name(filename, regex=IMAGENO_REGEX):
         >>> parse_name('myfile.tiff')
         Traceback (most recent call last):
         ...
-        ValueError: image index not found : myfile.tiff
+        ValueError: myfile.tiff : image index not found
 
     """
     m = list(regex.finditer(filename))
     if m == []:
-        raise ValueError('image index not found : {}'.format(filename))
+        raise ValueError('{} : image index not found'.format(filename))
 
     lastm = m[::-1][0]
     name = filename[:lastm.start()] + filename[lastm.end():]

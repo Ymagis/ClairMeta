@@ -10,7 +10,6 @@ This project status is **Beta**, the following needs to be done for the
 release :
 
 -  Large scale tests on lots DCP (including D-Box, DVIs, OCAP, CCAP, ...)
--  Copyright free test materials for unittest
 
 Features
 --------
@@ -178,10 +177,14 @@ Contributing
    pip install pipenv
    git clone https://github.com/Ymagis/ClairMeta.git
    cd clairmeta
-   pipenv install [–two]
+   pipenv install --dev [–two]
    pipenv check
+   # Enter virtual environment
    pipenv shell
    # Code...
+   # Run tests
+   nosetests --nocapture --with-doctest --doctest-options=+ELLIPSIS --with-coverage --cover-package=clairmeta
+   # Leave virtual environment
    exit
 
 -  Open a Pull Request

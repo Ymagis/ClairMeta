@@ -19,10 +19,14 @@ DCP_CHECK_PROFILE = {
         'check_cpl_contenttitle_pklannotationtext_match': 'WARNING',
         'check_cpl_reel_duration_picture_subtitles': 'WARNING',
         'check_assets_cpl_missing_from_vf': 'WARNING',
-        'check_certif_multi_role' : 'WARNING',
+        'check_assets_cpl_labels_schema': 'WARNING',
+        'check_certif_multi_role': 'WARNING',
         'check_picture_cpl_avg_bitrate': 'WARNING',
         'check_picture_cpl_resolution': 'WARNING',
         'check_subtitle_cpl_reel_number': 'WARNING',
+        'check_picture_cpl_archival_framerate': 'WARNING',
+        'check_picture_cpl_hfr_framerate': 'WARNING',
+        'check_sound_cpl_format': 'WARNING',
     },
     # Checker options
     # Bypass is a list of check names (function names)

@@ -185,6 +185,17 @@ class Checker(CheckerBase):
         if standard and standard != self.dcp.schema:
             raise CheckException("ContentTitle claims {} but DCP is not")
 
+    def check_dcnc_field_claim_dolbyvision(self, playlist, fields):
+        """ DolbyVision metadata shall be present in CPL. """
+        dvi_dcnc = fields['ContentType'].get('DolbyVision')
+        dvi_cpl = playlist['Info']['CompositionPlaylist']['DolbyVision']
+        if dvi_dcnc and not dvi_cpl:
+            raise CheckException("ContentTitle claims DolbyVision but CPL "
+                                 "miss required metadata")
+        elif not dvi_dcnc and dvi_cpl:
+            raise CheckException("CPL imply DolbyVision but ContentTitle miss "
+                                 "DVis ContentType field")
+
     # TODO : this check don't work for multi-CPL packages
     # def check_dcnc_field_claim_packagetype(self, playlist, fields):
     #     """ DCP type (OV / VF) coherence check. """
