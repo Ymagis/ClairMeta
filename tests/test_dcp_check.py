@@ -62,6 +62,7 @@ class DCPCheckTest(CheckerTestBase):
         self.assertFalse(self.has_failed(DCPCheckTest.vf_missing))
 
     def test_smpte_ov(self):
+        self.assertTrue(self.check(7))
         self.assertTrue(self.check(9))
         self.assertTrue(self.check(11))
         self.assertTrue(self.check(28))
@@ -88,6 +89,11 @@ class DCPCheckTest(CheckerTestBase):
         self.assertTrue(self.has_failed('check_picture_cpl_max_bitrate'))
         self.assertTrue(self.has_failed('check_picture_cpl_avg_bitrate'))
 
+        self.check(42)
+        self.assertFalse(self.has_succeeded())
+        self.assertTrue(self.has_failed('check_picture_cpl_max_bitrate'))
+        self.assertTrue(self.has_failed('check_picture_cpl_avg_bitrate'))
+
     def test_nondci_resolution(self):
         self.assertTrue(self.check(26))
         self.assertTrue(self.has_failed('check_picture_cpl_resolution'))
@@ -105,6 +111,10 @@ class DCPCheckTest(CheckerTestBase):
         self.assertFalse(self.check(32))
         self.assertTrue(self.has_failed('check_cpl_reel_coherence'))
 
+    def test_iop_subtitle_png(self):
+        self.assertTrue(self.check(33))
+        self.assertFalse(self.has_failed('check_subtitle_cpl_image'))
+
     def test_noncoherent_jp2k(self):
         self.assertFalse(self.check(39))
         self.assertTrue(self.has_failed('check_picture_cpl_encoding'))
@@ -112,6 +122,16 @@ class DCPCheckTest(CheckerTestBase):
 
     def test_mpeg(self):
         self.assertFalse(self.check(40))
+
+    def test_hfr(self):
+        self.assertTrue(self.check(41))
+        self.assertTrue(self.check(43))
+        self.assertTrue(self.check(44))
+        self.assertTrue(self.check(45))
+        self.assertTrue(self.check(46))
+
+    def test_multi_pkl(self):
+        self.assertTrue(self.check(47))
 
 
 if __name__ == '__main__':

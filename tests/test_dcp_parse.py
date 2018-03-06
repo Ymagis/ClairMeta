@@ -61,6 +61,13 @@ class DCPParseTest(ParserTestBase):
         self.assertTrue(res['schema'], 'Interop')
         self.assertTrue(res['package_type'], 'VF')
 
+    def test_dcp_07(self):
+        res = self.parse(7)
+        self.assertTrue(res['schema'], 'SMPTE')
+
+        cpl = res['cpl_list'][0]['Info']['CompositionPlaylist']
+        self.assertTrue(cpl['Stereoscopic'])
+
     def test_dcp_08(self):
         res = self.parse(8)
         self.assertTrue(res['schema'], 'SMPTE')
@@ -191,3 +198,12 @@ class DCPParseTest(ParserTestBase):
         res = self.parse(40)
         self.assertTrue(res['schema'], 'SMPTE')
         self.assertTrue(res['package_type'], 'OV')
+
+    def test_dcp_41_46(self):
+        for dcp_id in [41, 42, 43, 44, 45, 46]:
+            res = self.parse(dcp_id)
+            self.assertTrue(res['schema'], 'SMPTE')
+            self.assertTrue(res['package_type'], 'OV')
+
+            cpl = res['cpl_list'][0]['Info']['CompositionPlaylist']
+            self.assertTrue(cpl['HighFrameRate'])
