@@ -24,7 +24,7 @@ install:
 # This belong to default stage 'test'
 script:
 - pipenv run python -m compileall clairmeta
-- nosetests --nocapture --with-doctest --doctest-options=+ELLIPSIS --with-coverage --cover-package=clairmeta
+- nosetests --nocapture --with-doctest --doctest-options=+ELLIPSIS --with-coverage --cover-package=clairmeta --exclude='test_dcp_*' --exclude='test_mxf_*' --exclude='test_sequence*' --exclude='test_profile*' --exclude='test_cli*' --exclude='test_xml*'
 
 # Stage conditions
 stages:
