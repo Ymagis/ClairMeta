@@ -85,7 +85,7 @@ class Checker(CheckerBase):
         ct = cpl_node['ContentTitleText']
         cpl_pkl = [
             pkl for pkl in self.dcp._list_pkl
-            if pkl['Info']['PackingList']['Id'] == cpl_node['PKLId']]
+            if pkl['Info']['PackingList']['Id'] == cpl_node.get('PKLId')]
         if cpl_pkl:
             pkl = cpl_pkl[0]
             at = pkl['Info']['PackingList'].get('AnnotationText')
