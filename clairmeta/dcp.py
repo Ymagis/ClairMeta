@@ -64,7 +64,8 @@ class DCP(object):
         xml_list = []
         candidates = [
             f for f in self._list_files
-            if f.endswith('.xml') and not f.startswith('.')
+            if f.endswith('.xml')
+            and not os.path.basename(f).startswith('.')
             and os.path.dirname(f) == self.path]
 
         for c in candidates:
