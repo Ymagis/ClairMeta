@@ -4,6 +4,7 @@
 LOG_SETTINGS = {
     'level': 'INFO',
     'enable_console': True,
+    'enable_progressbar': True,
     'enable_file': True,
     'file_name': '~/Library/Logs/clairmeta.log',
     'file_size': 1e6,
