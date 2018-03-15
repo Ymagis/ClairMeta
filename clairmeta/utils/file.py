@@ -11,6 +11,7 @@ import tempfile
 import base64
 import hashlib
 import time
+from clairmeta.settings import LOG_SETTINGS
 
 
 def folder_size(folder):
@@ -98,7 +99,7 @@ def console_progress_bar(file_path, progress, elapsed, done):
     """
     col_width = 50
 
-    if not done:
+    if not done and LOG_SETTINGS['enable_progressbar']:
         progress_size = int(progress * col_width)
         eta_size = col_width - progress_size
 
