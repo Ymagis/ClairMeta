@@ -9,7 +9,7 @@ and checking.
 This project status is **Beta**, the following needs to be done for the
 release :
 
--  Large scale tests on lots DCP (including D-Box, DVIs, OCAP, CCAP, ...)
+-  Large scale tests on lots of DCPs (including D-Box, DVIs, OCAP, CCAP, ...)
 
 Features
 --------
@@ -20,9 +20,9 @@ Features
    exhaustive) :
 
    -  SMPTE / Interop standard convention (naming, …)
-   -  Integrity (mime type, size, hash) of all assets
+   -  Integrity (MIME type, size, hash) of all assets
    -  Foreign file identification
-   -  XSD Schema validation for XML files (VolIndex, AssetMap, CPL, PKL)
+   -  XSD Schema validation for XML files (VOLINDEX, ASSETMAP, CPL, PKL)
    -  Digital signature validation (CPL, PKL)
    -  Intra / Inter Reels integrity and coherence
    -  Metadata match between CPL assets and MXF headers
@@ -32,7 +32,7 @@ Features
    -  Subtitle : Deep inspection of Interop and SMPTE subtitles
 
 -  DSM / DCDM Checker : basic image file sequence validation with some
-   specifics rules.
+   specific rules.
 
 Installation
 ------------
@@ -43,6 +43,7 @@ Requirements :
 
    -  Should work on python 2.7 and python 3.3+
    -  Tested on : python 2.7, python 3.6
+
 -  Platform :
 
    -  Should work on Windows, macOS, Linux
@@ -113,15 +114,15 @@ Profiles
 ~~~~~~~~
 
 Check profile allow custom configuration of the DCP check process such
-as bypassing some unwanted tests or criticity specification. To
+as bypassing some unwanted tests or criteria specification. To
 implement a check profile, simply write a JSON file derived from this
-template (actual content listed below is for demonstration purpose only) :
+template (actual content listed below is for demonstration purposes only) :
 
--  *criticality* key allow custom criticity level specification, check
+-  *criticality* key allow custom criteria level specification, check
    name can be incomplete to quickly ignore a bunch of tests, *default* is
    used if no other match where found.
 -  *bypass* key allow specific test
-   bypassing, incomplete name are not allowed.
+   bypassing, incomplete names are not allowed.
 
 ::
 
@@ -156,7 +157,7 @@ Logging
 ~~~~~~~
 
 Logging is customizable, see settings.py file or below. By default Clairmeta
-log to stdout and a rotated log file.
+logs to stdout and a rotated log file.
 
 ::
 
@@ -193,7 +194,7 @@ Contributing
 Changes
 -------
 
-The releases changes are available on Github:
+The release changes are available on Github:
 https://github.com/Ymagis/ClairMeta/releases
 
 References
