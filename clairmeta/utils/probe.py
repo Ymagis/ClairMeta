@@ -10,7 +10,8 @@ import bisect
 import contextlib
 from shutilwhich import which
 
-from clairmeta.utils.sys import try_convert_number, camelize
+from clairmeta.utils.sys import (transform_keys_dict, try_convert_number,
+                                 camelize)
 from clairmeta.utils.file import temporary_dir
 from clairmeta.utils.time import format_ratio
 from clairmeta.settings import DCP_SETTINGS
@@ -333,8 +334,8 @@ def probe_mediainfo(path):
 
         for track in track_list:
             track_type = track.pop('@type')
-            for k, v in six.iteritems(track):
-                track[camelize(k)] = track.pop(k)
+            track = transform_keys_dict(track, camelize)
+
             if track_type == 'General':
                 metadata = track
             else:

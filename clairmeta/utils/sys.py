@@ -234,6 +234,31 @@ def remove_key_dict(in_dict, patterns):
     return in_dict
 
 
+def transform_keys_dict(in_dict, func):
+    """ Recursively transform all keys in dictionary.
+
+        Args:
+            in_dict (dict): Input dict.
+            func (callable): Callable object that take one argument.
+
+        Returns :
+            New dictionary with keys transformed according to ``func``.
+
+        >>> sorted(
+        ...     transform_keys_dict(
+        ...         {'A_key': 1, 'BKey': {'c_key': 3} }, camelize
+        ...     ).items()
+        ... )
+        [('AKey', 1), ('BKey', {'cKey': 3})]
+
+    """
+    return {
+        func(key): transform_keys_dict(value, func)
+        if isinstance(value, dict) else value
+        for key, value in six.iteritems(in_dict)
+    }
+
+
 def try_convert_number(in_val):
     """ String to number conversion with automatic fallback.
 
