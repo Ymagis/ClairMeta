@@ -273,3 +273,15 @@ def try_convert_number(in_val):
         pass
 
     return in_val
+
+
+def camelize(string):
+    """ Convert string to CamelCase notation (leave first character upper).
+
+        >>> camelize('Color_space')
+        'ColorSpace'
+        >>> camelize('ColorSpace')
+        'ColorSpace'
+
+    """
+    return re.sub(r'_([a-zA-Z])', lambda x: x.group(1).upper(), string)
