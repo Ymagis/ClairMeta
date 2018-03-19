@@ -60,15 +60,15 @@ class DCDM(object):
 
             # Note : Metadata are not reliable but we can at least check
             # for 3 channels colorspace.
-            if img["Color_space"] not in ["RGB", "XYZ"]:
+            if img["ColorSpace"] not in ["RGB", "XYZ"]:
                 raise ValueError(" {} : invalid colorspace detected {}"
-                                 .format(f, img["Color_space"]))
-            if img["Bit_depth"] != "16 bits":
+                                 .format(f, img["ColorSpace"]))
+            if "16" not in img["BitDepth"]:
                 raise ValueError("{} : invalid bitdepth detected {}"
-                                 .format(f, img["Bit_depth"]))
-            if "Compression_mode" in img:
-                if img["Compression_mode"] != "Lossless":
+                                 .format(f, img["BitDepth"]))
+            if "CompressionMode" in img:
+                if img["CompressionMode"] != "Lossless":
                     raise ValueError("{} : invalid compression detected {}"
-                                     .format(f, img["Compression_mode"]))
+                                     .format(f, img["CompressionMode"]))
 
         return True

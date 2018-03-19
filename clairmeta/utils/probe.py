@@ -10,7 +10,8 @@ import bisect
 import contextlib
 from shutilwhich import which
 
-from clairmeta.utils.sys import try_convert_number
+from clairmeta.utils.sys import (transform_keys_dict, try_convert_number,
+                                 camelize)
 from clairmeta.utils.file import temporary_dir
 from clairmeta.utils.time import format_ratio
 from clairmeta.settings import DCP_SETTINGS
@@ -315,18 +316,26 @@ def probe_mediainfo(path):
     ]
 
     out, err = execute_command(mediainfo_args)
+
     probe = xmltodict.parse(
         out,
         force_list=('track',),
-        process_namespaces=True,
+        process_namespaces=False,
         dict_constructor=dict)
 
     metadata = {}
 
     try:
-        track_list = probe['Mediainfo']['File']['track']
+        # Mediainfo < 2.0
+        if 'Mediainfo' in probe:
+            track_list = probe['Mediainfo']['File']['track']
+        else:
+            track_list = probe['MediaInfo']['media']['track']
+
         for track in track_list:
             track_type = track.pop('@type')
+            track = transform_keys_dict(track, camelize)
+
             if track_type == 'General':
                 metadata = track
             else:
@@ -381,7 +390,7 @@ def probe_folder(path):
                 bisect.insort(metadir[extension]['Paths'], f)
             else:
                 probe = probe_mediainfo(fullpath)['Probe']
-                probe.pop('Complete_name')
+                probe.pop('CompleteName', None)
 
                 metadesc = metadir[extension] = {}
                 metadesc['Folder'] = dirpath
