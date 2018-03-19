@@ -304,7 +304,7 @@ class Checker(CheckerBase):
         if not path:
             return
 
-        font_format = magic.from_file(path)
+        font_format = magic.from_file(path, mime=True)
         allowed_formats = DCP_SETTINGS['subtitle']['font_formats']
 
         for f in allowed_formats:
