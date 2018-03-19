@@ -255,7 +255,7 @@ def validate_xml(xml_path, xsd_id):
         schema.assertValid(doc)
 
 
-def canonicalize_xml(xml_path, root=None, ns=None):
+def canonicalize_xml(xml_path, root=None, ns=None, strip=None):
     """ Canonicalize a XML document using C14N method.
 
         Reference : https://www.w3.org/TR/xml-c14n/
@@ -288,6 +288,9 @@ def canonicalize_xml(xml_path, root=None, ns=None):
             raise LookupError("Canonicalization fail, missing root node")
 
         doc._setroot(new_root)
+
+    if strip:
+        etree.strip_elements(doc, strip, with_tail=False)
 
     f2 = io.BytesIO()
     doc.write_c14n(f2, with_comments=False)
