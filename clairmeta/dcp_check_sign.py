@@ -510,7 +510,7 @@ class Checker(CheckerBase):
         # Note 2 : why does the \n characters make a difference with C14n ?
         c14n_doc = c14n_doc.decode("utf-8")
         s = re.compile(
-            r'<(ds|dsig):Signature xmlns:(ds|dsig)="{}">.*</(ds|dsig):Signature>'
+            r'<(ds|dsig):Signature( xmlns:(ds|dsig)="{}")?>.*</(ds|dsig):Signature>'
             .format(DCP_SETTINGS['xmlns']['xmldsig']),
             re.DOTALL)
         c14n_doc = re.sub(s, '', c14n_doc)
