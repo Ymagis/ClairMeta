@@ -12,6 +12,7 @@ from clairmeta.utils.probe import probe_mxf, stat_mxf_audio
 # Generators to iterate on assets
 #
 
+
 def list_am_assets(assetmap):
     """ Iterator on AssetMap assets.
 
@@ -23,7 +24,7 @@ def list_am_assets(assetmap):
 
     """
     am = assetmap['Info']['AssetMap']
-    for asset in am['AssetList']['Asset']:
+    for asset in am['AssetList'].get('Asset', []):
         uuid = asset['Id']
         path = asset['ChunkList']['Chunk']['Path']
         path = path.replace('file:///', '').replace('file://', '')
@@ -42,7 +43,7 @@ def list_pkl_assets(packinglist):
     """
     root_path = os.path.dirname(packinglist['FilePath'])
     pkl = packinglist['Info']['PackingList']
-    for asset in pkl['AssetList']['Asset']:
+    for asset in pkl['AssetList'].get('Asset', []):
         uuid = asset['Id']
         path = asset.get('Path')
         path = os.path.join(root_path, path) if path else path
