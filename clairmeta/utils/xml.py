@@ -264,7 +264,8 @@ def canonicalize_xml(xml_path, root=None, ns=None, strip=None):
             xml_path (str): XML file absolute path.
             root (str, optional): New document root (to canonicalize only part
                 of the whole XML document).
-            ns (str, optional): Namespace associated with `root`
+            ns (str, optional): Namespace associated with `root`.
+            strip (str): Element node to strip before canonicalization.
 
         Returns:
             C14N bytes representation of the XML document.
