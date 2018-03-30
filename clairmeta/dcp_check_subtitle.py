@@ -3,7 +3,6 @@
 
 import os
 import re
-import magic
 import pycountry
 
 from clairmeta.utils.time import tc_to_frame, frame_to_tc
@@ -294,25 +293,6 @@ class Checker(CheckerBase):
             raise CheckException(
                 "Subtitle font maximum size is {}, got {}".format(
                     human_size(font_max_size), human_size(font_size)))
-
-    def check_subtitle_cpl_font_format(self, playlist, asset, folder):
-        """ Subtitle font format validation. """
-        st_dict = self.get_subtitle_xml(asset, folder)
-        if not st_dict:
-            return
-        path, uri = self.get_font_path(st_dict, folder)
-        if not path:
-            return
-
-        font_format = magic.from_file(path, mime=True)
-        allowed_formats = DCP_SETTINGS['subtitle']['font_formats']
-
-        for f in allowed_formats:
-            if font_format in f:
-                return
-
-        raise CheckException("Subtitle font format not valid : {}".format(
-            font_format))
 
     # def check_subtitle_cpl_font_glyph(self, playlist, asset, folder):
     #     """ Check if font can render all glyphs (parsing the text used
