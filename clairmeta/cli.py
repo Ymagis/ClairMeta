@@ -37,14 +37,13 @@ def cli_check(args):
 
             status, _ = DCP(args.path).check(
                 profile=check_profile, ov_path=args.ov)
-
         else:
             obj_type = package_type_map[args.type]
             status = obj_type(args.path).check()
 
-        return status
+        return status, ""
     except Exception as e:
-        print('Error : ' + str(e), file=sys.stderr)
+        return False, "Error : {}".format(e)
 
 
 def cli_probe(args):
@@ -54,16 +53,18 @@ def cli_probe(args):
         res = obj_type(args.path).parse()
 
         if args.format == "dict":
-            return pprint.pformat(res)
+            msg = pprint.pformat(res)
         elif args.format == "json":
-            return json.dumps(
+            msg = json.dumps(
                 res, sort_keys=True, indent=2, separators=(',', ': '))
         elif args.format == "xml":
             xml_str = dicttoxml.dicttoxml(
                 res, custom_root='ClairmetaProbe', ids=False, attr_type=False)
-            return prettyprint_xml(xml_str)
+            msg = prettyprint_xml(xml_str)
+
+        return True, msg
     except Exception as e:
-        print('Error : ' + str(e), file=sys.stderr)
+        return False, "Error : ".format(e)
 
 
 def get_parser():
@@ -103,4 +104,6 @@ if __name__ == '__main__':
     if len(sys.argv) == 1:
         parser.print_help()
     else:
-        print(args.func(args))
+        status, msg = args.func(args)
+        print(msg)
+        sys.exit(0 if status else 1)

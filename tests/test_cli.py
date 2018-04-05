@@ -49,50 +49,50 @@ class CliTest(unittest.TestCase):
         return args.func(args)
 
     def test_dcp_probe_formating_xml(self):
-        res = self.launch_command([
+        status, msg = self.launch_command([
             'probe', self.get_dcp_path(1),
             '-type', 'dcp', '-format', 'xml'])
-        ET.XML(res)
+        ET.XML(msg)
 
     def test_dcp_probe_formating_json(self):
-        res = self.launch_command([
+        status, msg = self.launch_command([
             'probe', self.get_dcp_path(1),
             '-type', 'dcp', '-format', 'json'])
 
-        json_test = json.loads(res, object_pairs_hook=OrderedDict)
+        json_test = json.loads(msg, object_pairs_hook=OrderedDict)
         with open(self.get_file_path('ECL01.json')) as f:
             json_gold = json.load(f, object_pairs_hook=OrderedDict)
         self.assertEqual(json_test, json_gold)
 
     def test_dcp_check_good(self):
-        res = self.launch_command([
+        status, msg = self.launch_command([
             'check', self.get_dcp_path(1),
             '-type', 'dcp', '-log', 'CRITICAL'])
-        self.assertTrue(res)
+        self.assertTrue(status)
 
     def test_dcp_check_bad(self):
-        res = self.launch_command([
+        status, msg = self.launch_command([
             'check', self.get_dcp_path(25),
             '-type', 'dcp', '-log', 'CRITICAL'])
-        self.assertFalse(res)
+        self.assertFalse(status)
 
     def test_dsm_probe(self):
-        res = self.launch_command([
+        status, msg = self.launch_command([
             'probe', '-type', 'dsm',
             self.get_dsm_path('DSM_PKG/MINI_DSM1')])
-        self.assertTrue(res)
+        self.assertTrue(status)
 
     def test_dsm_check_good(self):
-        res = self.launch_command([
+        status, msg = self.launch_command([
             'check', '-type', 'dsm',
             self.get_dsm_path('DSM_PKG/MINI_DSM1')])
-        self.assertTrue(res)
+        self.assertTrue(status)
 
     def test_dsm_check_bad(self):
-        res = self.launch_command([
+        status, msg = self.launch_command([
             'check', '-type', 'dsm',
             self.get_dsm_path('DSM_BAD_FILE_NAME_LENGTH')])
-        self.assertFalse(res)
+        self.assertFalse(status)
 
 
 if __name__ == '__main__':
