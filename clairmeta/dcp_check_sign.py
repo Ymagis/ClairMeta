@@ -442,7 +442,8 @@ class Checker(CheckerBase):
         sign_alg_set = set(
             [c.get_signature_algorithm() for c in self.cert_list])
         if len(sign_alg_set) > 1:
-            raise CheckException("Certificate chain contains certificates "
+            raise CheckException(
+                "Certificate chain contains certificates "
                 "signed with different algorithm")
 
     def check_sign_signature_algorithm(self, source):

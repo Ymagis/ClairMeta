@@ -19,6 +19,9 @@ class Checker(CheckerBase):
 
     def check_vol_xml(self, vol):
         """ VolIndex XML syntax and structure check. """
+        if self.dcp.schema == 'Interop':
+            return
+
         check_xml(
             vol['FilePath'],
             vol['Info']['VolumeIndex']['__xmlns__'],
