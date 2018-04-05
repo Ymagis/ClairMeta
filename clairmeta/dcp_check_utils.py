@@ -2,7 +2,6 @@
 # See LICENSE for more information
 
 import six
-import magic
 from datetime import datetime
 from dateutil import parser
 
@@ -20,13 +19,6 @@ def get_schema(name):
 
 
 def check_xml(xml_path, xml_ns, schema_type, schema_dcp):
-    # Correct file type (magic number)
-    xml_magic = magic.from_file(xml_path, mime=True)
-    if xml_magic != "text/xml":
-        raise CheckException(
-            "File type unknown, expected XML Document but got {}".format(
-                xml_magic))
-
     # Correct namespace
     schema_id = get_schema(xml_ns)
     if not schema_id:
