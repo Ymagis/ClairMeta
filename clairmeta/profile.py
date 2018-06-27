@@ -15,6 +15,7 @@ DCP_CHECK_PROFILE = {
     'criticality': {
         'default': 'ERROR',
         'check_dcnc_': 'WARNING',
+        'check_dcp_foreign_files': 'WARNING',
         'check_cpl_contenttitle_annotationtext_match': 'WARNING',
         'check_cpl_contenttitle_pklannotationtext_match': 'WARNING',
         'check_cpl_reel_duration_picture_subtitles': 'WARNING',
