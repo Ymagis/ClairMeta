@@ -111,6 +111,7 @@ def cpl_reels_parse(cpl_node):
     global_editrate = 0
     total_frame_duration = 0
     is_dvi = False
+    is_ec = False
 
     for pos, in_reel in enumerate(in_reels, 1):
 
@@ -183,13 +184,16 @@ def cpl_reels_parse(cpl_node):
             for ext in exts:
                 ext_desc = ext.get('ExtensionMetadata', {})
                 ext_name = ext_desc.get('Name')
-                # DolbyVision
                 if ext_name == 'Dolby EDR':
                     is_dvi = True
+                elif ext_name == 'Eclair Color':
+                    is_ec = True
 
         out_reels.append(out_reel)
 
     cpl_node['DolbyVision'] = is_dvi
+    cpl_node['EclairColor'] = is_ec
+
     cpl_node['ReelList'] = out_reels
     cpl_node['TotalDuration'] = total_frame_duration
     cpl_node['TotalTimeCodeDuration'] = frame_to_tc(
