@@ -38,6 +38,7 @@ RULES = {
             '(-(?P<MasteringLuminance>\d+fl))?'
             '(-(?P<FrameRate>\d+))?'
             '(-(?P<DolbyVision>DVis))?'
+            '(-(?P<EclairColor>EC))?'
             '$)',
         'ProjectorAspectRatio':
             r'(^'
@@ -88,6 +89,7 @@ DEFAULTS = {
     'PreRelease': False,
     'RedBand': False,
     'DolbyVision': False,
+    'EclairColor': False,
     'Caption': False,
     'HearingImpaired': False,
     'VisionImpaired': False,
