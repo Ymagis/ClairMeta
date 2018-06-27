@@ -309,6 +309,8 @@ class Checker(CheckerBase):
 
         subtitles = keys_by_name_dict(st_dict, 'Subtitle')
         editrate = self.get_subtitle_editrate(asset, st_dict)
+        if not subtitles:
+            return
 
         for st in subtitles[0]:
             st_idx = st['Subtitle@SpotNumber']
@@ -340,6 +342,8 @@ class Checker(CheckerBase):
         st_rate = self.get_subtitle_editrate(asset, st_dict)
         subtitles = keys_by_name_dict(st_dict, 'Subtitle')
         _, asset = asset
+        if not subtitles:
+            return
 
         last_tc = 0
         for st in subtitles[0]:
@@ -393,6 +397,16 @@ class Checker(CheckerBase):
                     "Subtitle UUID mismatch, Subtitle claims {} but CPL "
                     "{}".format(st_uuid, cpl_uuid))
 
+    def check_subtitle_cpl_empty(self, playlist, asset, folder):
+        """ Empty Subtitle file check. """
+        st_dict = self.get_subtitle_xml(asset, folder)
+        if not st_dict:
+            return
+
+        subtitles = keys_by_name_dict(st_dict, 'Subtitle')
+        if not subtitles:
+            raise CheckException("Subtitle file is empty")
+
     def check_subtitle_cpl_content(self, playlist, asset, folder):
         """ Subtitle individual structure check. """
         st_dict = self.get_subtitle_xml(asset, folder)
@@ -400,6 +414,9 @@ class Checker(CheckerBase):
             return
 
         subtitles = keys_by_name_dict(st_dict, 'Subtitle')
+        if not subtitles:
+            return
+
         for st in subtitles[0]:
             has_image = keys_by_name_dict(st, 'Image')
             has_text = keys_by_name_dict(st, 'Text')
