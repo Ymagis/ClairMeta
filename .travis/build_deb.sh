@@ -16,9 +16,12 @@ dpkg-buildpackage -us -uc
 mv ../asdcplib*.deb /deb
 cd -
 
+# Setup virtualenv
+pip3 install pipenv
+
 # We manually download clairmeta source distribution and add a stdeb.cfg file
 # corresponding to the current python version build.
-pip3 download --no-binary :all: --no-deps clairmeta
+pipenv run pip3 download --no-binary :all: --no-deps clairmeta
 mkdir clairmeta && tar xzf clairmeta-*.tar.gz -C clairmeta --strip-components=1
 cp /build_src/stdeb-python3.cfg clairmeta/stdeb.cfg
 tar czf clairmeta.tar.gz clairmeta
@@ -35,9 +38,9 @@ tar czf clairmeta.tar.gz clairmeta
 #    package (see https://github.com/pyca/cryptography/issues/4001).
 #    The same kind of issue occurs for cryptography python 2 specific depends
 #    enum34 and ipaddress that are handled with environment markers.
-pip3 install py2deb
-py2deb -r /deb --name-prefix=python3 --rename=python-magic,python3-magic-ahupp -y -- clairmeta.tar.gz
-py2deb -r /deb --name-prefix=python3 -y -- cffi>=1.7
+pipenv run pip3 install py2deb
+pipenv run py2deb -r /deb --name-prefix=python3 --rename=python-magic,python3-magic-ahupp -y -- clairmeta.tar.gz
+pipenv run py2deb -r /deb --name-prefix=python3 -y -- cffi>=1.7
 
 # Bintray packages deployment
 for DEB in /deb/*.deb
