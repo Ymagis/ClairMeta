@@ -154,7 +154,7 @@ class CheckerBase(object):
 
     def dump_report(self):
         """ Dump check report. """
-        valid_str = 'Sucess' if self.get_valid() else 'Fail'
+        valid_str = 'Success' if self.get_valid() else 'Fail'
 
         pretty_status = {
             'ERROR': 'Error(s)',

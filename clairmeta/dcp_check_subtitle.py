@@ -227,8 +227,9 @@ class Checker(CheckerBase):
         _, asset = asset
 
         st_lang = self.get_subtitle_elem(st_dict, 'Language')
-        st_lang_obj = pycountry.languages.lookup(st_lang)
-        if not st_lang_obj:
+        try:
+            st_lang_obj = pycountry.languages.lookup(st_lang)
+        except LookupError:
             raise CheckException("Subtitle language from XML could not  "
                                  "be detected : {}".format(st_lang))
 
