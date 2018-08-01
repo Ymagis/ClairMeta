@@ -112,6 +112,7 @@ def cpl_reels_parse(cpl_node):
     total_frame_duration = 0
     is_dvi = False
     is_ec = False
+    is_dbox = False
 
     for pos, in_reel in enumerate(in_reels, 1):
 
@@ -166,7 +167,6 @@ def cpl_reels_parse(cpl_node):
 
         if 'Markers' in out_reel['Assets']:
             marker = out_reel['Assets']['Markers']
-
             editrate_r = format_ratio(marker.get('EditRate'))
             marker['EditRate'] = editrate_r
 
@@ -187,11 +187,14 @@ def cpl_reels_parse(cpl_node):
                     is_dvi = True
                 elif ext_name == 'Eclair Color':
                     is_ec = True
+                elif ext_name == 'D-BOX Enabled':
+                    is_dbox = True
 
         out_reels.append(out_reel)
 
     cpl_node['DolbyVision'] = is_dvi
     cpl_node['EclairColor'] = is_ec
+    cpl_node['D-BOX'] = is_dbox
 
     cpl_node['ReelList'] = out_reels
     cpl_node['TotalDuration'] = total_frame_duration
