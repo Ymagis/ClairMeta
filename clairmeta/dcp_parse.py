@@ -86,7 +86,7 @@ def cpl_parse(path):
     """ Parse DCP CPL """
     cpl = generic_parse(
         path, "CompositionPlaylist",
-        ("Reel", "ExtensionMetadataList", "PropertyList"))
+        ("Reel", "ExtensionMetadata", "PropertyList"))
 
     if cpl:
         cpl_node = cpl['Info']['CompositionPlaylist']
@@ -180,10 +180,9 @@ def cpl_reels_parse(cpl_node):
 
         if 'Metadata' in out_reel['Assets']:
             meta = out_reel['Assets']['Metadata']
-            exts = meta.get('ExtensionMetadataList', [])
+            exts = meta['ExtensionMetadataList'].get('ExtensionMetadata', [])
             for ext in exts:
-                ext_desc = ext.get('ExtensionMetadata', {})
-                ext_name = ext_desc.get('Name')
+                ext_name = ext.get('Name')
                 if ext_name == 'Dolby EDR':
                     is_dvi = True
                 elif ext_name == 'Eclair Color':
