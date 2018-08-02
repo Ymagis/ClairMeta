@@ -383,20 +383,39 @@ class Checker(CheckerBase):
                     "{}".format(st_rate, cpl_rate))
 
     def check_subtitle_cpl_uuid(self, playlist, asset, folder):
-        """ Subtitle UUID coherence with CPL. """
+        """ Subtitle UUID coherence.
+
+            For Interop, XML DCSubtitle/SubtitleID should match the CPL
+            MainSubtitle/Id and the XML subfolder name should contain the Id.
+            For SMPTE, XML SubtitleReel/Id should match the
+            MXF ResourceId, here we rely on the fact that asdcp-info parser
+            (As_02_TimedText parser) store the TimedTextDescriptor/ResourceID
+            (from SMPTE 429-5) in a global AssetID key.
+        """
         st_dict = self.get_subtitle_xml(asset, folder)
         if not st_dict:
             return
 
         st_uuid = self.get_subtitle_uuid(st_dict)
         _, asset = asset
-        cpl_uuid = asset['Id']
 
-        if self.dcp.schema == 'SMPTE':
+        if self.dcp.schema == 'Interop':
+            cpl_uuid = asset['Id']
             if st_uuid != cpl_uuid:
                 raise CheckException(
                     "Subtitle UUID mismatch, Subtitle claims {} but CPL "
                     "{}".format(st_uuid, cpl_uuid))
+            folder_name = os.path.basename(folder)
+            if st_uuid not in folder_name:
+                raise CheckException(
+                    "Subtitle directory name unexpected, should contain {} but"
+                    " got {}".format(st_uuid, folder_name))
+        elif self.dcp.schema == 'SMPTE':
+            resource_uuid = asset['Probe'].get('AssetID', "")
+            if resource_uuid != st_uuid:
+                raise CheckException(
+                    "Subtitle UUID mismatch, Subtitle claims {} but MXF "
+                    "{}".format(st_uuid, resource_uuid))
 
     def check_subtitle_cpl_empty(self, playlist, asset, folder):
         """ Empty Subtitle file check. """
