@@ -59,8 +59,9 @@ jobs:
         skip_cleanup: true
         user: ymagis
         password:
-          secure: z+NBy5v4tPyROoqiZhtlPPmFYPJj8UB8cBmr0Yu2ka3+Zp+w/ouiQJTY8jZgMs0vvQ96DaGhC1OYVKdN2hV+vvzwfeZHmDbqMG5FAEeFndmnAwMnSrK02Ux6x5RVme90ji9x1fQYjG1eo+opSjm36QI8Lj7r8OXXdCsWumstpGeFQ1z9LrP5/5eGMXHYniFLJoDIWmR3oBxngxtj+2hbFOhTDfxSzfkNH6XLmNcGoUbpTYrmFNjHQtQod4OL25ZmWJjD01sxKXW9q/BIrUVHmGGoXnMtUPJGRm/LN0+3FOllJouhKd+GcLFW2eBQwRG4w3Ztz3M6PYXKt9ayI/Xb/zfspxq55qq3+s+wR94ZzgVWWydH1d1v0BIwrHs/mR9aBpHxuFa1nu4BRz3hLonVuw9/h96KmaFfhjthhVspNq4YnV6gzJmxenz0trI9JZxkjA+x33QUf3/zaKM1k+9zJESCng8KZWlDqxF41HSEFA+ZaYic9dH9fFc88VCXIQ1dyswOkuncPNPi7Dcj09IoKbyUqOlUFCFa3vb4YDtMt/ZAGnTR3KkLQjkJqTyQ6z5TC8Nwn+BM+vC9df3ckxv+ogyPM/YILlcEFmEl2PV2k0xUv62s1t08sU0eSB3WVewuNQwrkQt4OYwhjaHYKb0ThlHY74kyOaiSV4C5ygtd/S8=
+          secure: GVlzWA7XFERLLrq22aiOWM/+omejQXH4tVmaKjfXODnRSmtKN1JG2t4IqniNYstILpwv+CjOi4ANdAw2lLwZzbF17XIU2JlKya7R7jPuZOYh3f+98wrVzDyuAjflQIxcutoKX0ILGd+7JxvmmqzQNAoD6PCCnlE+WG11Mg+gK5Nmh9YE07fvLLerlCFFpEfSUEPsvWRgIkivPxbTkhUjQy5EiqgbQ9cmhW5ERoug+U1Q2r55RRyayfxpxPg+ASzi1Jn9NetAVFgkt1uaTEeU5NqjlEE1Z1+T9VRmpzpNlEXFWvkSA6iQMiSgDcEhJ6H49WORUv678/wJNmE/iYtENugABnMbmqTw58GYrHD2HI652JFuUstnbnh9Wp92GEgyLOQ3bNZJxkxi0h+onBxH8ubagg5d+Y5WjY4RQFthO1uxdFEJJtsuEgA0nNGVMrEjY6H/129KG4Sxtwws7jwPmamgd8UlVRc24QE4hJRYwfbtO/OgYl7Fr16+6rtaMLjG+CQ0GcCP5D29A8ChJG0n1P1PK1G9h/bUqaDX3Itk1vnqQkvQ+lEBQff9GmYDN5YKHZbOuJp9m7NLr8CkLR8FlgiZjz9TcRuNYVJo0vOwsDXfs65i3O2/z6FTRTL6eDFHZ4x7Am2eYguDWWDqNOTGaYnGhWQSxk7xhv8hjFcIwko=
         distributions: sdist bdist_wheel
         on:
           branch: master
           tags: true
+          repo: Ymagis/ClairMeta
