@@ -8,7 +8,7 @@
             <xs:element name="SubtitleID" type="UUID"/>
             <xs:element name="MovieTitle" type="xs:string"/>
             <xs:element name="ReelNumber" type="xs:string"/>
-            <xs:element name="Language" type="xs:language" minOccurs="0" default="en"/>
+            <xs:element name="Language" type="xs:string"/>
             <xs:element name="LoadFont" minOccurs="0" maxOccurs="unbounded">
                 <xs:complexType>
                     <xs:attribute name="Id" type="NonEmptyElement" use="required"/>
