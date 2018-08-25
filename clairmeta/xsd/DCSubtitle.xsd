@@ -172,13 +172,7 @@
                 </xs:restriction>
             </xs:simpleType>
         </xs:attribute>
-        <xs:attribute name="Spacing" use="optional" default="0em">
-            <xs:simpleType>
-                <xs:restriction base="xs:string">
-                    <xs:pattern value="-?(\d+|\d+\.\d+)em"/>
-                </xs:restriction>
-            </xs:simpleType>
-        </xs:attribute>
+        <xs:attribute name="Spacing" type="emType" use="optional" default="0em"/>
         <xs:attribute name="EffectSize" use="optional" default="0.01">
             <xs:simpleType>
                 <xs:restriction base="xs:decimal">
@@ -255,6 +249,13 @@
         </xs:restriction>
     </xs:simpleType>
 
+    <!-- Em Type -->
+    <xs:simpleType name="emType">
+        <xs:restriction base="xs:string">
+            <xs:pattern value="-?([0-9]+|[0-9]+\.[0-9]+)em"/>
+        </xs:restriction>
+    </xs:simpleType>
+
     <!-- Ruby Type -->
     <xs:complexType name="RubyType">
         <xs:sequence>
@@ -269,13 +270,7 @@
                 <xs:complexType>
                     <xs:simpleContent>
                         <xs:extension base="xs:string">
-                            <xs:attribute name="Size" use="optional" default="0.5">
-                                <xs:simpleType>
-                                    <xs:restriction base="xs:decimal">
-                                        <xs:minExclusive value="0"/>
-                                    </xs:restriction>
-                                </xs:simpleType>
-                            </xs:attribute>
+                            <xs:attribute name="Size" type="emType" use="optional" default="0.5em"/>
                             <xs:attribute name="Position" use="optional" default="before">
                                 <xs:simpleType>
                                     <xs:restriction base="xs:string">
@@ -284,20 +279,8 @@
                                     </xs:restriction>
                                 </xs:simpleType>
                             </xs:attribute>
-                            <xs:attribute name="Offset" use="optional" default="0.0">
-                                <xs:simpleType>
-                                    <xs:restriction base="xs:decimal">
-                                        <xs:minInclusive value="-1.0"/>
-                                    </xs:restriction>
-                                </xs:simpleType>
-                            </xs:attribute>
-                            <xs:attribute name="Spacing" use="optional" default="0.0">
-                                <xs:simpleType>
-                                    <xs:restriction base="xs:decimal">
-                                        <xs:minInclusive value="-1.0"/>
-                                    </xs:restriction>
-                                </xs:simpleType>
-                            </xs:attribute>
+                            <xs:attribute name="Offset" type="emType" use="optional" default="0em"/>
+                            <xs:attribute name="Spacing" type="emType" use="optional" default="0em"/>
                             <xs:attribute name="AspectAdjust" use="optional" default="1.0">
                                 <xs:simpleType>
                                     <xs:restriction base="xs:decimal">
@@ -332,17 +315,7 @@
 
     <!-- Space Type -->
     <xs:complexType name="SpaceType">
-        <xs:simpleContent>
-            <xs:extension base="EmptyElement">
-                <xs:attribute name="Size" use="optional" default="0.5">
-                    <xs:simpleType>
-                        <xs:restriction base="xs:decimal">
-                            <xs:minInclusive value="-1.0"/>
-                        </xs:restriction>
-                    </xs:simpleType>
-                </xs:attribute>
-            </xs:extension>
-        </xs:simpleContent>
+        <xs:attribute name="Size" type="emType" use="optional" default="0.5em"/>
     </xs:complexType>
 
     <!-- UUID Type -->
