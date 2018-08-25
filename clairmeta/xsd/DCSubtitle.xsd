@@ -11,8 +11,8 @@
             <xs:element name="Language" type="xs:string"/>
             <xs:element name="LoadFont" minOccurs="0" maxOccurs="unbounded">
                 <xs:complexType>
-                    <xs:attribute name="Id" type="NonEmptyElement" use="required"/>
-                    <xs:attribute name="URI" type="xs:anyURI" use="required"/>
+                    <xs:attribute name="Id" type="NonEmptyType" use="required"/>
+                    <xs:attribute name="URI" type="RelativePathnameType" use="required"/>
                 </xs:complexType>
             </xs:element>
             <xs:element name="Font" type="FontType" minOccurs="0" maxOccurs="unbounded"/>
@@ -370,6 +370,15 @@
     <xs:simpleType name="NonEmptyType">
         <xs:restriction base="xs:token">
             <xs:minLength value="1"/>
+        </xs:restriction>
+    </xs:simpleType>
+
+    <!-- RelativePathname Type -->
+    <xs:simpleType name="RelativePathnameType">
+        <xs:restriction base="xs:string">
+            <xs:pattern value="([A-Za-z0-9]{1}([A-Za-z0-9_\-.])*)([/]{1}[A-Za-z0-9]{1}([A-Za-z0-9_\-.])*)*"/>
+            <xs:minLength value="1"/>
+            <xs:maxLength value="99"/>
         </xs:restriction>
     </xs:simpleType>
 </xs:schema>
