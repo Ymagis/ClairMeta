@@ -15,8 +15,10 @@
                     <xs:attribute name="URI" type="RelativePathnameType" use="required"/>
                 </xs:complexType>
             </xs:element>
-            <xs:element name="Font" type="FontType" minOccurs="0" maxOccurs="unbounded"/>
-            <xs:element name="Subtitle" type="SubtitleType" minOccurs="0" maxOccurs="unbounded"/>
+            <xs:choice minOccurs="0" maxOccurs="unbounded">
+                <xs:element name="Subtitle" type="SubtitleType"/>
+                <xs:element name="Font" type="FontTypeDocumentLevel"/>
+            </xs:choice>
         </xs:sequence>
         <xs:attribute name="Version" use="required">
             <xs:simpleType>
@@ -35,9 +37,9 @@
                 <xs:element name="Text" type="TextType"/>
                 <xs:element name="Image" type="ImageType"/>
                 <xs:element name="Font">
-                    <xs:complexType mixed="true">
-                        <xs:complexContent mixed="true">
-                            <xs:extension base="FontType">
+                    <xs:complexType>
+                        <xs:complexContent>
+                            <xs:extension base="FontTypeSubtitleLevel">
                                 <xs:sequence>
                                     <xs:element name="Text" type="TextType" maxOccurs="unbounded"/>
                                 </xs:sequence>
@@ -97,11 +99,7 @@
     </xs:complexType>
 
     <!-- Font -->
-    <xs:complexType name="FontType" mixed="true">
-        <xs:choice minOccurs="0" maxOccurs="unbounded">
-            <xs:element name="Font" type="FontType"/>
-            <xs:element name="Subtitle" type="SubtitleType"/>
-        </xs:choice>
+    <xs:complexType name="FontType" mixed="true" abstract="true">
         <xs:attribute name="Script" use="optional" default="normal">
             <xs:simpleType>
                 <xs:restriction base="xs:string">
@@ -144,7 +142,7 @@
                 </xs:restriction>
             </xs:simpleType>
         </xs:attribute>
-        <xs:attribute name="Id" type="xs:string" use="optional"/>
+        <xs:attribute name="Id" type="NonEmptyType" use="optional"/>
         <xs:attribute name="Color" use="optional" default="FFFFFFFF">
             <xs:simpleType>
                 <xs:restriction base="xs:hexBinary">
@@ -182,10 +180,46 @@
         </xs:attribute>
     </xs:complexType>
 
+    <!-- Font Document Level-->
+    <xs:complexType name="FontTypeDocumentLevel">
+        <xs:complexContent>
+            <xs:restriction base="FontType">
+                <xs:choice minOccurs="0" maxOccurs="unbounded">
+                    <xs:element name="Font" type="FontTypeDocumentLevel"/>
+                    <xs:element name="Subtitle" type="SubtitleType"/>
+                </xs:choice>
+            </xs:restriction>
+        </xs:complexContent>
+    </xs:complexType>
+
+    <!-- Font Subtitle Level-->
+    <xs:complexType name="FontTypeSubtitleLevel">
+        <xs:complexContent>
+            <xs:restriction base="FontType">
+                <xs:choice minOccurs="0" maxOccurs="unbounded">
+                    <xs:element name="Font" type="FontTypeSubtitleLevel"/>
+                    <xs:element name="Text" type="TextType"/>
+                    <xs:element name="Image" type="ImageType"/>
+                </xs:choice>
+            </xs:restriction>
+        </xs:complexContent>
+    </xs:complexType>
+
+    <!-- Font Text Level-->
+    <xs:complexType name="FontTypeTextLevel" mixed="true">
+        <xs:complexContent>
+            <xs:restriction base="FontType">
+                <xs:choice minOccurs="0" maxOccurs="unbounded">
+                    <xs:element name="Font" type="FontTypeTextLevel"/>
+                </xs:choice>
+            </xs:restriction>
+        </xs:complexContent>
+    </xs:complexType>
+
     <!-- Text -->
     <xs:complexType name="TextType" mixed="true">
         <xs:choice minOccurs="0" maxOccurs="unbounded">
-            <xs:element name="Font" type="FontType"/>
+            <xs:element name="Font" type="FontTypeTextLevel"/>
             <xs:element name="Ruby" type="RubyType"/>
             <xs:element name="Space" type="SpaceType"/>
             <xs:element name="HGroup" type="xs:string"/>
