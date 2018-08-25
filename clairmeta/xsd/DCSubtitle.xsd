@@ -219,10 +219,10 @@
     <xs:complexType name="TextType" mixed="true">
         <xs:choice minOccurs="0" maxOccurs="unbounded">
             <xs:element name="Font" type="FontTypeTextLevel"/>
-            <xs:element name="Ruby" type="RubyType"/>
-            <xs:element name="Space" type="SpaceType"/>
-            <xs:element name="HGroup" type="xs:string"/>
-            <xs:element name="Rotate" type="RotateType"/>
+            <xs:element name="Ruby" type="RubyType" maxOccurs="unbounded"/>
+            <xs:element name="Space" type="SpaceType" maxOccurs="unbounded"/>
+            <xs:element name="HGroup" type="xs:string" maxOccurs="unbounded"/>
+            <xs:element name="Rotate" type="RotateType" maxOccurs="unbounded"/>
         </xs:choice>
         <xs:attribute name="HAlign" use="optional" default="center">
             <xs:simpleType>
