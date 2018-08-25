@@ -22,9 +22,8 @@
         </xs:sequence>
         <xs:attribute name="Version" use="required">
             <xs:simpleType>
-                <xs:restriction base="xs:string">
-                    <xs:enumeration value="1.0"/>
-                    <xs:enumeration value="1.1"/>
+                <xs:restriction base="xs:decimal">
+                    <xs:pattern value="1\.[0-1]"/>
                 </xs:restriction>
             </xs:simpleType>
         </xs:attribute>
