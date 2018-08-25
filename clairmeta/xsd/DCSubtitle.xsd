@@ -359,13 +359,6 @@
         </xs:restriction>
     </xs:simpleType>
 
-    <!-- NonEmptyElement Type -->
-    <xs:simpleType name="NonEmptyElement">
-        <xs:restriction base="xs:string">
-            <xs:minLength value="1"/>
-        </xs:restriction>
-    </xs:simpleType>
-
     <!-- NonEmpty Type -->
     <xs:simpleType name="NonEmptyType">
         <xs:restriction base="xs:token">
