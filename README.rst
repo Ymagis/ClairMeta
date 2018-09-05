@@ -205,9 +205,9 @@ The following sources / software were used :
 -  asdcp-lib : http://www.cinecert.com/asdcplib/
 -  sox : http://sox.sourceforge.net/
 -  mediainfo : https://mediaarea.net/
--  SMPTE Digital Cinema standards
--  Interop Digital Cinema specifications
--  Digital Cinema Initiative specifications
+-  SMPTE Digital Cinema standards : https://www.smpte.org/
+-  Interop Digital Cinema specifications : https://cinepedia.com/interop/
+-  Digital Cinema Initiative specifications : http://www.dcimovies.com/specification/index.html
 -  ISDCF Naming Convention : http://isdcf.com/dcnc/
 -  Texas Instrument Digital Cinema Subtitles specifications
 
