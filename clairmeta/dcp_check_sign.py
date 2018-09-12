@@ -442,7 +442,8 @@ class Checker(CheckerBase):
         sign_alg_set = set(
             [c.get_signature_algorithm() for c in self.cert_list])
         if len(sign_alg_set) > 1:
-            raise CheckException("Certificate chain contains certificates "
+            raise CheckException(
+                "Certificate chain contains certificates "
                 "signed with different algorithm")
 
     def check_sign_signature_algorithm(self, source):
@@ -498,23 +499,13 @@ class Checker(CheckerBase):
 
     def check_document_signature(self, source, path):
         """ Digital signature validation. """
+        # Check digest (XML document hash)
         signed_info = source['Signature']['SignedInfo']
         xml_digest = signed_info['Reference']['DigestValue']
         c14n_doc = canonicalize_xml(
             path,
-            ns=DCP_SETTINGS['xmlns']['xmldsig'])
-
-        # We need to remove Signature node from the canonicalized XML
-        # Note : If we do it with etree before canonicalization, we miss a \n
-        # in the canonicalized form and the digest don't match !
-        # Note 2 : why does the \n characters make a difference with C14n ?
-        c14n_doc = c14n_doc.decode("utf-8")
-        s = re.compile(
-            r'<(ds|dsig):Signature xmlns:(ds|dsig)="{}">.*</(ds|dsig):Signature>'
-            .format(DCP_SETTINGS['xmlns']['xmldsig']),
-            re.DOTALL)
-        c14n_doc = re.sub(s, '', c14n_doc)
-        c14n_doc = c14n_doc.encode("utf-8")
+            ns=DCP_SETTINGS['xmlns']['xmldsig'],
+            strip='{*}Signature')
 
         c14n_digest = base64.b64encode(self.digest_func(c14n_doc).digest())
         c14n_digest = c14n_digest.decode("utf-8")
@@ -522,7 +513,8 @@ class Checker(CheckerBase):
             raise CheckException(
                 "XML Digest mismatch, signature can't be checked")
 
-        # Check SignatureValue
+        # Check signature (XML document hash encrypted with certifier
+        # private key)
         c14n_sign = canonicalize_xml(
             path,
             root='SignedInfo',

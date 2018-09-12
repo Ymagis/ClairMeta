@@ -11,6 +11,7 @@ from clairmeta.profile import get_default_profile
 from clairmeta.dcp_utils import list_cpl_assets, cpl_probe_asset
 from clairmeta.dcp_check_base import CheckerBase, CheckException
 from clairmeta.utils.file import console_progress_bar
+from clairmeta.utils.sys import all_keys_in_dict
 
 
 class DCPChecker(CheckerBase):
@@ -155,6 +156,23 @@ class DCPChecker(CheckerBase):
         for cpl in self.dcp._list_cpl:
             for essence, asset in list_cpl_assets(cpl):
                 self.run_check(self.check_link_ov_asset, asset, essence)
+
+    def check_dcp_signed(self):
+        """ DCP with encrypted content must be digitally signed. """
+        if self.dcp.schema != "SMPTE":
+            return
+
+        for cpl in self.dcp._list_cpl:
+            cpl_node = cpl['Info']['CompositionPlaylist']
+            docs = [
+                pkl['Info']['PackingList'] for pkl in self.dcp._list_pkl
+                if pkl['Info']['PackingList']['Id'] == cpl_node.get('PKLId')]
+            docs.append(cpl_node)
+
+            for doc in docs:
+                signed = all_keys_in_dict(doc, ['Signer', 'Signature'])
+                if not signed and cpl_node['Encrypted'] is True:
+                    raise CheckException("Encrypted DCP must be signed")
 
     def check_link_ov_coherence(self):
         """ Relink OV/VF sanity checks. """

@@ -134,7 +134,6 @@ DCP_SETTINGS = {
     'subtitle': {
         # In bytes
         'font_max_size': 655360,
-        'font_formats': ['TrueType font data', 'OpenType font data'],
     },
 }
 

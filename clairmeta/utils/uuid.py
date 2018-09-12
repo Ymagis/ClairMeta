@@ -37,7 +37,7 @@ def extract_uuid(in_str, regex=FILE_RE):
             regex: Pattern to extract the UUID.
 
         Returns:
-            UUID extracted if sucessful.
+            UUID extracted if successful.
 
         >>> extract_uuid('jp2k_123e4567-e89b-12d3-a456-426655440000_ecl')
         '123e4567-e89b-12d3-a456-426655440000'

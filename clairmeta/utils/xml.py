@@ -4,6 +4,7 @@
 from __future__ import absolute_import
 import os
 import io
+import re
 import six
 import xmltodict
 from lxml import etree
@@ -255,7 +256,7 @@ def validate_xml(xml_path, xsd_id):
         schema.assertValid(doc)
 
 
-def canonicalize_xml(xml_path, root=None, ns=None):
+def canonicalize_xml(xml_path, root=None, ns=None, strip=None):
     """ Canonicalize a XML document using C14N method.
 
         Reference : https://www.w3.org/TR/xml-c14n/
@@ -264,7 +265,8 @@ def canonicalize_xml(xml_path, root=None, ns=None):
             xml_path (str): XML file absolute path.
             root (str, optional): New document root (to canonicalize only part
                 of the whole XML document).
-            ns (str, optional): Namespace associated with `root`
+            ns (str, optional): Namespace associated with `root`.
+            strip (str): Element node to strip before canonicalization.
 
         Returns:
             C14N bytes representation of the XML document.
@@ -289,6 +291,15 @@ def canonicalize_xml(xml_path, root=None, ns=None):
 
         doc._setroot(new_root)
 
-    f2 = io.BytesIO()
-    doc.write_c14n(f2, with_comments=False)
-    return f2.getvalue()
+    if strip:
+        etree.strip_elements(doc, strip, with_tail=False)
+
+    bindoc = io.BytesIO()
+    doc.write_c14n(bindoc, with_comments=False)
+
+    # In some cases where there is no namespace prefix, write_c14n add lot of
+    # 'xmlns=""' attributes that make are not wanted.
+    return re.sub(
+            r' xmlns=""', '',
+            bindoc.getvalue().decode("utf-8")
+        ).encode("utf-8")

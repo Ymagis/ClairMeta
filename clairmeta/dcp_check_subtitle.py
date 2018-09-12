@@ -3,7 +3,6 @@
 
 import os
 import re
-import magic
 import pycountry
 
 from clairmeta.utils.time import tc_to_frame, frame_to_tc
@@ -228,8 +227,9 @@ class Checker(CheckerBase):
         _, asset = asset
 
         st_lang = self.get_subtitle_elem(st_dict, 'Language')
-        st_lang_obj = pycountry.languages.lookup(st_lang)
-        if not st_lang_obj:
+        try:
+            st_lang_obj = pycountry.languages.lookup(st_lang)
+        except LookupError:
             raise CheckException("Subtitle language from XML could not  "
                                  "be detected : {}".format(st_lang))
 
@@ -295,25 +295,6 @@ class Checker(CheckerBase):
                 "Subtitle font maximum size is {}, got {}".format(
                     human_size(font_max_size), human_size(font_size)))
 
-    def check_subtitle_cpl_font_format(self, playlist, asset, folder):
-        """ Subtitle font format validation. """
-        st_dict = self.get_subtitle_xml(asset, folder)
-        if not st_dict:
-            return
-        path, uri = self.get_font_path(st_dict, folder)
-        if not path:
-            return
-
-        font_format = magic.from_file(path)
-        allowed_formats = DCP_SETTINGS['subtitle']['font_formats']
-
-        for f in allowed_formats:
-            if font_format in f:
-                return
-
-        raise CheckException("Subtitle font format not valid : {}".format(
-            font_format))
-
     # def check_subtitle_cpl_font_glyph(self, playlist, asset, folder):
     #     """ Check if font can render all glyphs (parsing the text used
     #         in subtitles to have the list of glyphs).
@@ -329,6 +310,8 @@ class Checker(CheckerBase):
 
         subtitles = keys_by_name_dict(st_dict, 'Subtitle')
         editrate = self.get_subtitle_editrate(asset, st_dict)
+        if not subtitles:
+            return
 
         for st in subtitles[0]:
             st_idx = st['Subtitle@SpotNumber']
@@ -360,6 +343,8 @@ class Checker(CheckerBase):
         st_rate = self.get_subtitle_editrate(asset, st_dict)
         subtitles = keys_by_name_dict(st_dict, 'Subtitle')
         _, asset = asset
+        if not subtitles:
+            return
 
         last_tc = 0
         for st in subtitles[0]:
@@ -398,20 +383,49 @@ class Checker(CheckerBase):
                     "{}".format(st_rate, cpl_rate))
 
     def check_subtitle_cpl_uuid(self, playlist, asset, folder):
-        """ Subtitle UUID coherence with CPL. """
+        """ Subtitle UUID coherence.
+
+            For Interop, XML DCSubtitle/SubtitleID should match the CPL
+            MainSubtitle/Id and the XML subfolder name should contain the Id.
+            For SMPTE, XML SubtitleReel/Id should match the
+            MXF ResourceId, here we rely on the fact that asdcp-info parser
+            (As_02_TimedText parser) store the TimedTextDescriptor/ResourceID
+            (from SMPTE 429-5) in a global AssetID key.
+        """
         st_dict = self.get_subtitle_xml(asset, folder)
         if not st_dict:
             return
 
         st_uuid = self.get_subtitle_uuid(st_dict)
         _, asset = asset
-        cpl_uuid = asset['Id']
 
-        if self.dcp.schema == 'SMPTE':
+        if self.dcp.schema == 'Interop':
+            cpl_uuid = asset['Id']
             if st_uuid != cpl_uuid:
                 raise CheckException(
                     "Subtitle UUID mismatch, Subtitle claims {} but CPL "
                     "{}".format(st_uuid, cpl_uuid))
+            folder_name = os.path.basename(folder)
+            if st_uuid not in folder_name:
+                raise CheckException(
+                    "Subtitle directory name unexpected, should contain {} but"
+                    " got {}".format(st_uuid, folder_name))
+        elif self.dcp.schema == 'SMPTE':
+            resource_uuid = asset['Probe'].get('AssetID', "")
+            if resource_uuid != st_uuid:
+                raise CheckException(
+                    "Subtitle UUID mismatch, Subtitle claims {} but MXF "
+                    "{}".format(st_uuid, resource_uuid))
+
+    def check_subtitle_cpl_empty(self, playlist, asset, folder):
+        """ Empty Subtitle file check. """
+        st_dict = self.get_subtitle_xml(asset, folder)
+        if not st_dict:
+            return
+
+        subtitles = keys_by_name_dict(st_dict, 'Subtitle')
+        if not subtitles:
+            raise CheckException("Subtitle file is empty")
 
     def check_subtitle_cpl_content(self, playlist, asset, folder):
         """ Subtitle individual structure check. """
@@ -420,6 +434,9 @@ class Checker(CheckerBase):
             return
 
         subtitles = keys_by_name_dict(st_dict, 'Subtitle')
+        if not subtitles:
+            return
+
         for st in subtitles[0]:
             has_image = keys_by_name_dict(st, 'Image')
             has_text = keys_by_name_dict(st, 'Text')

@@ -15,6 +15,7 @@ DCP_CHECK_PROFILE = {
     'criticality': {
         'default': 'ERROR',
         'check_dcnc_': 'WARNING',
+        'check_dcp_foreign_files': 'WARNING',
         'check_cpl_contenttitle_annotationtext_match': 'WARNING',
         'check_cpl_contenttitle_pklannotationtext_match': 'WARNING',
         'check_cpl_reel_duration_picture_subtitles': 'WARNING',
@@ -24,6 +25,7 @@ DCP_CHECK_PROFILE = {
         'check_picture_cpl_avg_bitrate': 'WARNING',
         'check_picture_cpl_resolution': 'WARNING',
         'check_subtitle_cpl_reel_number': 'WARNING',
+        'check_subtitle_cpl_empty': 'WARNING',
         'check_picture_cpl_archival_framerate': 'WARNING',
         'check_picture_cpl_hfr_framerate': 'WARNING',
         'check_sound_cpl_format': 'WARNING',

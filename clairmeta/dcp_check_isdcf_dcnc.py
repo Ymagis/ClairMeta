@@ -196,6 +196,17 @@ class Checker(CheckerBase):
             raise CheckException("CPL imply DolbyVision but ContentTitle miss "
                                  "DVis ContentType field")
 
+    def check_dcnc_field_claim_eclaircolor(self, playlist, fields):
+        """ EclairColor metadata shall be present in CPL. """
+        ec_dcnc = fields['ContentType'].get('EclairColor')
+        ec_cpl = playlist['Info']['CompositionPlaylist']['EclairColor']
+        if ec_dcnc and not ec_cpl:
+            raise CheckException("ContentTitle claims EclairColor but CPL "
+                                 "miss required metadata")
+        elif not ec_dcnc and ec_cpl:
+            raise CheckException("CPL imply EclairColor but ContentTitle miss "
+                                 "EC ContentType field")
+
     # TODO : this check don't work for multi-CPL packages
     # def check_dcnc_field_claim_packagetype(self, playlist, fields):
     #     """ DCP type (OV / VF) coherence check. """
