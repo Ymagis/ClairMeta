@@ -70,7 +70,7 @@ class DCP(object):
 
         for c in candidates:
             nodes = parse_xml(c, namespaces=DCP_SETTINGS['xmlns'])
-            if root_name in nodes:
+            if root_name and root_name in nodes:
                 xml_list.append(c)
 
         return xml_list
