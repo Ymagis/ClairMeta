@@ -424,6 +424,30 @@ class Checker(CheckerBase):
                     "Subtitle UUID mismatch, Subtitle claims {} but MXF "
                     "{}".format(st_uuid, resource_uuid))
 
+    def check_subtitle_cpl_duplicated_uuid(self, playlist, asset, folder):
+        """ Issue when using the same UUID for Subtitle XML and MXF.
+
+            This can cause issue on certain hardware, eg. Dolby server using
+            a version prior to 2.8.18, see patch notes extract below :
+            Fixed an error where the server did not extract SMPTE timedtext
+            (as in subtitles/captions) from the MXF file that was incorrectly
+            created using the same universally unique identifier (UUID) for
+            the MXF file and the main XML inside the MXF files. [DCPLYR-3418]
+        """
+        st_dict = self.st_util.get_subtitle_xml(asset, folder)
+        if not st_dict:
+            return
+
+        st_uuid = self.st_util.get_subtitle_uuid(st_dict)
+        _, asset = asset
+
+        if self.dcp.schema == 'SMPTE':
+            mxf_uuid = asset['Probe'].get('AssetUUID', "")
+            if st_uuid == mxf_uuid:
+                raise CheckException(
+                    "Using the same UUID for Subtitle ID and MXF UUID can "
+                    "cause issue on Dolby server prior to 2.8.18 firmware.")
+
     def check_subtitle_cpl_empty(self, playlist, asset, folder):
         """ Empty Subtitle file check. """
         st_dict = self.st_util.get_subtitle_xml(asset, folder)
