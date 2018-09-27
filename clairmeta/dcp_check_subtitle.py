@@ -16,40 +16,10 @@ from clairmeta.dcp_utils import list_cpl_assets, get_reel_for_asset
 from clairmeta.settings import DCP_SETTINGS
 
 
-class Checker(CheckerBase):
+class SubtitleUtils(object):
 
-    def __init__(self, dcp, profile):
-        super(Checker, self).__init__(dcp, profile)
-
-    def run_checks(self):
-        for cpl in self.dcp._list_cpl:
-            checks = self.find_check('subtitle_cpl')
-            assets = list_cpl_assets(
-                cpl, filters='Subtitle', required_keys=['Path'])
-
-            [self.run_checks_prepare(checks, cpl, asset) for asset in assets]
-
-        return self.check_executions
-
-    def run_checks_prepare(self, checks, cpl, asset):
-        _, asset_node = asset
-        path = os.path.join(self.dcp.path, asset_node['Path'])
-        do_unwrap = path.endswith('.mxf') and os.path.isfile(path)
-
-        if asset_node['Encrypted']:
-            return
-        elif do_unwrap:
-            with unwrap_mxf(path) as folder:
-                [self.run_check(
-                    check, cpl, asset, folder, message="{} (Asset {})".format(
-                        cpl['FileName'], asset[1].get('Path', asset[1]['Id'])))
-                    for check in checks]
-        else:
-            folder = os.path.dirname(path)
-            [self.run_check(
-                check, cpl, asset, folder, message="{} (Asset {})".format(
-                    cpl['FileName'], asset[1].get('Path', asset[1]['Id'])))
-             for check in checks]
+    def __init__(self, dcp):
+        self.dcp = dcp
 
     def get_subtitle_xml(self, asset, folder):
         _, asset = asset
@@ -171,6 +141,43 @@ class Checker(CheckerBase):
 
         return path, uri
 
+
+class Checker(CheckerBase):
+
+    def __init__(self, dcp, profile):
+        self.st_util = SubtitleUtils(dcp)
+        super(Checker, self).__init__(dcp, profile)
+
+    def run_checks(self):
+        for cpl in self.dcp._list_cpl:
+            assets = list_cpl_assets(
+                cpl, filters='Subtitle', required_keys=['Path'])
+
+            checks = self.find_check('subtitle_cpl')
+            [self.run_checks_prepare(checks, cpl, asset) for asset in assets]
+
+        return self.check_executions
+
+    def run_checks_prepare(self, checks, cpl, asset):
+        _, asset_node = asset
+        path = os.path.join(self.dcp.path, asset_node['Path'])
+        do_unwrap = path.endswith('.mxf') and os.path.isfile(path)
+
+        if asset_node['Encrypted']:
+            return
+        elif do_unwrap:
+            with unwrap_mxf(path) as folder:
+                [self.run_check(
+                    check, cpl, asset, folder, message="{} (Asset {})".format(
+                        cpl['FileName'], asset[1].get('Path', asset[1]['Id'])))
+                    for check in checks]
+        else:
+            folder = os.path.dirname(path)
+            [self.run_check(
+                check, cpl, asset, folder, message="{} (Asset {})".format(
+                    cpl['FileName'], asset[1].get('Path', asset[1]['Id'])))
+             for check in checks]
+
     def check_subtitle_cpl_format(self, playlist, asset, folder):
         """ Subtitle format (related to DCP Standard) check. """
         _, asset = asset
@@ -207,12 +214,12 @@ class Checker(CheckerBase):
 
     def check_subtitle_cpl_reel_number(self, playlist, asset, folder):
         """ Subtitle reel number coherence with CPL. """
-        st_dict = self.get_subtitle_xml(asset, folder)
+        st_dict = self.st_util.get_subtitle_xml(asset, folder)
         if not st_dict:
             return
         _, asset = asset
 
-        reel_no = self.get_subtitle_elem(st_dict, 'ReelNumber')
+        reel_no = self.st_util.get_subtitle_elem(st_dict, 'ReelNumber')
         reel_cpl = get_reel_for_asset(playlist, asset['Id'])['Position']
 
         if reel_no and reel_no != reel_cpl:
@@ -221,12 +228,12 @@ class Checker(CheckerBase):
 
     def check_subtitle_cpl_language(self, playlist, asset, folder):
         """ Subtitle language coherence with CPL. """
-        st_dict = self.get_subtitle_xml(asset, folder)
+        st_dict = self.st_util.get_subtitle_xml(asset, folder)
         if not st_dict:
             return
         _, asset = asset
 
-        st_lang = self.get_subtitle_elem(st_dict, 'Language')
+        st_lang = self.st_util.get_subtitle_elem(st_dict, 'Language')
         try:
             st_lang_obj = pycountry.languages.lookup(st_lang)
         except LookupError:
@@ -249,15 +256,15 @@ class Checker(CheckerBase):
 
     def check_subtitle_cpl_font_ref(self, playlist, asset, folder):
         """ Subtitle font references check. """
-        st_dict = self.get_subtitle_xml(asset, folder)
+        st_dict = self.st_util.get_subtitle_xml(asset, folder)
         if not st_dict:
             return
 
         if self.dcp.schema == 'SMPTE':
-            font_id = self.get_subtitle_elem(st_dict, 'LoadFont@ID')
+            font_id = self.st_util.get_subtitle_elem(st_dict, 'LoadFont@ID')
             font_ref = keys_by_name_dict(st_dict, 'Font@ID')
         else:
-            font_id = self.get_subtitle_elem(st_dict, 'LoadFont@Id')
+            font_id = self.st_util.get_subtitle_elem(st_dict, 'LoadFont@Id')
             font_ref = keys_by_name_dict(st_dict, 'Font@Id')
 
         for ref in font_ref:
@@ -268,10 +275,10 @@ class Checker(CheckerBase):
 
     def check_subtitle_cpl_font(self, playlist, asset, folder):
         """ Subtitle font file exists. """
-        st_dict = self.get_subtitle_xml(asset, folder)
+        st_dict = self.st_util.get_subtitle_xml(asset, folder)
         if not st_dict:
             return
-        path, uri = self.get_font_path(st_dict, folder)
+        path, uri = self.st_util.get_font_path(st_dict, folder)
         if not path:
             return
 
@@ -280,10 +287,10 @@ class Checker(CheckerBase):
 
     def check_subtitle_cpl_font_size(self, playlist, asset, folder):
         """ Subtitle maximum font size. """
-        st_dict = self.get_subtitle_xml(asset, folder)
+        st_dict = self.st_util.get_subtitle_xml(asset, folder)
         if not st_dict:
             return
-        path, uri = self.get_font_path(st_dict, folder)
+        path, uri = self.st_util.get_font_path(st_dict, folder)
         if not path:
             return
 
@@ -304,12 +311,12 @@ class Checker(CheckerBase):
 
     def check_subtitle_cpl_st_timing(self, playlist, asset, folder):
         """ Subtitle individual duration / fade time check. """
-        st_dict = self.get_subtitle_xml(asset, folder)
+        st_dict = self.st_util.get_subtitle_xml(asset, folder)
         if not st_dict:
             return
 
         subtitles = keys_by_name_dict(st_dict, 'Subtitle')
-        editrate = self.get_subtitle_editrate(asset, st_dict)
+        editrate = self.st_util.get_subtitle_editrate(asset, st_dict)
         if not subtitles:
             return
 
@@ -317,14 +324,14 @@ class Checker(CheckerBase):
             st_idx = st['Subtitle@SpotNumber']
             st_in, st_out = st['Subtitle@TimeIn'], st['Subtitle@TimeOut']
             dur = (
-                self.st_tc_frames(st_out, editrate)
-                - self.st_tc_frames(st_in, editrate))
+                self.st_util.st_tc_frames(st_out, editrate)
+                - self.st_util.st_tc_frames(st_in, editrate))
 
             if dur <= 0:
                 raise CheckException(
                     "Subtitle {} null or negative duration".format(st_idx))
 
-            f_s, f_d = self.get_subtitle_fade_io(st, editrate)
+            f_s, f_d = self.st_util.get_subtitle_fade_io(st, editrate)
             if f_s and f_s > dur:
                 raise CheckException(
                     "Subtitle {} FadeUpTime longer than duration".format(
@@ -336,11 +343,11 @@ class Checker(CheckerBase):
 
     def check_subtitle_cpl_duration(self, playlist, asset, folder):
         """ Subtitle duration coherence with CPL. """
-        st_dict = self.get_subtitle_xml(asset, folder)
+        st_dict = self.st_util.get_subtitle_xml(asset, folder)
         if not st_dict:
             return
 
-        st_rate = self.get_subtitle_editrate(asset, st_dict)
+        st_rate = self.st_util.get_subtitle_editrate(asset, st_dict)
         subtitles = keys_by_name_dict(st_dict, 'Subtitle')
         _, asset = asset
         if not subtitles:
@@ -348,7 +355,7 @@ class Checker(CheckerBase):
 
         last_tc = 0
         for st in subtitles[0]:
-            st_out = self.st_tc_frames(st['Subtitle@TimeOut'], st_rate)
+            st_out = self.st_util.st_tc_frames(st['Subtitle@TimeOut'], st_rate)
             if st_out > last_tc:
                 last_tc = st_out
 
@@ -368,11 +375,11 @@ class Checker(CheckerBase):
 
     def check_subtitle_cpl_editrate(self, playlist, asset, folder):
         """ Subtitle editrate coherence with CPL. """
-        st_dict = self.get_subtitle_xml(asset, folder)
+        st_dict = self.st_util.get_subtitle_xml(asset, folder)
         if not st_dict:
             return
 
-        st_rate = self.get_subtitle_editrate(asset, st_dict)
+        st_rate = self.st_util.get_subtitle_editrate(asset, st_dict)
         _, asset = asset
         cpl_rate = asset['EditRate']
 
@@ -392,11 +399,11 @@ class Checker(CheckerBase):
             (As_02_TimedText parser) store the TimedTextDescriptor/ResourceID
             (from SMPTE 429-5) in a global AssetID key.
         """
-        st_dict = self.get_subtitle_xml(asset, folder)
+        st_dict = self.st_util.get_subtitle_xml(asset, folder)
         if not st_dict:
             return
 
-        st_uuid = self.get_subtitle_uuid(st_dict)
+        st_uuid = self.st_util.get_subtitle_uuid(st_dict)
         _, asset = asset
 
         if self.dcp.schema == 'Interop':
@@ -419,7 +426,7 @@ class Checker(CheckerBase):
 
     def check_subtitle_cpl_empty(self, playlist, asset, folder):
         """ Empty Subtitle file check. """
-        st_dict = self.get_subtitle_xml(asset, folder)
+        st_dict = self.st_util.get_subtitle_xml(asset, folder)
         if not st_dict:
             return
 
@@ -429,7 +436,7 @@ class Checker(CheckerBase):
 
     def check_subtitle_cpl_content(self, playlist, asset, folder):
         """ Subtitle individual structure check. """
-        st_dict = self.get_subtitle_xml(asset, folder)
+        st_dict = self.st_util.get_subtitle_xml(asset, folder)
         if not st_dict:
             return
 
@@ -451,7 +458,7 @@ class Checker(CheckerBase):
             VAlign="top", VPosition="0" : out of the top of the screen
             VAlign="bottom", VPosition="0" : some char like 'g' will be cut
         """
-        st_dict = self.get_subtitle_xml(asset, folder)
+        st_dict = self.st_util.get_subtitle_xml(asset, folder)
         if not st_dict:
             return
 
@@ -474,7 +481,7 @@ class Checker(CheckerBase):
 
     def check_subtitle_cpl_image(self, playlist, asset, folder):
         """ Subtitle image element must reference a valid PNG file. """
-        st_dict = self.get_subtitle_xml(asset, folder)
+        st_dict = self.st_util.get_subtitle_xml(asset, folder)
         if not st_dict:
             return
         # TODO : Implement the test for SMPTE
