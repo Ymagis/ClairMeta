@@ -10,7 +10,6 @@ from clairmeta.logger import set_level
 from clairmeta.profile import get_default_profile
 from clairmeta.dcp_utils import list_cpl_assets, cpl_probe_asset
 from clairmeta.dcp_check_base import CheckerBase, CheckException
-from clairmeta.utils.file import console_progress_bar
 from clairmeta.utils.sys import all_keys_in_dict
 
 
@@ -19,7 +18,7 @@ class DCPChecker(CheckerBase):
 
     def __init__(
         self, dcp, profile=get_default_profile(), ov_path=None,
-        hash_callback=console_progress_bar
+        hash_callback=None
     ):
         """ DCPChecker constructor.
 

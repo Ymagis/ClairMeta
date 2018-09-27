@@ -15,6 +15,7 @@ from clairmeta.logger import disable_log
 from clairmeta.info import __version__
 from clairmeta.profile import load_profile, DCP_CHECK_PROFILE
 from clairmeta.utils.xml import prettyprint_xml
+from clairmeta.utils.file import console_progress_bar
 
 
 package_type_map = {
@@ -28,15 +29,18 @@ def cli_check(args):
     try:
         if args.type == 'dcp':
             check_profile = DCP_CHECK_PROFILE
+            callback = None
 
             if args.profile:
                 path = os.path.abspath(args.profile)
                 check_profile = load_profile(path)
             if args.log:
                 check_profile['log_level'] = args.log
+            if args.progress:
+                callback = console_progress_bar
 
             status, _ = DCP(args.path).check(
-                profile=check_profile, ov_path=args.ov)
+                profile=check_profile, ov_path=args.ov, hash_callback=callback)
         else:
             obj_type = package_type_map[args.type]
             status = obj_type(args.path).check()
@@ -79,6 +83,8 @@ def get_parser():
     parser.add_argument('path', help="absolute package path")
     parser.add_argument('-log', default=None, help="logging level [dcp]")
     parser.add_argument('-profile', default=None, help="json profile [dcp]")
+    parser.add_argument(
+        '-progress', action='store_true', help="hash progress bar [dcp]")
     parser.add_argument('-ov', default=None, help="ov package path [dcp]")
     parser.add_argument(
         '-type', choices=package_type_map.keys(),
