@@ -2,6 +2,7 @@
 # See LICENSE for more information
 
 import six
+import operator
 
 from clairmeta.utils.sys import all_keys_in_dict
 from clairmeta.utils.uuid import check_uuid, extract_uuid, RFC4122_RE
@@ -35,12 +36,14 @@ class Checker(CheckerBase):
 
         return self.check_executions
 
-    def metadata_match_pair(
+    def metadata_cmp_pair(
         self,
         playlist,
         metadata,
         type_a,
-        type_b
+        type_b,
+        cmp=operator.eq,
+        message=""
     ):
         for reel in playlist['Info']['CompositionPlaylist']['ReelList']:
             metadatas = {
@@ -48,10 +51,14 @@ class Checker(CheckerBase):
                 if v.get(metadata) and k in [type_a, type_b]
             }
 
-            if len(set(list(metadatas.values()))) != 1:
-                raise CheckException(
-                    "{} / {} duration mismatch for Reel {}".format(
-                        type_a, type_b, reel['Position']))
+            vals = list(metadatas.values())
+            if len(vals) == 2 and not cmp(vals[0], vals[1]):
+                what = "{} / {} {} mismatch for Reel {}".format(
+                        type_a, type_b, metadata, reel['Position'])
+                if message:
+                    what += ", {}".format(message)
+
+                raise CheckException(what)
 
     def check_cpl_xml(self, playlist):
         """ CPL XML syntax and structure check. """
@@ -143,15 +150,34 @@ class Checker(CheckerBase):
 
     def check_cpl_reel_duration_picture_sound(self, playlist):
         """ CPL reels picture and audio tracks duration shall match. """
-        self.metadata_match_pair(playlist, 'Duration', 'Picture', 'Sound')
+        self.metadata_cmp_pair(playlist, 'Duration', 'Picture', 'Sound')
 
     def check_cpl_reel_duration_picture_aux(self, playlist):
         """ CPL reels picture and auxiliary tracks duration shall match. """
-        self.metadata_match_pair(playlist, 'Duration', 'Picture', 'AuxData')
+        self.metadata_cmp_pair(playlist, 'Duration', 'Picture', 'AuxData')
 
     def check_cpl_reel_duration_picture_subtitles(self, playlist):
-        """ CPL reels picture and subtitle tracks duration shall match. """
-        self.metadata_match_pair(playlist, 'Duration', 'Picture', 'Subtitle')
+        """ CPL reels picture and subtitle tracks duration check.
+
+            For Interop: MainSubtitle Duration must be equal to MainPicture
+            Duration.
+            For SMPTE: MainSubtitle duration is allowed to be less than or
+            equal to MainPicture Duration.
+         """
+        cmp_op = None
+        mess = None
+
+        if self.dcp.schema == "Interop":
+            cmp_op = operator.eq
+            mess = ("MainSubtitle and MainPicture Duration must match for "
+                    "Interop DCP")
+        else:
+            cmp_op = operator.ge
+            mess = ("MainSubtitle Duration must less than or equal that of "
+                    "MainPicture for SMPTE DCP")
+
+        self.metadata_cmp_pair(
+            playlist, 'Duration', 'Picture', 'Subtitle', cmp_op, mess)
 
     def check_cpl_reels_cut(self, playlist):
         """ CPL reels cut coherence check. """
