@@ -107,9 +107,9 @@ class DCPCheckTest(CheckerTestBase):
 
     def test_noncoherent_encryption(self):
         self.assertFalse(self.check(31))
-        self.assertTrue(self.has_failed('check_cpl_reel_coherence'))
+        self.assertTrue(self.has_failed('check_cpl_reel_coherence_encryption'))
         self.assertFalse(self.check(32))
-        self.assertTrue(self.has_failed('check_cpl_reel_coherence'))
+        self.assertTrue(self.has_failed('check_cpl_reel_coherence_encryption'))
 
     def test_iop_subtitle_png(self):
         self.assertTrue(self.check(33))

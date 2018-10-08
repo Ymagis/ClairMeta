@@ -117,7 +117,6 @@ class Checker(CheckerBase):
             'ScreenAspectRatio',
             'Stereoscopic',
             'Resolution',
-            'Encrypted',
             'DecompositionLevels',
             'Precincts',
             'ChannelCount',
@@ -130,6 +129,16 @@ class Checker(CheckerBase):
             if cpl[k] == "Mixed":
                 raise CheckException(
                     "{} is not coherent for all reels".format(k))
+
+    def check_cpl_reel_coherence_encryption(self, playlist):
+        """ Encryption should be coherent across all reeels.
+
+            This is not required explicitly in the standards but is known to
+            cause issue for some equipements in the field.
+        """
+        cpl = playlist['Info']['CompositionPlaylist']
+        if cpl['Encrypted'] == "Mixed":
+            raise CheckException("Encryption is not coherent for all reels")
 
     def check_cpl_reel_duration(self, playlist):
         """ CPL reels shall last at least one second. """
