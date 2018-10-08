@@ -1,3 +1,9 @@
+asdcplib (2.9.30) UNSTABLE; urgency=medium
+
+  * Upgrade version
+
+ -- Rémi Achard <remi.achard@ymagis.com>  Mon, 08 Oct 2018 16:00:00 +0100
+
 asdcplib (2.7.19) UNSTABLE; urgency=medium
 
   * Debian Packaging

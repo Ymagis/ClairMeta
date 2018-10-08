@@ -7,9 +7,9 @@ cd /tmp
 
 # Cinecert asdcplib packaging
 wget --no-check-certificate -P /tmp \
-  http://download.cinecert.com/asdcplib/asdcplib-2.7.19.tar.gz
-tar xzf /tmp/asdcplib-2.7.19.tar.gz
-cd asdcplib-2.7.19
+  http://download.cinecert.com/asdcplib/asdcplib-2.9.30.tar.gz
+tar xzf /tmp/asdcplib-2.9.30.tar.gz
+cd asdcplib-2.9.30
 cp -r /build_src/debian-asdcplib debian/
 sed -i "s/UNSTABLE/$DISTRIBUTION/g" debian/changelog
 dpkg-buildpackage -us -uc
