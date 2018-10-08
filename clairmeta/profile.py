@@ -18,7 +18,6 @@ DCP_CHECK_PROFILE = {
         'check_dcp_foreign_files': 'WARNING',
         'check_cpl_contenttitle_annotationtext_match': 'WARNING',
         'check_cpl_contenttitle_pklannotationtext_match': 'WARNING',
-        'check_cpl_reel_duration_picture_subtitles': 'WARNING',
         'check_assets_cpl_missing_from_vf': 'WARNING',
         'check_assets_cpl_labels_schema': 'WARNING',
         'check_certif_multi_role': 'WARNING',
