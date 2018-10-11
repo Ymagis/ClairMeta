@@ -74,6 +74,9 @@ class CheckTest(SequenceTestBase):
     def test_check_dsm_ok(self):
         self.assertTrue(DSM(self.get_path('DSM_PKG/MINI_DSM1')).check())
 
+    def test_check_dsm_empty_name(self):
+        self.assertTrue(DSM(self.get_path('DSM_EMPTY_NAME')).check())
+
     def test_check_dsm_no_padding(self):
         self.assertTrue(DSM(self.get_path('DSM_NO_PADDING')).check())
 
