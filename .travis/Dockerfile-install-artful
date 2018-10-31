@@ -1,0 +1,13 @@
+FROM ubuntu:bionic
+
+RUN apt-get update && apt-get install -y apt-transport-https
+
+ENV DCP="/dcp/ECL-SINGLE-CPL_TST_S_EN-EN_UK-U_51_2K_DI_20160622_ECL_SMPTE_VF/"
+
+CMD apt-get install dirmngr \
+ && gpg --keyserver hkp://keyserver.ubuntu.com:80 --recv 379CE192D401AB61 \
+ && gpg --export --armor 379CE192D401AB61 | apt-key add - \
+ && echo "deb https://dl.bintray.com/ymagis/Clairmeta bionic main" | tee /etc/apt/sources.list.d/clairmeta.list \
+ && apt-get update \
+ && apt-get install -y python3-clairmeta \
+ && python3.6 -m clairmeta.cli check -type dcp ${DCP}
