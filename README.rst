@@ -76,6 +76,7 @@ Install from Debian package (all requirements will be automatically installed):
     # Ubuntu 14.04 : use trusty
     # Ubuntu 16.04 : use xenial
     # Ubuntu 17.04 : use artful
+    # Ubuntu 18.04 : use bionic
     echo "deb https://dl.bintray.com/ymagis/Clairmeta <distro> main" | sudo tee /etc/apt/sources.list.d/clairmeta.list
 
     sudo apt-get update

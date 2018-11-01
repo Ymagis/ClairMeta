@@ -28,4 +28,14 @@ docker run -it \
   -e "BINTRAY_REPO=${BINTRAY_REPO}" \
   -e "BINTRAY_TOKEN=${BINTRAY_TOKEN}" \
   -e "DISTRIBUTION=artful" \
-  clairmeta/build_artful
+clairmeta/build_artful
+
+docker build -f .travis/Dockerfile-build-bionic -t clairmeta/build_bionic .
+docker run -it \
+  -v $PWD/.travis:/build_src \
+  -e "BINTRAY_USER=${BINTRAY_USER}" \
+  -e "BINTRAY_ORG=${BINTRAY_ORG}" \
+  -e "BINTRAY_REPO=${BINTRAY_REPO}" \
+  -e "BINTRAY_TOKEN=${BINTRAY_TOKEN}" \
+  -e "DISTRIBUTION=bionic" \
+  clairmeta/build_bionic
