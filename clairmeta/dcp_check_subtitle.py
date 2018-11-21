@@ -132,12 +132,12 @@ class SubtitleUtils(object):
         uri, path = None, None
 
         if self.dcp.schema == 'SMPTE':
-            font_uri = self.get_subtitle_elem(xml_dict, 'LoadFont')
+            uri = self.get_subtitle_elem(xml_dict, 'LoadFont')
         else:
-            font_uri = self.get_subtitle_elem(xml_dict, 'LoadFont@URI')
+            uri = self.get_subtitle_elem(xml_dict, 'LoadFont@URI')
 
-        if font_uri:
-            path = os.path.join(folder, font_uri)
+        if uri:
+            path = os.path.join(folder, uri)
 
         return path, uri
 
