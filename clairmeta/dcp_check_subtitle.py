@@ -293,6 +293,8 @@ class Checker(CheckerBase):
         path, uri = self.st_util.get_font_path(st_dict, folder)
         if not path:
             return
+        if not os.path.exists(path):
+            return
 
         font_size = os.path.getsize(path)
         font_max_size = DCP_SETTINGS['subtitle']['font_max_size']
