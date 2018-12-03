@@ -132,7 +132,7 @@ class SubtitleUtils(object):
         uri, path = None, None
 
         if self.dcp.schema == 'SMPTE':
-            font_uri = self.get_subtitle_elem(xml_dict, 'LoadFont')
+            font_uri = self.get_subtitle_elem(xml_dict, 'LoadFont').lower()
         else:
             font_uri = self.get_subtitle_elem(xml_dict, 'LoadFont@URI')
 
