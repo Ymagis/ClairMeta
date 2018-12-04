@@ -60,7 +60,10 @@ class SubtitleUtils(object):
     def ticks_to_frame(self, tick, edit_rate):
         tick = int(tick)
         time_base = 1.0 / edit_rate
-        return int((tick * 0.004) // time_base)
+
+        # Ceiling division. Ugly, but avoids importing math.ceil
+        # https://stackoverflow.com/questions/14822184/is-there-a-ceiling-equivalent-of-operator-in-python#17511341
+        return int(-(-(tick * 0.004) // time_base))
 
     def st_tc_frames(self, tc, edit_rate):
         """ Convert TimeCode to frame count.
