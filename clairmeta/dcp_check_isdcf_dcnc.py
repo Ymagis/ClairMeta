@@ -114,8 +114,9 @@ class Checker(CheckerBase):
         """ Subtitle (presence) from CPL and ContentTitleText shall match. """
         cpl_node = playlist['Info']['CompositionPlaylist']
 
-        subtitle = fields['Language'].get('Subtitle')
-        if subtitle != cpl_node['Subtitle']:
+        hasSub = fields['Language'].get('Subtitle', False)
+        hasBurnedSub = fields['Language'].get('BurnedSubtitle', False)
+        if not hasBurnedSub and hasSub != cpl_node['Subtitle']:
             raise CheckException(
                 "ContentTitle suggest Subtitle but CPL have none")
 
