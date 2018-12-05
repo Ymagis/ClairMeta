@@ -1,0 +1,82 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xs:schema targetNamespace="http://www.smpte-ra.org/schemas/430-1/2006/KDM"
+  xmlns:kdm="http://www.smpte-ra.org/schemas/430-1/2006/KDM"
+  xmlns:etm="http://www.smpte-ra.org/schemas/430-3/2006/ETM"
+  xmlns:ds="http://www.w3.org/2000/09/xmldsig#"
+  xmlns:xs="http://www.w3.org/2001/XMLSchema" elementFormDefault="qualified" attributeFormDefault="unqualified">
+
+  <xs:import namespace="http://www.smpte-ra.org/schemas/430-3/2006/ETM" schemaLocation="SMPTE-430-3-2006-ETM.xsd"/>
+  <xs:import namespace="http://www.w3.org/2000/09/xmldsig#" schemaLocation="http://www.w3.org/TR/2002/REC-xmldsig-core-20020212/xmldsig-core-schema.xsd"/>
+  <xs:element name="KDMRequiredExtensions" type="kdm:KDMRequiredExtensionsType"/>
+
+  <!-- KDMRequiredExtensionsType -->
+  <xs:complexType name="KDMRequiredExtensionsType">
+    <xs:sequence>
+
+      <xs:element name="Recipient">
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element name="X509IssuerSerial" type="ds:X509IssuerSerialType"/>
+            <xs:element name="X509SubjectName" type="xs:string"/>
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+
+      <xs:element name="CompositionPlaylistId" type="etm:UUID"/>
+      <xs:element name="ContentTitleText" type="etm:UserText"/>
+      <xs:element name="ContentAuthenticator" type="xs:base64Binary" minOccurs="0"/>
+      <xs:element name="ContentKeysNotValidBefore" type="xs:dateTime"/>
+      <xs:element name="ContentKeysNotValidAfter" type="xs:dateTime"/>
+      <xs:element name="AuthorizedDeviceInfo" type="kdm:AuthorizedDeviceInfoType"/>
+
+      <xs:element name="KeyIdList">
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element name="TypedKeyId" type="kdm:TypedKeyIdType" maxOccurs="unbounded"/>
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+
+      <xs:element name="ForensicMarkFlagList" minOccurs="0">
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element name="ForensicMarkFlag" type="xs:anyURI" maxOccurs="unbounded"/>
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+
+    </xs:sequence>
+  </xs:complexType>
+
+  <!-- AuthorizedDeviceInfoType -->
+  <xs:complexType name="AuthorizedDeviceInfoType">
+    <xs:sequence>
+      <xs:element name="DeviceListIdentifier" type="etm:UUID"/>
+      <xs:element name="DeviceListDescription" type="etm:UserText" minOccurs="0"/>
+      <xs:element name="DeviceList">
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element name="CertificateThumbprint" type="ds:DigestValueType" minOccurs="1" maxOccurs="unbounded"/>
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+    </xs:sequence>
+  </xs:complexType>
+
+  <!-- TypedKeyIdType -->
+  <xs:complexType name="TypedKeyIdType">
+    <xs:sequence>
+      <xs:element name="KeyType">
+        <xs:complexType>
+          <xs:simpleContent>
+            <xs:extension base="xs:string">
+              <xs:attribute name="scope" type="xs:anyURI" use="optional" default="http://www.smpte-ra.org/430-1/2006/KDM#kdm-key-type"/>
+            </xs:extension>
+          </xs:simpleContent>
+        </xs:complexType>
+      </xs:element>
+      <xs:element name="KeyId" type="etm:UUID"/>
+    </xs:sequence>
+  </xs:complexType>
+
+</xs:schema>
