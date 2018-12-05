@@ -33,7 +33,6 @@ DCP_CHECK_PROFILE = {
     # Checker options
     # Bypass is a list of check names (function names)
     'bypass': [],
-    'log_level': 'INFO',
 }
 
 
@@ -73,8 +72,7 @@ def load_profile(file_path):
 
     profile_format = {
         'criticality': dict,
-        'bypass': list,
-        'log_level': six.string_types
+        'bypass': list
     }
 
     try:

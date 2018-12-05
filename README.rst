@@ -140,8 +140,7 @@ template (actual content listed below is for demonstration purposes only) :
             "check_picture_cpl_avg_bitrate": "WARNING",
             "check_picture_cpl_resolution": "WARNING"
         },
-        "bypass": ["check_assets_pkl_hash"],
-        "log_level": "INFO"
+        "bypass": ["check_assets_pkl_hash"]
     }
 
 Custom profile check :

@@ -6,7 +6,6 @@ import six
 import importlib
 
 from clairmeta.settings import DCP_CHECK_SETTINGS
-from clairmeta.logger import set_level
 from clairmeta.profile import get_default_profile
 from clairmeta.dcp_utils import list_cpl_assets, cpl_probe_asset
 from clairmeta.dcp_check_base import CheckerBase, CheckException
@@ -29,7 +28,6 @@ class DCPChecker(CheckerBase):
 
         """
         super(DCPChecker, self).__init__(dcp, profile)
-        set_level(profile['log_level'])
         self.ov_path = ov_path
         self.hash_callback = hash_callback
 
