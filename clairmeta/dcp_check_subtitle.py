@@ -51,7 +51,7 @@ class SubtitleUtils(object):
         _, asset = asset
 
         if self.dcp.schema == 'SMPTE':
-            tc_rate = xml_dict['SubtitleReel']['TimeCodeRate']
+            tc_rate = xml_dict.get('SubtitleReel', {}).get('TimeCodeRate')
         else:
             tc_rate = asset['EditRate']
 
@@ -112,9 +112,9 @@ class SubtitleUtils(object):
 
     def get_subtitle_uuid(self, xml_dict):
         if self.dcp.schema == 'SMPTE':
-            uuid = xml_dict['SubtitleReel']['Id']
+            uuid = xml_dict.get('SubtitleReel', {}).get('Id')
         else:
-            uuid = xml_dict['DCSubtitle']['SubtitleID']
+            uuid = xml_dict.get('DCSubtitle', {}).get('SubtitleID')
 
         return uuid
 
