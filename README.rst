@@ -96,6 +96,7 @@ As a command line tool :
     python3 -m clairmeta.cli probe -type dcp path/to/dcp -format json > dcp.json
     python3 -m clairmeta.cli probe -type dcp path/to/dcp -format xml > dcp.xml
     python3 -m clairmeta.cli check -type dcp path/to/dcp
+    python3 -m clairmeta.cli check -type dcp path/to/dcp -kdm /path/to/kdm -key /path/to/privatekey
     python3 -m clairmeta.cli check -type dcp path/to/dcp -progress
 
 As a python library :
