@@ -74,7 +74,7 @@ def cli_probe(args):
 
         return True, msg
     except Exception as e:
-        return False, "Error : ".format(e)
+        return False, "Error : {}".format(e)
 
 
 def get_parser():

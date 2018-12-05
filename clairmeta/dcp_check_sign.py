@@ -90,7 +90,8 @@ class Checker(CheckerBase):
             X509 = crypto.load_certificate(crypto.FILETYPE_ASN1, certif)
             return X509
         except (crypto.Error) as e:
-            raise CheckException("Invalid certificate encoding")
+            raise CheckException("Invalid certificate encoding : {}".format(
+                str(e)))
 
     def certif_ext_map(self, cert):
         extensions_map = {}
