@@ -153,34 +153,40 @@ class Checker(CheckerBase):
             assets = list_cpl_assets(
                 cpl, filters='Subtitle', required_keys=['Path'])
 
-            checks = self.find_check('subtitle_cpl')
-            [self.run_checks_prepare(checks, cpl, asset) for asset in assets]
+            for asset in assets:
+                checks = self.find_check('subtitle_dcp')
+                [self.run_check(check, cpl, asset) for check in checks]
+                checks = self.find_check('subtitle_cpl')
+                self.run_checks_prepare(checks, cpl, asset)
 
         return self.check_executions
 
     def run_checks_prepare(self, checks, cpl, asset):
         _, asset_node = asset
         path = os.path.join(self.dcp.path, asset_node['Path'])
-        do_unwrap = path.endswith('.mxf') and os.path.isfile(path)
 
         if asset_node['Encrypted']:
             return
-        elif do_unwrap:
-            with unwrap_mxf(path) as folder:
+        can_unwrap = path.endswith('.mxf') and os.path.isfile(path)
+
+        if self.dcp.schema == 'SMPTE' and can_unwrap:
+            unwrap_args = []
+            with unwrap_mxf(path, args=unwrap_args) as folder:
                 [self.run_check(
                     check, cpl, asset, folder, message="{} (Asset {})".format(
                         cpl['FileName'], asset[1].get('Path', asset[1]['Id'])))
                     for check in checks]
-        else:
+        elif self.dcp.schema == 'Interop':
             folder = os.path.dirname(path)
             [self.run_check(
                 check, cpl, asset, folder, message="{} (Asset {})".format(
                     cpl['FileName'], asset[1].get('Path', asset[1]['Id'])))
              for check in checks]
 
-    def check_subtitle_cpl_format(self, playlist, asset, folder):
+    def check_subtitle_dcp_format(self, playlist, asset):
         """ Subtitle format (related to DCP Standard) check. """
         _, asset = asset
+        asset_path = asset['Path']
         extension_by_schema = {
             'Interop': '.xml',
             'SMPTE': '.mxf'
@@ -188,8 +194,8 @@ class Checker(CheckerBase):
         ext = os.path.splitext(asset['Path'])[-1]
 
         if ext != extension_by_schema[self.dcp.schema]:
-            raise CheckException("Wrong subtitle format for {} DCP".format(
-                self.dcp.schema))
+            raise CheckException("Wrong subtitle format for asset {}".format(
+                asset_path))
 
     def check_subtitle_cpl_xml(self, playlist, asset, folder):
         """ Subtitle XML file syntax and structure validation. """
