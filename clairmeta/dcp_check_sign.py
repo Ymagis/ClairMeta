@@ -185,7 +185,7 @@ class Checker(CheckerBase):
         # Fields : signed part
         # Version SerialNumber Signature Issuer Subject Validity
         # SubjectPublicKeyInfo AuthorityKeyIdentifier KeyUsage BasicConstraint
-        if not isinstance(cert.get_subject(), crypto.X509Name):
+        if not isinstance(cert.get_issuer(), crypto.X509Name):
             raise CheckException("Missing Issuer field")
         if not isinstance(cert.get_subject(), crypto.X509Name):
             raise CheckException("Missing Subject field")
