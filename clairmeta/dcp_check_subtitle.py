@@ -194,7 +194,7 @@ class Checker(CheckerBase):
             'Interop': '.xml',
             'SMPTE': '.mxf'
         }
-        ext = os.path.splitext(asset['Path'])[-1]
+        ext = os.path.splitext(asset['Path'])[-1].lower()
 
         if ext != extension_by_schema[self.dcp.schema]:
             raise CheckException("Wrong subtitle format for asset {}".format(
