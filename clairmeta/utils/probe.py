@@ -15,6 +15,7 @@ from clairmeta.utils.sys import (transform_keys_dict, try_convert_number,
 from clairmeta.utils.file import temporary_dir
 from clairmeta.utils.time import format_ratio
 from clairmeta.settings import DCP_SETTINGS
+from clairmeta.logger import get_log
 
 
 def check_command(name):
@@ -54,7 +55,14 @@ def execute_command(cmd_args):
     if p.returncode:
         raise ValueError("Error calling process : {}".format(cmd_args[0]))
 
-    return p.communicate()
+    stdout, stderr = p.communicate()
+
+    get_log().debug("Executed command with return code ({})\n{}".format(
+        p.returncode, " ".join(cmd_args)))
+    if p.returncode != 0:
+        get_log().warning(stderr)
+
+    return stdout, stderr
 
 
 def probe_mxf(path, stereoscopic=False):
