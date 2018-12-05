@@ -226,9 +226,11 @@ def kdm_parse(path):
     in_dict = parse_xml(path, namespaces=DCP_SETTINGS['xmlns'])
     out_dict = {}
 
+    keys = {}
     counter_mapping = {
         'MDIK': 0,
         'MDAK': 0,
+        'MDSK': 0,
         'MDEK': 0
     }
 
@@ -243,13 +245,17 @@ def kdm_parse(path):
                 req_ext['KDMRequiredExtensions']['AuthorizedDeviceInfo']):
             root = req_ext['KDMRequiredExtensions']
 
-            for item in root['KeyIdList']['TypedKeyId']:
-                if isinstance(item['KeyType'], dict):
-                    key = item['KeyType']['#text']
-                else:
-                    key = item['KeyType']
+            keys_pub = root['KeyIdList']['TypedKeyId']
+            keys_priv = in_dict['DCinemaSecurityMessage']['AuthenticatedPrivate']['EncryptedKey']
 
-                counter_mapping[key] += 1
+            for pub, priv in zip(keys_pub, keys_priv):
+                keys[pub['KeyId']] = {
+                    'Cipher': priv['CipherData']['CipherValue']
+                }
+
+                key = pub['KeyType']
+                if key in counter_mapping:
+                    counter_mapping[key] += 1
 
             devices = root['AuthorizedDeviceInfo']['DeviceList']
             out_dict['AuthorizedDevice'] = devices['CertificateThumbprint']
@@ -262,7 +268,9 @@ def kdm_parse(path):
         out_dict['Recipient'] = out_dict['Recipient'].split(',')[1]
         out_dict['ImageKeys'] = counter_mapping['MDIK']
         out_dict['AudioKeys'] = counter_mapping['MDAK']
+        out_dict['SubtitleKeys'] = counter_mapping['MDSK']
         out_dict['AtmosKeys'] = counter_mapping['MDEK']
+        out_dict['Keys'] = keys
 
         return {
             'FileName': os.path.basename(path),
