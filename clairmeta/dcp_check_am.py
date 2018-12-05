@@ -67,6 +67,18 @@ class Checker(CheckerBase):
             raise CheckException(
                 "Invalid VolIndex found : {}".format(asset_vol))
 
+    def check_assets_am_volindex_one(self, am, asset):
+        """ AssetMap assets VolIndex shall be one or absent.
+
+            As per SMPTE 429-9:2014.
+        """
+        _, _, asset = asset
+        asset_vol = asset['ChunkList']['Chunk'].get('VolumeIndex')
+        if asset_vol and asset_vol != 1:
+            raise CheckException(
+                "VolIndex is now deprecated and shall always be 1, got {}"
+                .format(asset_vol))
+
     def check_assets_am_path(self, am, asset):
         """ AssetMap assets path validation. """
         uuid, path, _ = asset
