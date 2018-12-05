@@ -4,7 +4,7 @@
 import unittest
 import os
 
-from tests import DCP_MAP
+from tests import DCP_MAP, KDM_MAP, KEY
 from clairmeta.logger import disable_log
 from clairmeta.profile import get_default_profile
 from clairmeta.dcp import DCP
@@ -17,18 +17,25 @@ class CheckerTestBase(unittest.TestCase):
         disable_log()
         self.profile = get_default_profile()
 
+    def get_dcp_folder(self):
+        return os.path.join(
+            os.path.dirname(__file__), 'resources', 'DCP', 'ECL-SET')
+
     def get_dcp_path(self, dcp_id):
         if dcp_id in DCP_MAP:
-            dcp_folder = os.path.join(
-                os.path.dirname(__file__),
-                'resources', 'DCP', 'ECL-SET')
             dcp_name = DCP_MAP[dcp_id]
-
-            folder_path = os.path.join(dcp_folder, dcp_name)
+            folder_path = os.path.join(self.get_dcp_folder(), dcp_name)
             self.assertTrue(os.path.exists(folder_path))
             return folder_path
 
-    def check(self, dcp_id, ov_id=None):
+    def get_kdm_path(self, dcp_id):
+        if dcp_id in KDM_MAP:
+            kdm_name = KDM_MAP[dcp_id]
+            file_path = os.path.join(self.get_dcp_folder(), kdm_name)
+            self.assertTrue(os.path.exists(file_path))
+            return file_path
+
+    def check(self, dcp_id, ov_id=None, kdm=None, pkey=None):
         self.dcp = DCP(self.get_dcp_path(dcp_id))
         self.status, self.report = self.dcp.check(
             profile=self.profile,
@@ -104,6 +111,10 @@ class DCPCheckTest(CheckerTestBase):
     def test_encrypted(self):
         self.assertTrue(self.check(29))
         self.assertTrue(self.check(30))
+
+    def test_encrypted_kdm(self):
+        self.assertTrue(self.check(29, kdm=self.get_kdm_path(29), pkey=KEY))
+        self.assertTrue(self.check(30, kdm=self.get_kdm_path(30), pkey=KEY))
 
     def test_noncoherent_encryption(self):
         self.assertFalse(self.check(31))
