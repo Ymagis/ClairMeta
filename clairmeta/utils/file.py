@@ -65,7 +65,7 @@ def temporary_file(prefix="tmp", suffix=""):
 
     """
     try:
-        handle, filepath = tempfile.mkstemp(prefix=prefix, suffix=suffix)
+        _, filepath = tempfile.mkstemp(prefix=prefix, suffix=suffix)
         yield filepath
     finally:
         os.remove(filepath)
