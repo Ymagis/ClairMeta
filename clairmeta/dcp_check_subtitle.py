@@ -51,7 +51,7 @@ class SubtitleUtils(object):
         _, asset = asset
 
         if self.dcp.schema == 'SMPTE':
-            tc_rate = xml_dict['SubtitleReel']['TimeCodeRate']
+            tc_rate = xml_dict.get('SubtitleReel', {}).get('TimeCodeRate')
         else:
             tc_rate = asset['EditRate']
 
@@ -60,7 +60,10 @@ class SubtitleUtils(object):
     def ticks_to_frame(self, tick, edit_rate):
         tick = int(tick)
         time_base = 1.0 / edit_rate
-        return int((tick * 0.004) // time_base)
+
+        # Ceiling division. Ugly, but avoids importing math.ceil
+        # https://stackoverflow.com/questions/14822184/is-there-a-ceiling-equivalent-of-operator-in-python#17511341
+        return int(-(-(tick * 0.004) // time_base))
 
     def st_tc_frames(self, tc, edit_rate):
         """ Convert TimeCode to frame count.
@@ -112,9 +115,9 @@ class SubtitleUtils(object):
 
     def get_subtitle_uuid(self, xml_dict):
         if self.dcp.schema == 'SMPTE':
-            uuid = xml_dict['SubtitleReel']['Id']
+            uuid = xml_dict.get('SubtitleReel', {}).get('Id')
         else:
-            uuid = xml_dict['DCSubtitle']['SubtitleID']
+            uuid = xml_dict.get('DCSubtitle', {}).get('SubtitleID')
 
         return uuid
 
@@ -132,12 +135,12 @@ class SubtitleUtils(object):
         uri, path = None, None
 
         if self.dcp.schema == 'SMPTE':
-            font_uri = self.get_subtitle_elem(xml_dict, 'LoadFont').lower()
+            uri = self.get_subtitle_elem(xml_dict, 'LoadFont').lower()
         else:
-            font_uri = self.get_subtitle_elem(xml_dict, 'LoadFont@URI')
+            uri = self.get_subtitle_elem(xml_dict, 'LoadFont@URI')
 
-        if font_uri:
-            path = os.path.join(folder, font_uri)
+        if uri:
+            path = os.path.join(folder, uri)
 
         return path, uri
 
@@ -153,34 +156,40 @@ class Checker(CheckerBase):
             assets = list_cpl_assets(
                 cpl, filters='Subtitle', required_keys=['Path'])
 
-            checks = self.find_check('subtitle_cpl')
-            [self.run_checks_prepare(checks, cpl, asset) for asset in assets]
+            for asset in assets:
+                checks = self.find_check('subtitle_dcp')
+                [self.run_check(check, cpl, asset) for check in checks]
+                checks = self.find_check('subtitle_cpl')
+                self.run_checks_prepare(checks, cpl, asset)
 
         return self.check_executions
 
     def run_checks_prepare(self, checks, cpl, asset):
         _, asset_node = asset
         path = os.path.join(self.dcp.path, asset_node['Path'])
-        do_unwrap = path.endswith('.mxf') and os.path.isfile(path)
 
         if asset_node['Encrypted']:
             return
-        elif do_unwrap:
-            with unwrap_mxf(path) as folder:
+        can_unwrap = path.endswith('.mxf') and os.path.isfile(path)
+
+        if self.dcp.schema == 'SMPTE' and can_unwrap:
+            unwrap_args = []
+            with unwrap_mxf(path, args=unwrap_args) as folder:
                 [self.run_check(
                     check, cpl, asset, folder, message="{} (Asset {})".format(
                         cpl['FileName'], asset[1].get('Path', asset[1]['Id'])))
                     for check in checks]
-        else:
+        elif self.dcp.schema == 'Interop':
             folder = os.path.dirname(path)
             [self.run_check(
                 check, cpl, asset, folder, message="{} (Asset {})".format(
                     cpl['FileName'], asset[1].get('Path', asset[1]['Id'])))
              for check in checks]
 
-    def check_subtitle_cpl_format(self, playlist, asset, folder):
+    def check_subtitle_dcp_format(self, playlist, asset):
         """ Subtitle format (related to DCP Standard) check. """
         _, asset = asset
+        asset_path = asset['Path']
         extension_by_schema = {
             'Interop': '.xml',
             'SMPTE': '.mxf'
@@ -188,8 +197,8 @@ class Checker(CheckerBase):
         ext = os.path.splitext(asset['Path'])[-1]
 
         if ext != extension_by_schema[self.dcp.schema]:
-            raise CheckException("Wrong subtitle format for {} DCP".format(
-                self.dcp.schema))
+            raise CheckException("Wrong subtitle format for asset {}".format(
+                asset_path))
 
     def check_subtitle_cpl_xml(self, playlist, asset, folder):
         """ Subtitle XML file syntax and structure validation. """
@@ -292,6 +301,8 @@ class Checker(CheckerBase):
             return
         path, uri = self.st_util.get_font_path(st_dict, folder)
         if not path:
+            return
+        if not os.path.exists(path):
             return
 
         font_size = os.path.getsize(path)
