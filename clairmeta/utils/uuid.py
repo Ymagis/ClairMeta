@@ -4,10 +4,10 @@
 import re
 
 
-RE = '(^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$)'
-FILE_RE = '([0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12})'
-RFC4122_RE = '(^[0-9a-f]{8}-[0-9a-f]{4}-([1-5])[0-9a-f]{3}\
--[8-9a-b][0-9a-f]{3}-[0-9a-f]{12}$)'
+RE = '(^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$)'
+FILE_RE = '([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12})'
+RFC4122_RE = '(^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-([1-5])[0-9a-fA-F]{3}\
+-[8-9a-b][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$)'
 
 
 def check_uuid(uuid, regex=RE):
@@ -21,6 +21,8 @@ def check_uuid(uuid, regex=RE):
             True if successful, False otherwise.
 
         >>> check_uuid('123e4567-e89b-12d3-a456-426655440000')
+        True
+        >>> check_uuid('123E4567-E89B-12D3-A456-426655440000')
         True
         >>> check_uuid('23e4567-e89b-12d3-a456-426655440000')
         False
