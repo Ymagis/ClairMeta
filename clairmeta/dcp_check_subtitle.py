@@ -12,8 +12,10 @@ from clairmeta.utils.xml import parse_xml
 from clairmeta.utils.probe import unwrap_mxf
 from clairmeta.dcp_check import CheckerBase, CheckException
 from clairmeta.dcp_check_utils import check_xml
-from clairmeta.dcp_utils import list_cpl_assets, get_reel_for_asset
+from clairmeta.dcp_utils import (list_cpl_assets, get_reel_for_asset,
+                                 get_contentkey_for_asset)
 from clairmeta.settings import DCP_SETTINGS
+from clairmeta.logger import get_log
 
 
 class SubtitleUtils(object):
@@ -164,13 +166,19 @@ class Checker(CheckerBase):
     def run_checks_prepare(self, checks, cpl, asset):
         _, asset_node = asset
         path = os.path.join(self.dcp.path, asset_node['Path'])
-
-        if asset_node['Encrypted']:
-            return
         can_unwrap = path.endswith('.mxf') and os.path.isfile(path)
 
         if self.dcp.schema == 'SMPTE' and can_unwrap:
             unwrap_args = []
+            try:
+                if asset_node['Encrypted']:
+                    k = get_contentkey_for_asset(self.dcp, asset_node)
+                    unwrap_args = ['-k', k]
+            except Exception as e:
+                get_log().info('ContentKey not found for asset {} : {}'.format(
+                    asset_node['Id'], str(e)))
+                return
+
             with unwrap_mxf(path, args=unwrap_args) as folder:
                 [self.run_check(
                     check, cpl, asset, folder, message="{} (Asset {})".format(
