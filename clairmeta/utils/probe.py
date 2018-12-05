@@ -101,7 +101,7 @@ def probe_mxf(path, stereoscopic=False):
         raise ValueError(err)
 
     metadata = {}
-    out = out.decode('UTF-8').split('\n')
+    out = out.decode('UTF-8').splitlines()
     for line in out:
         if ':' not in line:
             continue
