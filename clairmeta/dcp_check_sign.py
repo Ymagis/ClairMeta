@@ -8,6 +8,7 @@ import hashlib
 from datetime import datetime
 from OpenSSL import crypto
 from cryptography.hazmat.primitives import serialization
+from cryptography.x509.name import _ASN1Type
 
 from clairmeta.settings import DCP_SETTINGS
 from clairmeta.utils.xml import canonicalize_xml
@@ -184,10 +185,30 @@ class Checker(CheckerBase):
         # Fields : signed part
         # Version SerialNumber Signature Issuer Subject Validity
         # SubjectPublicKeyInfo AuthorityKeyIdentifier KeyUsage BasicConstraint
-        if not isinstance(cert.get_subject(), crypto.X509Name):
+        if not isinstance(cert.get_issuer(), crypto.X509Name):
             raise CheckException("Missing Issuer field")
         if not isinstance(cert.get_subject(), crypto.X509Name):
             raise CheckException("Missing Subject field")
+
+    def check_certif_fields_encoding(self, cert, index):
+        """ Certificate Issuer and Subject attributes encoding check.
+
+            Dn, O, OU and CN fields shall be of type PrintableString.
+            See SMPTE 430-2 2006
+        """
+        cert = cert.to_cryptography()
+        fields = {
+            'Subject': cert.subject,
+            'Issuer': cert.issuer
+        }
+
+        for name, field in six.iteritems(fields):
+            for a in field:
+                if a._type != _ASN1Type.PrintableString:
+                    type_str = str(a._type).split('.')[-1]
+                    raise CheckException(
+                        "{} {} field encoding should be PrintableString"
+                        ", got {}".format(name, a.oid._name, type_str))
 
     def check_certif_basic_constraint(self, cert, index):
         """ Certificate basic constraint check. """
