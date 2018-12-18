@@ -16,6 +16,7 @@ DCP_CHECK_PROFILE = {
         'default': 'ERROR',
         'check_dcnc_': 'WARNING',
         'check_dcp_foreign_files': 'WARNING',
+        'check_assets_am_volindex_one': 'WARNING',
         'check_cpl_contenttitle_annotationtext_match': 'WARNING',
         'check_cpl_contenttitle_pklannotationtext_match': 'WARNING',
         'check_assets_cpl_missing_from_vf': 'WARNING',
@@ -33,7 +34,6 @@ DCP_CHECK_PROFILE = {
     # Checker options
     # Bypass is a list of check names (function names)
     'bypass': [],
-    'log_level': 'INFO',
 }
 
 
@@ -73,8 +73,7 @@ def load_profile(file_path):
 
     profile_format = {
         'criticality': dict,
-        'bypass': list,
-        'log_level': six.string_types
+        'bypass': list
     }
 
     try:
