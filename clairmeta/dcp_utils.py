@@ -3,6 +3,9 @@
 
 import six
 import os
+import base64
+import binascii
+import uuid
 
 from clairmeta.utils.sys import key_by_path_dict
 from clairmeta.utils.probe import probe_mxf, stat_mxf_audio
@@ -11,7 +14,6 @@ from clairmeta.utils.probe import probe_mxf, stat_mxf_audio
 #
 # Generators to iterate on assets
 #
-
 
 def list_am_assets(assetmap):
     """ Iterator on AssetMap assets.
@@ -100,6 +102,33 @@ def get_reel_for_asset(cpl, uuid):
 
         if uuid in uuids:
             return reel
+
+
+def get_contentkey_for_asset(dcp, asset):
+    """ Asset encryption key lookup.
+
+        Args:
+            asset (dict): Dictionary representation of Asset.
+
+        Returns:
+            Returns the ContentKey of the encrypted MXF essence or None if not
+            found.
+
+        Raise:
+            ValueError: Asset ``asset_id`` don't have a KeyId tag.
+            LookupError: Asset ``asset_id`` key was not found.
+
+    """
+    if 'KeyId' not in asset:
+        raise ValueError("Asset {} don't have a KeyId tag".format(asset['Id']))
+
+    key_id = asset['KeyId']
+    for kdm in dcp.list_kdm:
+        keys_list = kdm['Info']['KDM']['Keys']
+        if key_id in keys_list and 'ContentKey' in keys_list[key_id]:
+            return keys_list[key_id]['ContentKey']
+
+    raise LookupError("Asset {} key was not found".format(asset['Id']))
 
 
 #
@@ -218,3 +247,33 @@ def cpl_probe_asset(asset, essence, path):
                 asset['Duration'])
     except Exception as e:
         asset['ProbeError'] = str(e)
+
+
+#
+# KDM utilities
+#
+
+
+def kdm_extract_key_info(data):
+    """ Extract fields from decoded key cipher data.
+
+        For more details, see SMPTE 430-1, section 6.1.2
+
+        Args:
+            data (bytes): Decoded key cipher data.
+
+        Returns:
+            Returns a Dictionary containing all key info fields.
+    """
+    fields = {}
+
+    fields['StructureID'] = binascii.hexlify(data[:16]).decode()
+    fields["CertificateThumbprint"] = base64.b64encode(data[16:36]).decode()
+    fields["CompositionPlaylistId"] = str(uuid.UUID(bytes=data[36:52]))
+    fields["KeyType"] = data[52:56].decode('ascii')
+    fields["KeyId"] = str(uuid.UUID(bytes=data[56:72]))
+    fields["NotValidBefore"] = data[72:97].decode('ascii')
+    fields["NotValidAfter"] = data[97:122].decode('ascii')
+    fields["ContentKey"] = binascii.hexlify((data[122:138])).decode()
+
+    return fields

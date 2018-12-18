@@ -39,7 +39,7 @@ def cli_check(args):
             if args.progress:
                 callback = console_progress_bar
 
-            status, _ = DCP(args.path).check(
+            status, _ = DCP(args.path, kdm=args.kdm, pkey=args.key).check(
                 profile=check_profile, ov_path=args.ov, hash_callback=callback)
         else:
             obj_type = package_type_map[args.type]
@@ -53,8 +53,14 @@ def cli_check(args):
 def cli_probe(args):
     try:
         disable_log()
+        kwargs = {}
+
+        if args.type == 'dcp':
+            kwargs['kdm'] = args.kdm
+            kwargs['pkey'] = args.key
+
         obj_type = package_type_map[args.type]
-        res = obj_type(args.path).parse()
+        res = obj_type(args.path, **kwargs).parse()
 
         if args.format == "dict":
             msg = pprint.pformat(res)
@@ -68,7 +74,7 @@ def cli_probe(args):
 
         return True, msg
     except Exception as e:
-        return False, "Error : ".format(e)
+        return False, "Error : {}".format(e)
 
 
 def get_parser():
@@ -83,6 +89,8 @@ def get_parser():
     parser.add_argument('path', help="absolute package path")
     parser.add_argument('-log', default=None, help="logging level [dcp]")
     parser.add_argument('-profile', default=None, help="json profile [dcp]")
+    parser.add_argument('-kdm', default=None, help="kdm with encrypted keys")
+    parser.add_argument('-key', default=None, help="recipient private key")
     parser.add_argument(
         '-progress', action='store_true', help="hash progress bar [dcp]")
     parser.add_argument('-ov', default=None, help="ov package path [dcp]")
@@ -93,6 +101,8 @@ def get_parser():
 
     parser = subparsers.add_parser('probe', help="Package metadata extraction")
     parser.add_argument('path', help="absolute package path")
+    parser.add_argument('-kdm', default=None, help="kdm with encrypted keys")
+    parser.add_argument('-key', default=None, help="recipient private key")
     parser.add_argument(
         '-format', default="dict", choices=['dict', 'xml', 'json'],
         help="output format")

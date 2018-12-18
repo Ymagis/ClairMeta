@@ -8,13 +8,15 @@ import time
 from clairmeta.logger import get_log
 from clairmeta.dcp_utils import list_cpl_assets
 from clairmeta.dcp_parse import (assetmap_parse, volindex_parse, pkl_parse,
-                                 cpl_parse)
+                                 cpl_parse, kdm_parse)
 from clairmeta.dcp_utils import (list_am_assets, list_pkl_assets,
-                                 cpl_extract_characteristics, cpl_probe_asset)
+                                 cpl_extract_characteristics, cpl_probe_asset,
+                                 kdm_extract_key_info)
 from clairmeta.dcp_check import DCPChecker
 from clairmeta.utils.xml import parse_xml
 from clairmeta.utils.sys import remove_key_dict
 from clairmeta.utils.file import folder_size, human_size
+from clairmeta.utils.crypto import decrypt_b64
 from clairmeta.settings import DCP_SETTINGS
 from clairmeta.profile import DCP_CHECK_PROFILE
 
@@ -22,11 +24,14 @@ from clairmeta.profile import DCP_CHECK_PROFILE
 class DCP(object):
     """ Digital Cinema Package abstraction. """
 
-    def __init__(self, path):
+    def __init__(self, path, kdm=None, pkey=None):
         """ DCP constructor.
 
             Args:
                 path (str): Absolute path to directory.
+                kdm (str): Absolute path to KDM file.
+                pkey (str): Absolute path to private key, this should be the
+                KDM recipient private key.
 
             Raises:
                 ValueError: ``path`` directory not found.
@@ -37,6 +42,8 @@ class DCP(object):
             raise ValueError("{} is not a valid folder".format(path))
 
         self.path = os.path.normpath(path)
+        self.kdm = os.path.normpath(kdm) if kdm else None
+        self.pkey = os.path.normpath(pkey) if pkey else None
         self.schema = 'Unknown'
         self.package_type = 'Unknown'
         self.foreign_files = []
@@ -123,6 +130,21 @@ class DCP(object):
         self.cpl_find_pkl()
         self.cpl_link_assets()
 
+    def init_kdm(self):
+        """ Find DCP KeyDeliveryMessage. """
+        self._list_kdm_path = self.filter_xml_by_root('DCinemaSecurityMessage')
+        if self.kdm:
+            self._list_kdm_path.append(self.kdm)
+        self._list_kdm = [kdm_parse(f) for f in self._list_kdm_path]
+
+        if not self.pkey or not os.path.exists(self.pkey):
+            return
+
+        for kdm in self._list_kdm:
+            for _, key in kdm['Info']['KDM']['Keys'].items():
+                plain = decrypt_b64(key['Cipher'], self.pkey)
+                key.update(kdm_extract_key_info(plain))
+
     def cpl_find_pkl(self):
         """ Find PKL that reference the CPL. """
         for cpl in self._list_cpl:
@@ -183,6 +205,11 @@ class DCP(object):
         """ List of DCP CompositionPlayList Dictionary. """
         return self._list_cpl
 
+    @property
+    def list_kdm(self):
+        """ List of DCP KeyDeliveryMessage List Dictionary. """
+        return self._list_kdm
+
     def parse(self, probe=True):
         """ Parse the DCP and Probe its assets. """
         if self._parsed:
@@ -197,6 +224,7 @@ class DCP(object):
         self.init_volindex()
         self.init_pkl()
         self.init_cpl()
+        self.init_kdm()
 
         if probe:
             self.cpl_probe_assets()
@@ -213,6 +241,7 @@ class DCP(object):
             'assetmap_list': self._list_am,
             'cpl_list': self._list_cpl,
             'pkl_list': self._list_pkl,
+            'kdm_list': self._list_kdm,
             'package_type': self.package_type,
             'path': self.path,
             'size': human_size(self.size),
