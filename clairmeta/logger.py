@@ -22,7 +22,7 @@ def init_log():
 
     if LOG_SETTINGS['enable_console']:
         init_console(log, formatter)
-    if LOG_SETTINGS['enable_file']:
+    if LOG_SETTINGS['enable_file'] and LOG_SETTINGS['file_name']:
         init_file(log, formatter)
 
     return log

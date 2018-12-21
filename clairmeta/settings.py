@@ -4,8 +4,8 @@
 LOG_SETTINGS = {
     'level': 'INFO',
     'enable_console': True,
-    'enable_file': True,
-    'file_name': '~/Library/Logs/clairmeta.log',
+    'enable_file': False,
+    'file_name': '',
     'file_size': 1e6,
     'file_count': 10,
 }
