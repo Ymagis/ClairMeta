@@ -62,7 +62,7 @@ setup(
     ],
 
     # 2.7 or 3.3+
-    python_requires='>=2.7, !=3.0.*, !=3.1.*, !=3.2.*, <4',
+    python_requires='>=2.7, !=3.0.*, !=3.1.*, !=3.2.*, !=3.3.*, <4',
 
     package_data={
         'clairmeta': ['xsd/*'],
