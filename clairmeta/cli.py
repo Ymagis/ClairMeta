@@ -45,9 +45,13 @@ def cli_check(args):
             obj_type = package_type_map[args.type]
             status = obj_type(args.path).check()
 
-        return status, ""
     except Exception as e:
-        return False, "Error : {}".format(e)
+        status = False
+        print("Error : {}".format(e))
+
+    msg = "{} - {} - Check {}".format(
+        args.type.upper(), args.path, "succeeded" if status else "failed")
+    return status, msg
 
 
 def cli_probe(args):
