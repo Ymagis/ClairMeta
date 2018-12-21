@@ -35,6 +35,23 @@ class Checker(CheckerBase):
                 "Invalid Sound ChannelCount, should be less than {} but got {}"
                 "".format(channels, cc))
 
+    def check_sound_cpl_channels_odd(self, playlist, asset):
+        """ Sound channels count must be an even number.
+
+            Extract fom ISDCF recommandation : Note 1. Not all channels need to
+            be present in a given DCP. For instance, only the first 8 channels
+            should be used when delivering 5.1 + HI/VI content. In all cases,
+            an even number of channels shall be used.
+            http://isdcf.com/papers/ISDCF-Doc4-Audio-channel-recommendations.pdf
+        """
+        _, asset = asset
+        cc = asset['Probe']['ChannelCount']
+
+        if cc % 2 != 0:
+            raise CheckException(
+                "Invalid Sound ChannelCount, should be an even number, got {}"
+                "".format(cc))
+
     def check_sound_cpl_format(self, playlist, asset):
         """ Sound channels count coherence with format. """
         configurations = DCP_SETTINGS['sound']['configuration_channels']
