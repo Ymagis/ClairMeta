@@ -251,6 +251,9 @@ class Checker(CheckerBase):
         _, asset = asset
 
         st_lang = self.st_util.get_subtitle_elem(st_dict, 'Language')
+        if not st_lang:
+            return
+
         try:
             st_lang_obj = pycountry.languages.lookup(st_lang)
         except LookupError:
