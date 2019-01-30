@@ -304,6 +304,13 @@ def number_is_close(a, b, rtol=1e-05, atol=1e-08):
     """ Return True if the values a and b are close to each other and False
         otherwise.
 
+        Args:
+            rtol (float): Relative tolerance – it is the maximum allowed
+            difference between a and b, relative to the larger absolute value
+            of a or b.
+            atol (float): Minimum absolute tolerance – useful for comparisons
+            near zero. atol must be at least zero.
+
         >>> number_is_close(10000, 10001, rtol=1e-04)
         True
         >>> number_is_close(10000, 10002, rtol=1e-04)
