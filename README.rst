@@ -51,7 +51,6 @@ Requirements :
 
 -  External (non-python) dependencies :
 
-   -  libmagic
    -  asdcplib
    -  mediainfo (opt)
    -  sox (opt)

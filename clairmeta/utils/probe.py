@@ -5,7 +5,6 @@ import os
 import six
 import subprocess
 import xmltodict
-import magic
 import bisect
 import contextlib
 from shutilwhich import which
@@ -391,7 +390,6 @@ def probe_folder(path):
         for f in filenames:
             fullpath = os.path.join(dirpath, f)
             extension = os.path.splitext(f)[-1][1:]
-            description = magic.from_file(fullpath)
 
             if extension in metadir:
                 metadir[extension]['Count'] += 1
@@ -404,7 +402,6 @@ def probe_folder(path):
                 metadesc['Folder'] = dirpath
                 metadesc['Paths'] = [f]
                 metadesc['Count'] = 1
-                metadesc['Description'] = description
                 metadesc['Probe'] = probe
 
     # Remove base folder path from keys

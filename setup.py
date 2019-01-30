@@ -53,7 +53,6 @@ setup(
         'lxml',
         'dicttoxml',
         'xmltodict',
-        'python-magic',
         'python-dateutil',
         'six',
         'pyopenssl',
