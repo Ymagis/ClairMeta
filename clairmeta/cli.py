@@ -10,18 +10,26 @@ import json
 import dicttoxml
 import pprint
 
-from clairmeta import DCP, DSM, DCDM
+from clairmeta import DCP, Sequence
 from clairmeta.logger import disable_log
 from clairmeta.info import __version__
 from clairmeta.profile import load_profile, DCP_CHECK_PROFILE
+from clairmeta.settings import SEQUENCE_SETTINGS
 from clairmeta.utils.xml import prettyprint_xml
 from clairmeta.utils.file import console_progress_bar
 
 
 package_type_map = {
     'dcp': DCP,
-    'dcdm': DCDM,
-    'dsm': DSM,
+    'dcdm': Sequence,
+    'dsm': Sequence,
+    'scan': Sequence,
+}
+
+package_check_settings = {
+    'dcdm': SEQUENCE_SETTINGS['DCDM'],
+    'dsm': SEQUENCE_SETTINGS['DSM'],
+    'scan': SEQUENCE_SETTINGS['SCAN'],
 }
 
 
@@ -43,7 +51,8 @@ def cli_check(args):
                 profile=check_profile, ov_path=args.ov, hash_callback=callback)
         else:
             obj_type = package_type_map[args.type]
-            status = obj_type(args.path).check()
+            setting = package_check_settings[args.type]
+            status = obj_type(args.path).check(setting)
 
     except Exception as e:
         status = False
