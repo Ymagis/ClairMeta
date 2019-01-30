@@ -203,12 +203,12 @@ SEQUENCE_SETTINGS = {
             '.tiff': {
                 'Format': 'TIFF',
                 'ProbeImage.ColorSpace': ['RGB', 'XYZ'],
-                'ProbeImage.BitDepth': 16,
+                'ProbeImage.BitDepth': "16",
             },
             '.tif': {
                 'Format': 'TIFF',
                 'ProbeImage.ColorSpace': ['RGB', 'XYZ'],
-                'ProbeImage.BitDepth': 16,
+                'ProbeImage.BitDepth': "16",
             },
         },
         'directory_white_list': ['.thumbnails'],

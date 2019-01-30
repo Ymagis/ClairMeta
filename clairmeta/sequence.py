@@ -73,7 +73,7 @@ class Sequence(object):
                 if val not in expect_val:
                     raise ValueError("{} - Invalid {}, got {} but expected"
                     .format(folder, key, val, expect_val))
-            elif isinstance(expect_val, six.string_types):
+            else:
                 if val != expect_val:
                     raise ValueError("{} - Invalid {}, got {} but expected {}"
                     .format(folder, key, val, expect_val))
