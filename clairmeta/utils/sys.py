@@ -300,6 +300,18 @@ def try_convert_number(in_val):
     return in_val
 
 
+def number_is_close(a, b, rtol=1e-05, atol=1e-08):
+    """ Return True if the values a and b are close to each other and False
+        otherwise.
+
+        >>> number_is_close(10000, 10001, rtol=1e-04)
+        True
+        >>> number_is_close(10000, 10002, rtol=1e-04)
+        False
+    """
+    return abs(a - b) <= max(rtol * max(abs(a), abs(b)), atol)
+
+
 def camelize(string):
     """ Convert string to CamelCase notation (leave first character upper).
 
