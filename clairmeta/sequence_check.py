@@ -3,7 +3,8 @@
 
 import os
 import re
-import magic
+
+from clairmeta.utils.sys import number_is_close
 
 
 def check_sequence(path, allowed_extensions, ignore_files=[], ignore_dirs=[]):
@@ -11,8 +12,7 @@ def check_sequence(path, allowed_extensions, ignore_files=[], ignore_dirs=[]):
 
         Args:
             path (str): Base directory path.
-            allowed_extensions (dict): Dictionary mapping extensions with file
-                descriptions as returned by magic.
+            allowed_extensions (dict): Dictionary mapping extensions.
             ignore_files (list): List of files name to ignore.
             ignore_dirs (list): List of directory name to ignore.
 
@@ -61,8 +61,7 @@ def check_sequence_folder(dirpath, filenames, allowed_extensions):
         Args:
             dirpath (str): Directory path.
             filenames (list): List of files to check in ``dirpath``.
-            allowed_extensions (dict): Dictionary mapping extensions with file
-                descriptions as returned by magic.
+            allowed_extensions (dict): Dictionary mapping extensions.
 
         Raises:
             ValueError: If image file sequence check failed.
@@ -74,15 +73,11 @@ def check_sequence_folder(dirpath, filenames, allowed_extensions):
     filename, idx = parse_name(fileref)
     filesize = os.path.getsize(fullpath_ref)
     extension = os.path.splitext(fileref)[-1]
-    description = magic.from_file(fullpath_ref).split(',')[0]
     sequence_idx = [idx]
 
     # Check that this reference is conform
     if extension not in allowed_extensions:
         raise ValueError('extension {} not authorized'.format(extension))
-    if description != allowed_extensions[extension]:
-        raise ValueError('wrong file format : {} should not be {}'
-                         .format(fileref, description))
 
     # Then check that all subsequent files are identical
     for f in filenames[1:]:
@@ -90,20 +85,16 @@ def check_sequence_folder(dirpath, filenames, allowed_extensions):
         current_ext = os.path.splitext(f)[-1]
         current_filename, current_idx = parse_name(f)
         current_filesize = os.path.getsize(fullpath)
-        current_description = magic.from_file(fullpath).split(',')[0]
         sequence_idx.append(current_idx)
 
         if current_filename != filename:
-            raise ValueError('{} : filename difference, expected {}'
+            raise ValueError('Filename difference, {} but expected {}'
                              .format(current_filename, filename))
         if current_ext != extension:
-            raise ValueError('{} : file extension difference, expected {}'
+            raise ValueError('File extension difference, {} but expected {}'
                              .format(current_filename, extension))
-        if current_description != description:
-            raise ValueError(
-                '{} : file description difference got {} but expected {}'
-                .format(current_filename, current_description, description))
-        if current_filesize != filesize:
+        # Allow for small 0.01% variation (header might vary in size)
+        if not number_is_close(current_filesize, filesize, rtol=1e-04):
             raise ValueError(
                 '{} : file size difference got {} but expected {}'
                 .format(current_filename, current_filesize, filesize))
@@ -113,7 +104,7 @@ def check_sequence_folder(dirpath, filenames, allowed_extensions):
     for idx, fno in enumerate(sequence_idx, sequence_idx[0]):
         if idx != fno:
             raise ValueError(
-                'file sequence jump found, file {} not found'.format(idx))
+                'File sequence jump found, file {} not found'.format(idx))
 
 
 IMAGENO_REGEX = re.compile(r'[\._]?(?P<Index>\d+)(?=[\._])')

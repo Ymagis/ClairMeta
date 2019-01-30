@@ -164,23 +164,55 @@ IMP_SETTINGS = {
     }
 }
 
-DSM_SETTINGS = {
-    'allowed_extensions': {
-        '.dpx': 'DPX image data',
-        '.tiff': 'TIFF image data',
-        '.tif': 'TIFF image data',
-        '.exr': 'OpenEXR image data',
-        '.cin': 'Cineon image data',
+SEQUENCE_SETTINGS = {
+    'SCAN': {
+        'allowed_extensions': {
+            '.dpx': {
+                'Format': 'DPX',
+            },
+            '.cri': {
+
+            },
+        },
+        'directory_white_list': ['.thumbnails'],
+        'file_white_list': ['.DS_Store'],
     },
-    'directory_white_list': ['.thumbnails'],
-    'file_white_list': ['.DS_Store'],
+    'DSM': {
+        'allowed_extensions': {
+            '.dpx':  {
+                'Format': 'DPX',
+            },
+            '.tiff': {
+                'Format': 'TIFF'
+            },
+            '.tif': {
+                'Format': 'TIFF'
+            },
+            '.exr': {
+                'Format': 'EXR'
+            },
+            '.cin': {
+
+            },
+        },
+        'directory_white_list': ['.thumbnails'],
+        'file_white_list': ['.DS_Store'],
+    },
+    'DCDM': {
+        'allowed_extensions': {
+            '.tiff': {
+                'Format': 'TIFF',
+                'ProbeImage.ColorSpace': ['RGB', 'XYZ'],
+                'ProbeImage.BitDepth': "16",
+            },
+            '.tif': {
+                'Format': 'TIFF',
+                'ProbeImage.ColorSpace': ['RGB', 'XYZ'],
+                'ProbeImage.BitDepth': "16",
+            },
+        },
+        'directory_white_list': ['.thumbnails'],
+        'file_white_list': ['.DS_Store'],
+    }
 }
 
-DCDM_SETTINGS = {
-    'allowed_extensions': {
-        '.tiff': 'TIFF image data',
-        '.tif': 'TIFF image data',
-    },
-    'directory_white_list': ['.thumbnails'],
-    'file_white_list': ['.DS_Store'],
-}

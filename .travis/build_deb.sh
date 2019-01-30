@@ -28,9 +28,7 @@ tar czf clairmeta.tar.gz clairmeta
 
 # We use py2deb to automatically create debian packages from PyPI packages,
 # requirements are also packaged. Some specific topic to watch :
-# 1/ Rename python-magic to avoid name conflict with already existing
-#    debian package.
-# 2/ py2deb force a downgrade of pip to 7.1.2 (seems to be a pip-accel
+# 1/ py2deb force a downgrade of pip to 7.1.2 (seems to be a pip-accel
 #    requirement, see https://github.com/paylogic/pip-accel/issues/73).
 #    This means newest pip functionalities like environment markers are not
 #    supported, cryptography package use one for cffi depends. We need to add
@@ -39,7 +37,7 @@ tar czf clairmeta.tar.gz clairmeta
 #    The same kind of issue occurs for cryptography python 2 specific depends
 #    enum34 and ipaddress that are handled with environment markers.
 pipenv run pip3 install py2deb
-pipenv run py2deb -r /deb --name-prefix=python3 --rename=python-magic,python3-magic-ahupp -y -- clairmeta.tar.gz
+pipenv run py2deb -r /deb --name-prefix=python3 -y -- clairmeta.tar.gz
 pipenv run py2deb -r /deb --name-prefix=python3 -y -- cffi>=1.7
 
 # Bintray packages deployment
