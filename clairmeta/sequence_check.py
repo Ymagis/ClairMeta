@@ -7,7 +7,7 @@ from clairmeta.utils.sys import number_is_close
 from clairmeta.utils.file import parse_name
 
 
-def check_sequence(path, allowed_extensions, ignore_files=[], ignore_dirs=[]):
+def check_sequence(path, allowed_extensions, ignore_files=None, ignore_dirs=None):
     """ Check image file sequence coherence recursively.
 
         Args:
