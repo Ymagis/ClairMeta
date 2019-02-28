@@ -47,8 +47,9 @@ class Sequence(object):
             setting['directory_white_list']
         )
 
-        for folder, exts in six.iteritems(self.probe_folder):
-            for ext, keys in six.iteritems(exts):
+        for folder, seqs in six.iteritems(self.probe_folder):
+            for seq, keys in six.iteritems(seqs):
+                ext = keys.get('Extension')
                 check_keys = setting['allowed_extensions'].get('.' + ext)
                 probe_keys = keys.get('Probe')
 

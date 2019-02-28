@@ -12,3 +12,5 @@ clairmeta.egg-info
 __pycache__
 .pybuild
 .coverage
+.mypy_cache/
+.vscode/

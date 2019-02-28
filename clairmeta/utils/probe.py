@@ -11,7 +11,7 @@ from shutilwhich import which
 
 from clairmeta.utils.sys import (transform_keys_dict, try_convert_number,
                                  camelize)
-from clairmeta.utils.file import temporary_dir
+from clairmeta.utils.file import temporary_dir, parse_name
 from clairmeta.utils.time import format_ratio
 from clairmeta.settings import DCP_SETTINGS
 from clairmeta.logger import get_log
@@ -385,24 +385,37 @@ def probe_folder(path):
             continue
 
         metadata[dirpath] = {}
-        metadir = metadata[dirpath]
+        meta = metadata[dirpath]
 
         for f in filenames:
             fullpath = os.path.join(dirpath, f)
-            extension = os.path.splitext(f)[-1][1:]
+            ext = os.path.splitext(f)[-1][1:]
 
-            if extension in metadir:
-                metadir[extension]['Count'] += 1
-                bisect.insort(metadir[extension]['Paths'], f)
-            else:
+            # Ignore files that don't contains index
+            try:
+                name, index = parse_name(f)
+            except ValueError:
+                continue
+
+            # This is the first file for that sequence, initialize metadata
+            # dictionary with default values and perform a file based probe.
+            if name not in meta:
                 probe = probe_mediainfo(fullpath)['Probe']
                 probe.pop('CompleteName', None)
 
-                metadesc = metadir[extension] = {}
-                metadesc['Folder'] = dirpath
-                metadesc['Paths'] = [f]
-                metadesc['Count'] = 1
-                metadesc['Probe'] = probe
+                meta[name] = {
+                    'Folder': dirpath,
+                    'Extension': ext,
+                    'Count': 1,
+                    'StartIndex': 0,
+                    'EndIndex': 0,
+                    'Probe': probe
+                }
+            # Already know this sequence, simply accumulating files
+            else:
+                meta[name]['Count'] += 1
+                meta[name]['StartIndex'] = min(index, meta[name]['StartIndex'])
+                meta[name]['EndIndex'] = max(index, meta[name]['EndIndex'])
 
     # Remove base folder path from keys
     rootpath = os.path.dirname(path) + '/'
