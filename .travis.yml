@@ -22,12 +22,11 @@ install:
 - pipenv install --dev
 - pipenv graph
 - pipenv check
-- pipenv shell
 
 # This belong to default stage 'test'
 script:
-- python -m compileall clairmeta
-- nosetests --nocapture --with-doctest --doctest-options=+ELLIPSIS --with-coverage --cover-package=clairmeta --exclude='test_dcp_*' --exclude='test_mxf_*' --exclude='test_sequence*' --exclude='test_profile*' --exclude='test_cli*' --exclude='test_xml*'
+- pipenv run python -m compileall clairmeta
+- pipenv run nosetests --nocapture --with-doctest --doctest-options=+ELLIPSIS --with-coverage --cover-package=clairmeta --exclude='test_dcp_*' --exclude='test_mxf_*' --exclude='test_sequence*' --exclude='test_profile*' --exclude='test_cli*' --exclude='test_xml*'
 
 # Stage conditions
 stages:
@@ -47,7 +46,7 @@ jobs:
   - stage: deploy
     script:
     - echo "Deploying..."
-    - python setup.py sdist bdist_wheel
+    - pipenv run python setup.py sdist bdist_wheel
     deploy:
       - provider: releases
         skip_cleanup: true
