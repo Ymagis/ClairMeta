@@ -20,6 +20,7 @@ env:
 install:
 - pip install pipenv
 - pipenv install --dev
+- pipenv graph
 - pipenv check
 
 # This belong to default stage 'test'
