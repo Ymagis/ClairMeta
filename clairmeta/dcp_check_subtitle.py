@@ -275,6 +275,24 @@ class Checker(CheckerBase):
                 "Subtitle language mismatch, CPL claims {} but XML {}".format(
                     cpl_lang_obj.name, st_lang_obj.name))
 
+    def check_subtitle_cpl_loadfont(self, playlist, asset, folder):
+        """ Text subtitle must contains one and only one LoadFont element.
+
+            As specified in SMPTE 429-2 8.4.1, only exception is PNG based
+            subtitles.
+        """
+        st_dict = self.st_util.get_subtitle_xml(asset, folder)
+        if not st_dict:
+            return
+
+        if self.dcp.schema == 'SMPTE':
+            text_elems = keys_by_name_dict(st_dict, 'Text')
+            loadfont_elems = keys_by_name_dict(st_dict, 'LoadFont@ID')
+            if text_elems and len(loadfont_elems) != 1:
+                raise CheckException(
+                    "Text based subtitle shall contain one and only one "
+                    "LoadFont element, found {}".format(len(loadfont_elems)))
+
     def check_subtitle_cpl_font_ref(self, playlist, asset, folder):
         """ Subtitle font references check. """
         st_dict = self.st_util.get_subtitle_xml(asset, folder)
