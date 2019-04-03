@@ -48,6 +48,7 @@ DCP_SETTINGS = {
         'c14n': 'http://www.w3.org/TR/2001/REC-xml-c14n-20010315',
         'sha1': 'http://www.w3.org/2000/09/xmldsig#sha1',
         'dolby_edr': 'http://www.dolby.com/schemas/2014/EDR-Metadata',
+        'eidr': 'http://eidr.org/EIDR/2016',
     },
     'picture': {
         # Standard resolutions

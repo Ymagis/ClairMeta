@@ -110,9 +110,11 @@ def cpl_reels_parse(cpl_node):
 
     global_editrate = 0
     total_frame_duration = 0
+
     is_dvi = False
     is_ec = False
     is_dbox = False
+    eidr = ''
 
     for pos, in_reel in enumerate(in_reels, 1):
 
@@ -183,18 +185,29 @@ def cpl_reels_parse(cpl_node):
             exts = meta['ExtensionMetadataList'].get('ExtensionMetadata', [])
             for ext in exts:
                 ext_name = ext.get('Name')
+                properties = ext.get('PropertyList')
+
                 if ext_name == 'Dolby EDR':
                     is_dvi = True
                 elif ext_name == 'Eclair Color':
                     is_ec = True
                 elif ext_name == 'D-BOX Enabled':
                     is_dbox = True
+                elif ext_name == 'EIDR':
+                    for p in properties:
+                        prop_name = p['Property'].get('Name', '')
+                        if prop_name != 'structural-type':
+                            continue
+
+                        eidr = p['Property'].get('Value', '')
+                        eidr = eidr.replace('urn:eidr:10.5240:', '').strip()
 
         out_reels.append(out_reel)
 
     cpl_node['DolbyVision'] = is_dvi
     cpl_node['EclairColor'] = is_ec
     cpl_node['D-BOX'] = is_dbox
+    cpl_node['EIDR'] = eidr
 
     cpl_node['ReelList'] = out_reels
     cpl_node['TotalDuration'] = total_frame_duration
