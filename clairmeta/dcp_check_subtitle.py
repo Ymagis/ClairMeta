@@ -47,7 +47,8 @@ class SubtitleUtils(object):
 
         root = xml_dict.get(subtitle_root[self.dcp.schema])
         if root:
-            return root.get(name)
+            return root.get(name, '')
+        return ''
 
     def get_subtitle_editrate(self, asset, xml_dict):
         _, asset = asset
