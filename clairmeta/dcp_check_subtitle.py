@@ -47,7 +47,8 @@ class SubtitleUtils(object):
 
         root = xml_dict.get(subtitle_root[self.dcp.schema])
         if root:
-            return root.get(name)
+            return root.get(name, '')
+        return ''
 
     def get_subtitle_editrate(self, asset, xml_dict):
         _, asset = asset
@@ -178,8 +179,8 @@ class Checker(CheckerBase):
                     k = get_contentkey_for_asset(self.dcp, asset_node)
                     unwrap_args = ['-k', k]
             except Exception as e:
-                get_log().info('ContentKey not found for asset {} : {}'.format(
-                    asset_node['Id'], str(e)))
+                get_log().info('Subtitle inspection skipped : {}'.format(
+                    str(e)))
                 return
 
             with unwrap_mxf(path, args=unwrap_args) as folder:
@@ -257,7 +258,7 @@ class Checker(CheckerBase):
         try:
             st_lang_obj = pycountry.languages.lookup(st_lang)
         except LookupError:
-            raise CheckException("Subtitle language from XML could not  "
+            raise CheckException("Subtitle language from XML could not "
                                  "be detected : {}".format(st_lang))
 
         cpl_lang = asset.get('Language')
@@ -266,13 +267,31 @@ class Checker(CheckerBase):
 
         cpl_lang_obj = pycountry.languages.lookup(cpl_lang)
         if not cpl_lang_obj:
-            raise CheckException("Subtitle language from CPL could not  "
+            raise CheckException("Subtitle language from CPL could not "
                                  "be detected : {}".format(cpl_lang))
 
         if st_lang_obj != cpl_lang_obj:
             raise CheckException(
                 "Subtitle language mismatch, CPL claims {} but XML {}".format(
                     cpl_lang_obj.name, st_lang_obj.name))
+
+    def check_subtitle_cpl_loadfont(self, playlist, asset, folder):
+        """ Text subtitle must contains one and only one LoadFont element.
+
+            As specified in SMPTE 429-2 8.4.1, only exception is PNG based
+            subtitles.
+        """
+        st_dict = self.st_util.get_subtitle_xml(asset, folder)
+        if not st_dict:
+            return
+
+        if self.dcp.schema == 'SMPTE':
+            text_elems = keys_by_name_dict(st_dict, 'Text')
+            loadfont_elems = keys_by_name_dict(st_dict, 'LoadFont@ID')
+            if text_elems and len(loadfont_elems) != 1:
+                raise CheckException(
+                    "Text based subtitle shall contain one and only one "
+                    "LoadFont element, found {}".format(len(loadfont_elems)))
 
     def check_subtitle_cpl_font_ref(self, playlist, asset, folder):
         """ Subtitle font references check. """
