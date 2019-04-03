@@ -100,6 +100,19 @@ class Checker(CheckerBase):
                 raise CheckException(
                     "CPL ContentTitleText / PKL "
                     "AnnotationText mismatch : {} / {}".format(ct, at))
+    def check_cpl_empty_text_fields(self, am):
+        """ PKL empty text fields check. """
+        fields = ['Creator', 'Issuer', 'AnnotationText']
+        empty_fields = []
+
+        for f in fields:
+            am_f = am['Info']['CompositionPlaylist'].get(f)
+            if am_f == '':
+                empty_fields.append(f)
+
+        if empty_fields:
+            raise CheckException("Empty {} field(s)".format(
+                ", ".join(empty_fields)))
 
     def check_cpl_issuedate(self, playlist):
         """ CPL Issue Date validation. """

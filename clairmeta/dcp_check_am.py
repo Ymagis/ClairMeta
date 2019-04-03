@@ -51,6 +51,20 @@ class Checker(CheckerBase):
                     schema, mandatory_name[schema], am['FileName'])
             )
 
+    def check_am_empty_text_fields(self, am):
+        """ AssetMap empty text fields check. """
+        fields = ['Creator', 'Issuer', 'AnnotationText']
+        empty_fields = []
+
+        for f in fields:
+            am_f = am['Info']['AssetMap'].get(f)
+            if am_f == '':
+                empty_fields.append(f)
+
+        if empty_fields:
+            raise CheckException("Empty {} field(s)".format(
+                ", ".join(empty_fields)))
+
     def check_assets_am_uuid(self, am, asset):
         """ AssetMap UUIDs validation. """
         uuid, _, _ = asset
