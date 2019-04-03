@@ -99,8 +99,7 @@ def cpl_parse(path):
 def cpl_dcnc_parse(cpl_node):
     """ Extract information from ContentTitle """
     fields, errors = parse_isdcf_string(cpl_node.get('ContentTitleText'))
-    if not errors:
-        cpl_node["NamingConvention"] = fields
+    cpl_node["NamingConvention"] = fields
 
 
 def cpl_reels_parse(cpl_node):

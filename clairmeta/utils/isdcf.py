@@ -123,12 +123,6 @@ def parse_isdcf_string(str):
         error_list.append("ContentTitle invalid type")
         return fields_dict, error_list
 
-    fields_list = str.split('_')
-    if len(fields_list) != 12:
-        error_list.append("ContentTitle must have 12 parts, {} found".format(
-            len(fields_list)))
-        return fields_dict, error_list
-
     # Sort the fields to respect DCNC order
     # Note : in python3 we can declare an OrderedDict({...}) and the field
     # order is preserved so this is not needed, but not in python 2.7
@@ -137,25 +131,46 @@ def parse_isdcf_string(str):
         six.iteritems(RULES[dcnc_version]),
         key=lambda f: RULES_ORDER.index(f[0])))
 
-    # Basic regex checking
+    fields_dict = init_dict_isdcf(rules)
 
-    for field, (name, regex) in zip(fields_list, six.iteritems(rules)):
-        pattern = re.compile(regex)
-        match = re.match(pattern, field)
-        fields_dict[name] = {}
-        fields_dict[name]['Value'] = field
+    fields_list = str.split('_')
+    if len(fields_list) != 12:
+        error_list.append("ContentTitle must have 12 parts, {} found".format(
+            len(fields_list)))
+    else:
+        for field, (name, regex) in zip(fields_list, six.iteritems(rules)):
+            pattern = re.compile(regex)
+            match = re.match(pattern, field)
+            fields_dict[name] = {}
+            fields_dict[name]['Value'] = field
 
-        if match:
-            fields_dict[name].update(match.groupdict(DEFAULT))
-        else:
-            fields_dict[name].update({
-                k: DEFAULT for k in pattern.groupindex.keys()})
-            error_list.append("ContentTitle Part {} : {} don't conform with "
-                              "ISDCF naming convention version {}".format(
-                               name, field, dcnc_version))
+            if match:
+                fields_dict[name].update(match.groupdict(DEFAULT))
+            else:
+                error_list.append("ContentTitle Part {} : {} don't conform "
+                                  "with ISDCF naming convention version {}"
+                                  .format(name, field, dcnc_version))
 
     fields_dict = post_parse_isdcf(fields_dict)
     return fields_dict, error_list
+
+
+def init_dict_isdcf(rules):
+    """ Initialize naming convention metadata dictionary.
+
+        Args:
+            rules (dict): Dictionary of the rules.
+    """
+    res = {}
+
+    for (name, regex) in six.iteritems(rules):
+        pattern = re.compile(regex)
+
+        res[name] = {}
+        res[name]['Value'] = ''
+        res[name].update({k: DEFAULT for k in pattern.groupindex.keys()})
+
+    return res
 
 
 def post_parse_isdcf(fields):
