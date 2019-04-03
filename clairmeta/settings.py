@@ -128,7 +128,8 @@ DCP_SETTINGS = {
     },
     'atmos': {
         'max_channel_count': 64,
-        'max_object_count': 118
+        'max_object_count': 118,
+        'smpte_ul': '060e2b34.04010105.0e090604.00000000',
     },
     'subtitle': {
         # In bytes

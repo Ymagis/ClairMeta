@@ -25,6 +25,18 @@ class Checker(CheckerBase):
 
         return self.check_executions
 
+    def check_atmos_cpl_essence_encoding(self, playlist, asset):
+        """ Atmos encoding. """
+        _, asset = asset
+        ul = DCP_SETTINGS['atmos']['smpte_ul']
+        cpl_ul = asset.get('DataType', '').replace('urn:smpte:ul:', '').strip()
+        mxf_ul = asset['Probe'].get('DataEssenceCoding', '')
+
+        if not cpl_ul:
+            raise CheckException("Missing DataType tag for Atmos Track")
+        elif not mxf_ul or cpl_ul != mxf_ul:
+            raise CheckException("Invalid Atmos Essence")
+
     def check_atmos_cpl_channels(self, playlist, asset):
         """ Atmos maximum channels count. """
         _, asset = asset
