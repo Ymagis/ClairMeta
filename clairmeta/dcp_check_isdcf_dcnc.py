@@ -149,8 +149,7 @@ class Checker(CheckerBase):
         immersive = fields['AudioType'].get('ImmersiveSound')
         auxdatas = list(list_cpl_assets(
             playlist,
-            filters=['AuxData'],
-            required_keys=['Probe']))
+            filters=['AuxData']))
 
         if immersive and not auxdatas:
             raise CheckException("ContentTitle claims immersive audio ({}) "
