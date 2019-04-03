@@ -178,8 +178,8 @@ class Checker(CheckerBase):
                     k = get_contentkey_for_asset(self.dcp, asset_node)
                     unwrap_args = ['-k', k]
             except Exception as e:
-                get_log().info('ContentKey not found for asset {} : {}'.format(
-                    asset_node['Id'], str(e)))
+                get_log().info('Subtitle inspection skipped : {}'.format(
+                    str(e)))
                 return
 
             with unwrap_mxf(path, args=unwrap_args) as folder:
@@ -257,7 +257,7 @@ class Checker(CheckerBase):
         try:
             st_lang_obj = pycountry.languages.lookup(st_lang)
         except LookupError:
-            raise CheckException("Subtitle language from XML could not  "
+            raise CheckException("Subtitle language from XML could not "
                                  "be detected : {}".format(st_lang))
 
         cpl_lang = asset.get('Language')
@@ -266,7 +266,7 @@ class Checker(CheckerBase):
 
         cpl_lang_obj = pycountry.languages.lookup(cpl_lang)
         if not cpl_lang_obj:
-            raise CheckException("Subtitle language from CPL could not  "
+            raise CheckException("Subtitle language from CPL could not "
                                  "be detected : {}".format(cpl_lang))
 
         if st_lang_obj != cpl_lang_obj:
