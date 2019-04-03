@@ -141,7 +141,6 @@ def parse_isdcf_string(str):
         for field, (name, regex) in zip(fields_list, six.iteritems(rules)):
             pattern = re.compile(regex)
             match = re.match(pattern, field)
-            fields_dict[name] = {}
             fields_dict[name]['Value'] = field
 
             if match:
