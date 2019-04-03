@@ -160,8 +160,6 @@ class DCP(object):
 
     def cpl_link_assets(self):
         """ Link assets for each reel with actual files in the package. """
-        # TODO : For Multi CPL package, what to choose if there are both
-        # OV / VF?
         self.package_type = 'OV'
 
         for cpl in self._list_cpl:

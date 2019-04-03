@@ -226,6 +226,18 @@ class Checker(CheckerBase):
         if is_vf_asset and not is_relinked_from_ov:
             raise CheckException("Asset missing, external reference")
 
+    def check_assets_cpl_missing_from_multi_cpl(self, playlist, asset):
+        """ Multi CPL package must be self contained. """
+        _, asset = asset
+        uuid = asset['Id']
+        is_found = uuid in self.dcp._list_asset
+
+        if len(self.dcp.list_cpl) == 1:
+            return
+
+        if not is_found:
+            raise CheckException("Asset missing, multi CPL must be complete")
+
     def check_assets_cpl_labels(self, playlist, asset):
         """ CPL assets labels check. """
         _, asset = asset
