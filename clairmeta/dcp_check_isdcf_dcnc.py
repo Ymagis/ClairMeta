@@ -18,7 +18,8 @@ class Checker(CheckerBase):
             valid, fields = self.run_check(self.check_dcnc_compliance, source)
             if valid:
                 checks = self.find_check('dcnc_field')
-                [self.run_check(check, source, fields) for check in checks]
+                [self.run_check(check, source, fields, message="{}".format(
+                    source['FileName'])) for check in checks]
 
         return self.check_executions
 
