@@ -24,11 +24,11 @@ RULES_ORDER = [
 ]
 
 RULES = {
-    '9.3': {
+    '9.6': {
         'FilmTitle': r'(^[a-zA-Z0-9-]{1,14}$)',
         'ContentType':
             r'(^'
-            '(?P<Type>FTR|TLR|TSR|PRO|TST|RTG-F|RTG-T|SHR|ADV|XSN|PSA|POL)'
+            '(?P<Type>FTR|EPS|TLR|TSR|PRO|TST|RTG-F|RTG-T|SHR|ADV|XSN|PSA|POL)'
             '(-(?P<Version>\d))?'
             '(-(?P<Temporary>Temp))?'
             '(-(?P<PreRelease>Pre))?'
@@ -59,11 +59,12 @@ RULES = {
             '$)',
         'AudioType':
             r'(^'
-            '(?P<Channels>(10|20|51|61|71|MOS))'
+            '(?P<Channels>(10|20|51|71|MOS))'
             '(-(?P<HearingImpaired>HI))?'
             '(-(?P<VisionImpaired>VI))?'
-            '(-(?P<ImmersiveSound>(ATMOS|AURO|DTS-X)))?'
-            '(-(?P<MotionSimulator>DBOX))?'
+            '(-(?P<SignLanguage>SL))?'
+            '(-(?P<ImmersiveSound>(ATMOS|Atmos|AURO|DTS-X)))?'
+            '(-(?P<MotionSimulator>(DBOX|Dbox)))?'
             '$)',
         'Resolution': r'(^2K|4K$)',
         'Studio': r'(^[A-Z0-9]{2,4}$)',
@@ -93,6 +94,7 @@ DEFAULTS = {
     'Caption': False,
     'HearingImpaired': False,
     'VisionImpaired': False,
+    'SignLanguage': False,
     'ImmersiveSound': False,
     'MotionSimulator': False,
 }
