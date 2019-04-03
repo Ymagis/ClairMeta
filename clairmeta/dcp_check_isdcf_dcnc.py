@@ -208,11 +208,15 @@ class Checker(CheckerBase):
             raise CheckException("CPL imply EclairColor but ContentTitle miss "
                                  "EC ContentType field")
 
-    # TODO : this check don't work for multi-CPL packages
-    # def check_dcnc_field_claim_packagetype(self, playlist, fields):
-    #     """ DCP type (OV / VF) coherence check. """
-    #     package = fields['PackageType'].get('Type')
-    #     dcp_package = self.dcp.package_type
-    #     if package and dcp_package != package:
-    #         raise CheckException(
-    #             "ContentTitle claims {} but DCP is not".format(package))
+    def check_dcnc_field_claim_packagetype(self, playlist, fields):
+        """ DCP type (OV / VF) coherence check. """
+        package = fields['PackageType'].get('Type')
+        dcp_package = self.dcp.package_type
+
+        if package and package == 'OV' and dcp_package != package:
+            raise CheckException(
+                "ContentTitle claims OV but DCP is not complete")
+
+        if package and package == 'VF' and dcp_package != package:
+            raise CheckException(
+                "ContentTitle claims VF but DCP is complete")
