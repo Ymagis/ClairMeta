@@ -224,7 +224,7 @@ class Checker(CheckerBase):
         is_relinked_from_ov = 'Probe' in asset
 
         if is_vf_asset and not is_relinked_from_ov:
-            raise CheckException("Asset reference OV package")
+            raise CheckException("Asset missing, external reference")
 
     def check_assets_cpl_labels(self, playlist, asset):
         """ CPL assets labels check. """
