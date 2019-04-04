@@ -41,6 +41,20 @@ class Checker(CheckerBase):
             pkl_node['Schema'],
             self.dcp.schema)
 
+    def check_pkl_empty_text_fields(self, am):
+        """ PKL empty text fields check. """
+        fields = ['Creator', 'Issuer', 'AnnotationText']
+        empty_fields = []
+
+        for f in fields:
+            am_f = am['Info']['PackingList'].get(f)
+            if am_f == '':
+                empty_fields.append(f)
+
+        if empty_fields:
+            raise CheckException("Empty {} field(s)".format(
+                ", ".join(empty_fields)))
+
     def check_pkl_issuedate(self, pkl):
         """ PKL Issue Date validation. """
         check_issuedate(pkl['Info']['PackingList']['IssueDate'])

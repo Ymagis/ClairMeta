@@ -93,13 +93,36 @@ class Checker(CheckerBase):
         cpl_pkl = [
             pkl for pkl in self.dcp._list_pkl
             if pkl['Info']['PackingList']['Id'] == cpl_node.get('PKLId')]
-        if cpl_pkl:
-            pkl = cpl_pkl[0]
-            at = pkl['Info']['PackingList'].get('AnnotationText')
-            if at and at != ct:
-                raise CheckException(
-                    "CPL ContentTitleText / PKL "
-                    "AnnotationText mismatch : {} / {}".format(ct, at))
+
+        if not cpl_pkl:
+            return
+
+        pkl = cpl_pkl[0]
+        at = pkl['Info']['PackingList'].get('AnnotationText')
+        is_multi_cpl = len(self.dcp.list_cpl) > 1
+
+        if is_multi_cpl and at and not ct.startswith(at):
+            raise CheckException(
+                "Multi CPLs package shall use a common denominator of all CPL "
+                "titles as the PKL AnnotationText : {} / {}".format(ct, at))
+        elif at and at != ct:
+            raise CheckException(
+                "CPL ContentTitleText / PKL "
+                "AnnotationText mismatch : {} / {}".format(ct, at))
+
+    def check_cpl_empty_text_fields(self, am):
+        """ PKL empty text fields check. """
+        fields = ['Creator', 'Issuer', 'AnnotationText']
+        empty_fields = []
+
+        for f in fields:
+            am_f = am['Info']['CompositionPlaylist'].get(f)
+            if am_f == '':
+                empty_fields.append(f)
+
+        if empty_fields:
+            raise CheckException("Empty {} field(s)".format(
+                ", ".join(empty_fields)))
 
     def check_cpl_issuedate(self, playlist):
         """ CPL Issue Date validation. """
