@@ -12,7 +12,7 @@ LOG_SETTINGS = {
 
 DCP_SETTINGS = {
     # ISDCF Naming Convention enforced
-    'naming_convention': '9.3',
+    'naming_convention': '9.6',
     # Recognized XML namespaces
     'xmlns': {
         'xml': 'http://www.w3.org/XML/1998/namespace',

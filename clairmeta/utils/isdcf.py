@@ -24,11 +24,11 @@ RULES_ORDER = [
 ]
 
 RULES = {
-    '9.3': {
+    '9.6': {
         'FilmTitle': r'(^[a-zA-Z0-9-]{1,14}$)',
         'ContentType':
             r'(^'
-            '(?P<Type>FTR|TLR|TSR|PRO|TST|RTG-F|RTG-T|SHR|ADV|XSN|PSA|POL)'
+            '(?P<Type>FTR|EPS|TLR|TSR|PRO|TST|RTG-F|RTG-T|SHR|ADV|XSN|PSA|POL)'
             '(-(?P<Version>\d))?'
             '(-(?P<Temporary>Temp))?'
             '(-(?P<PreRelease>Pre))?'
@@ -59,11 +59,12 @@ RULES = {
             '$)',
         'AudioType':
             r'(^'
-            '(?P<Channels>(10|20|51|61|71|MOS))'
+            '(?P<Channels>(10|20|51|71|MOS))'
             '(-(?P<HearingImpaired>HI))?'
             '(-(?P<VisionImpaired>VI))?'
-            '(-(?P<ImmersiveSound>(ATMOS|AURO|DTS-X)))?'
-            '(-(?P<MotionSimulator>DBOX))?'
+            '(-(?P<SignLanguage>SL))?'
+            '(-(?P<ImmersiveSound>(ATMOS|Atmos|AURO|DTS-X)))?'
+            '(-(?P<MotionSimulator>(DBOX|Dbox)))?'
             '$)',
         'Resolution': r'(^2K|4K$)',
         'Studio': r'(^[A-Z0-9]{2,4}$)',
@@ -93,6 +94,7 @@ DEFAULTS = {
     'Caption': False,
     'HearingImpaired': False,
     'VisionImpaired': False,
+    'SignLanguage': False,
     'ImmersiveSound': False,
     'MotionSimulator': False,
 }
@@ -121,12 +123,6 @@ def parse_isdcf_string(str):
         error_list.append("ContentTitle invalid type")
         return fields_dict, error_list
 
-    fields_list = str.split('_')
-    if len(fields_list) != 12:
-        error_list.append("ContentTitle must have 12 parts, {} found".format(
-            len(fields_list)))
-        return fields_dict, error_list
-
     # Sort the fields to respect DCNC order
     # Note : in python3 we can declare an OrderedDict({...}) and the field
     # order is preserved so this is not needed, but not in python 2.7
@@ -135,25 +131,45 @@ def parse_isdcf_string(str):
         six.iteritems(RULES[dcnc_version]),
         key=lambda f: RULES_ORDER.index(f[0])))
 
-    # Basic regex checking
+    fields_dict = init_dict_isdcf(rules)
 
-    for field, (name, regex) in zip(fields_list, six.iteritems(rules)):
-        pattern = re.compile(regex)
-        match = re.match(pattern, field)
-        fields_dict[name] = {}
-        fields_dict[name]['Value'] = field
+    fields_list = str.split('_')
+    if len(fields_list) != 12:
+        error_list.append("ContentTitle must have 12 parts, {} found".format(
+            len(fields_list)))
+    else:
+        for field, (name, regex) in zip(fields_list, six.iteritems(rules)):
+            pattern = re.compile(regex)
+            match = re.match(pattern, field)
+            fields_dict[name]['Value'] = field
 
-        if match:
-            fields_dict[name].update(match.groupdict(DEFAULT))
-        else:
-            fields_dict[name].update({
-                k: DEFAULT for k in pattern.groupindex.keys()})
-            error_list.append("ContentTitle Part {} : {} don't conform with "
-                              "ISDCF naming convention version {}".format(
-                               name, field, dcnc_version))
+            if match:
+                fields_dict[name].update(match.groupdict(DEFAULT))
+            else:
+                error_list.append("ContentTitle Part {} : {} don't conform "
+                                  "with ISDCF naming convention version {}"
+                                  .format(name, field, dcnc_version))
 
     fields_dict = post_parse_isdcf(fields_dict)
     return fields_dict, error_list
+
+
+def init_dict_isdcf(rules):
+    """ Initialize naming convention metadata dictionary.
+
+        Args:
+            rules (dict): Dictionary of the rules.
+    """
+    res = {}
+
+    for (name, regex) in six.iteritems(rules):
+        pattern = re.compile(regex)
+
+        res[name] = {}
+        res[name]['Value'] = ''
+        res[name].update({k: DEFAULT for k in pattern.groupindex.keys()})
+
+    return res
 
 
 def post_parse_isdcf(fields):

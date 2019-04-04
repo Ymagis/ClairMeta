@@ -18,7 +18,8 @@ class Checker(CheckerBase):
             valid, fields = self.run_check(self.check_dcnc_compliance, source)
             if valid:
                 checks = self.find_check('dcnc_field')
-                [self.run_check(check, source, fields) for check in checks]
+                [self.run_check(check, source, fields, message="{}".format(
+                    source['FileName'])) for check in checks]
 
         return self.check_executions
 
@@ -149,8 +150,7 @@ class Checker(CheckerBase):
         immersive = fields['AudioType'].get('ImmersiveSound')
         auxdatas = list(list_cpl_assets(
             playlist,
-            filters=['AuxData'],
-            required_keys=['Probe']))
+            filters=['AuxData']))
 
         if immersive and not auxdatas:
             raise CheckException("ContentTitle claims immersive audio ({}) "
@@ -208,11 +208,15 @@ class Checker(CheckerBase):
             raise CheckException("CPL imply EclairColor but ContentTitle miss "
                                  "EC ContentType field")
 
-    # TODO : this check don't work for multi-CPL packages
-    # def check_dcnc_field_claim_packagetype(self, playlist, fields):
-    #     """ DCP type (OV / VF) coherence check. """
-    #     package = fields['PackageType'].get('Type')
-    #     dcp_package = self.dcp.package_type
-    #     if package and dcp_package != package:
-    #         raise CheckException(
-    #             "ContentTitle claims {} but DCP is not".format(package))
+    def check_dcnc_field_claim_packagetype(self, playlist, fields):
+        """ DCP type (OV / VF) coherence check. """
+        package = fields['PackageType'].get('Type')
+        dcp_package = self.dcp.package_type
+
+        if package and package == 'OV' and dcp_package != package:
+            raise CheckException(
+                "ContentTitle claims OV but DCP is not complete")
+
+        if package and package == 'VF' and dcp_package != package:
+            raise CheckException(
+                "ContentTitle claims VF but DCP is complete")
