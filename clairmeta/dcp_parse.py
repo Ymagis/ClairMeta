@@ -7,7 +7,6 @@ import six
 from clairmeta.utils.isdcf import parse_isdcf_string
 from clairmeta.utils.xml import parse_xml
 from clairmeta.utils.time import frame_to_tc, format_ratio
-from clairmeta.utils.file import human_size
 from clairmeta.utils.sys import all_keys_in_dict
 from clairmeta.settings import DCP_SETTINGS
 from clairmeta.logger import get_log
@@ -73,7 +72,7 @@ def assetmap_parse(path):
             if 'PackingList' in asset:
                 asset['PackingList'] = True
 
-        am['Info']['AssetMap']['AssetsSize'] = human_size(total_size)
+        am['Info']['AssetMap']['AssetsSizeBytes'] = total_size
 
     return am
 
@@ -93,7 +92,7 @@ def pkl_parse(path):
         for asset in pkl['Info']['PackingList']['AssetList']['Asset']:
             total_size += asset.get('Size', 0)
 
-        pkl['Info']['PackingList']['AssetsSize'] = human_size(total_size)
+        pkl['Info']['PackingList']['AssetsSizeBytes'] = total_size
 
     return pkl
 
