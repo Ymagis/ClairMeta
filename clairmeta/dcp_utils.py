@@ -104,6 +104,26 @@ def get_reel_for_asset(cpl, uuid):
             return reel
 
 
+def get_type_for_asset(cpl, uuid):
+    """ Asset Track type lookup (eg. Picture, Sound, AuxData, ...).
+
+        Args:
+            cpl (dict): Dictionary representation of CompositionPlayList.
+            uuid (str): Asset UUID.
+
+        Returns:
+            Returns the a string describing the asset type.
+
+    """
+    for reel in cpl['Info']['CompositionPlaylist']['ReelList']:
+        assets = reel.get('Assets', [])
+        for asset_type, asset in six.iteritems(assets):
+            if uuid == asset['Id']:
+                return asset_type
+
+    return "Unknown"
+
+
 def get_contentkey_for_asset(dcp, asset):
     """ Asset encryption key lookup.
 
