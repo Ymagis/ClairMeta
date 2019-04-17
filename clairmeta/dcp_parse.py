@@ -7,6 +7,7 @@ import six
 from clairmeta.utils.isdcf import parse_isdcf_string
 from clairmeta.utils.xml import parse_xml
 from clairmeta.utils.time import frame_to_tc, format_ratio
+from clairmeta.utils.file import human_size
 from clairmeta.utils.sys import all_keys_in_dict
 from clairmeta.settings import DCP_SETTINGS
 from clairmeta.logger import get_log
@@ -61,13 +62,18 @@ def assetmap_parse(path):
     am = generic_parse(path, "AssetMap", ("Asset",))
 
     if am:
+        total_size = 0
+
         # Two ways of identifying a PKL inside the assetmap :
         # <PackingList></PackingList> (Interop)
         # <PackingList>true</PackingList> (SMPTE)
         # Hide these specificities and return PackingList: True in both cases
         for asset in am['Info']['AssetMap']["AssetList"]["Asset"]:
+            total_size += asset['ChunkList']['Chunk'].get('Length', 0)
             if 'PackingList' in asset:
                 asset['PackingList'] = True
+
+        am['Info']['AssetMap']['AssetsSize'] = human_size(total_size)
 
     return am
 
@@ -79,7 +85,17 @@ def volindex_parse(path):
 
 def pkl_parse(path):
     """ Parse DCP PKL """
-    return generic_parse(path, "PackingList", ("Asset",))
+    pkl = generic_parse(path, "PackingList", ("Asset",))
+
+    if pkl:
+        total_size = 0
+
+        for asset in pkl['Info']['PackingList']['AssetList']['Asset']:
+            total_size += asset.get('Size', 0)
+
+        pkl['Info']['PackingList']['AssetsSize'] = human_size(total_size)
+
+    return pkl
 
 
 def cpl_parse(path):
