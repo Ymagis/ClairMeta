@@ -407,8 +407,8 @@ def probe_folder(path):
                     'Folder': dirpath,
                     'Extension': ext,
                     'Count': 1,
-                    'StartIndex': 0,
-                    'EndIndex': 0,
+                    'StartIndex': index,
+                    'EndIndex': index,
                     'Probe': probe
                 }
             # Already know this sequence, simply accumulating files
