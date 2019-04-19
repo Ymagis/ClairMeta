@@ -9,7 +9,7 @@ from clairmeta.utils.uuid import check_uuid, extract_uuid, RFC4122_RE
 from clairmeta.utils.time import compare_ratio
 from clairmeta.dcp_check import CheckerBase, CheckException
 from clairmeta.dcp_check_utils import check_xml, check_issuedate, compare_uuid
-from clairmeta.dcp_utils import list_cpl_assets
+from clairmeta.dcp_utils import list_cpl_assets, get_type_for_asset
 
 
 class Checker(CheckerBase):
@@ -247,7 +247,9 @@ class Checker(CheckerBase):
         is_relinked_from_ov = 'Probe' in asset
 
         if is_vf_asset and not is_relinked_from_ov:
-            raise CheckException("Asset missing, external reference")
+            asset_type = get_type_for_asset(playlist, uuid)
+            raise CheckException(
+                "Asset missing ({}), external reference".format(asset_type))
 
     def check_assets_cpl_missing_from_multi_cpl(self, playlist, asset):
         """ Multi CPL package must be self contained. """
@@ -259,6 +261,7 @@ class Checker(CheckerBase):
             return
 
         if not is_found:
+            asset_type = get_type_for_asset(playlist, uuid)
             raise CheckException("Asset missing, multi CPL must be complete")
 
     def check_assets_cpl_labels(self, playlist, asset):

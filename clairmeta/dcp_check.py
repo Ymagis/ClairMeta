@@ -192,13 +192,13 @@ class DCPChecker(CheckerBase):
 
             if not path_ov:
                 raise CheckException(
-                    "Missing asset from OV : {}".format(uuid))
+                    "Asset missing ({}) from OV : {}".format(essence, uuid))
 
             asset_path = os.path.join(self.ov_dcp.path, path_ov)
             if not os.path.exists(asset_path):
                 raise CheckException(
-                    "Missing asset from OV (MXF not found) : {}"
-                    "".format(path_ov))
+                    "Asset missing ({}) from OV (MXF not found) : {}"
+                    "".format(essence, path_ov))
 
             # Probe asset for later checks
             asset['Path'] = asset_path
