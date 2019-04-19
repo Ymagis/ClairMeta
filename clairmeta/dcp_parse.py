@@ -61,13 +61,18 @@ def assetmap_parse(path):
     am = generic_parse(path, "AssetMap", ("Asset",))
 
     if am:
+        total_size = 0
+
         # Two ways of identifying a PKL inside the assetmap :
         # <PackingList></PackingList> (Interop)
         # <PackingList>true</PackingList> (SMPTE)
         # Hide these specificities and return PackingList: True in both cases
         for asset in am['Info']['AssetMap']["AssetList"]["Asset"]:
+            total_size += asset['ChunkList']['Chunk'].get('Length', 0)
             if 'PackingList' in asset:
                 asset['PackingList'] = True
+
+        am['Info']['AssetMap']['AssetsSizeBytes'] = total_size
 
     return am
 
@@ -79,7 +84,17 @@ def volindex_parse(path):
 
 def pkl_parse(path):
     """ Parse DCP PKL """
-    return generic_parse(path, "PackingList", ("Asset",))
+    pkl = generic_parse(path, "PackingList", ("Asset",))
+
+    if pkl:
+        total_size = 0
+
+        for asset in pkl['Info']['PackingList']['AssetList']['Asset']:
+            total_size += asset.get('Size', 0)
+
+        pkl['Info']['PackingList']['AssetsSizeBytes'] = total_size
+
+    return pkl
 
 
 def cpl_parse(path):
