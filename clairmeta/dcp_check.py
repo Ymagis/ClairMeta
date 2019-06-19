@@ -186,7 +186,7 @@ class DCPChecker(CheckerBase):
         """ VF package shall reference assets present in OV. """
         ov_dcp_dict = self.ov_dcp.parse()
 
-        if 'Path' not in asset:
+        if not asset.get('Path'):
             uuid = asset['Id']
             path_ov = ov_dcp_dict['asset_list'].get(uuid)
 
@@ -201,5 +201,5 @@ class DCPChecker(CheckerBase):
                     "".format(essence, path_ov))
 
             # Probe asset for later checks
-            asset['Path'] = asset_path
+            asset['AbsolutePath'] = asset_path
             cpl_probe_asset(asset, essence, asset_path)

@@ -165,8 +165,13 @@ class DCP(object):
         for cpl in self._list_cpl:
             for _, asset in list_cpl_assets(cpl):
                 asset_id = asset['Id']
+                asset['Path'] = ''
+                asset['AbsolutePath'] = ''
+
                 if asset_id in self._list_asset:
                     asset['Path'] = self._list_asset[asset_id]
+                    asset['AbsolutePath'] = os.path.join(
+                        self.path, self._list_asset[asset_id])
                 else:
                     self.package_type = 'VF'
 
@@ -174,7 +179,7 @@ class DCP(object):
         """ Probe mxf assets for each reel. """
         for cpl in self._list_cpl:
             for essence, asset in list_cpl_assets(cpl):
-                asset_path = os.path.join(self.path, asset.get('Path', ''))
+                asset_path = asset.get('AbsolutePath', '')
                 cpl_probe_asset(asset, essence, asset_path)
 
     def cpl_parse_metadata(self):
