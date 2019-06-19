@@ -191,53 +191,41 @@ class DCP(object):
     @property
     def list_assetmap(self):
         """ List of DCP AssetMap Dictionary. """
+        if not self._parsed:
+            return None
         return self._list_am
 
     @property
     def list_volindex(self):
         """ List of DCP VolIndex Dictionary. """
+        if not self._parsed:
+            return None
         return self._list_vol
 
     @property
     def list_pkl(self):
         """ List of DCP PackingList Dictionary. """
+        if not self._parsed:
+            return None
         return self._list_pkl
 
     @property
     def list_cpl(self):
         """ List of DCP CompositionPlayList Dictionary. """
+        if not self._parsed:
+            return None
         return self._list_cpl
 
     @property
     def list_kdm(self):
         """ List of DCP KeyDeliveryMessage List Dictionary. """
+        if not self._parsed:
+            return None
         return self._list_kdm
 
-    def parse(self, probe=True):
-        """ Parse the DCP and Probe its assets. """
-        if self._parsed:
-            return self.probe_dict
-
-        start = time.time()
-        self.log.info("Probing DCP : {}".format(self.path))
-
-        # Find and parse package components
-        self.init_package_files()
-        self.init_assetmap()
-        self.init_volindex()
-        self.init_pkl()
-        self.init_cpl()
-        self.init_kdm()
-
-        if probe:
-            self.cpl_probe_assets()
-            self._probeb = True
-
-        self.cpl_parse_metadata()
-
-        seconds_elapsed = time.time() - start
-        self.log.info("Total time : {:.2f} seconds".format(seconds_elapsed))
-
+    @property
+    def metadata(self):
+        """ All extracted package metadata Dictionnary. """
         self.probe_dict = {
             'asset_list': self._list_asset,
             'volindex_list': self._list_vol,
@@ -253,11 +241,41 @@ class DCP(object):
             'type': 'DCP'
         }
 
-        # Remove namespace and attributes key from final result
+        # Remove namespace and attributes key
         self.probe_dict = remove_key_dict(
             self.probe_dict, ['__xmlns__', '@xmlns'])
-        self._parsed = True
+
         return self.probe_dict
+
+    def parse(self, probe=True):
+        """ Parse the DCP and Probe its assets. """
+        if self._parsed and self._probeb:
+            return self.metadata
+
+        start = time.time()
+        self.log.info("Probing DCP : {}".format(self.path))
+
+        # Find and parse package components
+        if not self._parsed:
+            self.init_package_files()
+            self.init_assetmap()
+            self.init_volindex()
+            self.init_pkl()
+            self.init_cpl()
+            self.init_kdm()
+            self.cpl_parse_metadata()
+            self._parsed = True
+
+        # Probe file content
+        if not self._probeb and probe:
+            self.cpl_probe_assets()
+            self.cpl_parse_metadata()
+            self._probeb = True
+
+        seconds_elapsed = time.time() - start
+        self.log.info("Total time : {:.2f} seconds".format(seconds_elapsed))
+
+        return self.metadata
 
     def check(
         self, profile=DCP_CHECK_PROFILE, ov_path=None, hash_callback=None
