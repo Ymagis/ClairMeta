@@ -38,7 +38,10 @@ class Checker(CheckerBase):
             raise CheckException("Invalid Atmos Essence")
 
     def check_atmos_cpl_channels(self, playlist, asset):
-        """ Atmos maximum channels count. """
+        """ Atmos maximum channels count.
+
+            This field will be optional, cf. 429-18.
+        """
         _, asset = asset
         max_atmos = DCP_SETTINGS['atmos']['max_channel_count']
         max_cc = asset['Probe'].get('MaxChannelCount')
@@ -51,7 +54,10 @@ class Checker(CheckerBase):
                 .format(max_cc, max_atmos))
 
     def check_atmos_cpl_objects(self, playlist, asset):
-        """ Atmos maximum objects count. """
+        """ Atmos maximum objects count.
+
+            This field will be optional, cf. 429-18.
+        """
         _, asset = asset
         max_atmos = DCP_SETTINGS['atmos']['max_object_count']
         max_obj = asset['Probe'].get('MaxObjectCount')
