@@ -18,6 +18,7 @@ env:
     - secure: "IKV4DSNedoMP/uTPWHVnJp2E/K9JDKu/InMJGQkQR5hreJGpWw6Q2OWo9qIDXQ0PXX9k5Aw3k+w+/Utp6+lNHUzMuKk92CCZ5ieolTgzYzaN/eYDIPVnQhE/S7v06liQn8f1IgDl+/brEmDmWQm73aYGjlkt1jBWma0ZOXxPC3eBhUMIc/5pWJXwnGRSNREW1LxLami+C7uN02qZwd1eHU+RU71bt5uYFHKrhMHB40MGQx20YpJ/yMcGhhXNZHSvmzKIus27oPreP1hFc22xO3Mfjq4Vgz9qoEQolJZPe/v2bHtMKooTPAfeTAI36oNpiTvR3SHEYX3uVjOIcuG3QCNPkhXEWIgjUtj3SVlM19Nvb0qtGkQVZnVXHtRZKKdzWbnOYI0zwWj3OEhyCzUbsadUFqiWJ7FZwtkYCT7Kmdi6UzPAh2L7/gSOECj4RZgZgpjaApJ3ruSMz/pMzDq1U+Q25esj/JS9vJU8eaSrOjD2Fk1RxhI8WXMZutb6dcLo0eQIrYo5LN7UOVRzd19KoliWMOmUQrTYlSU08CK0IVog4+rVlw8PjJ71LP/+w/5IZtCyhkYqmFSdwdNkQNKrydQE7jNZ6iZnkMmx9LLzwQ2HbamyjCQeoGHuK7SVlMXgkg0msqiyj5lpPnc5oZaTDCLJBUY9cDjxSYQDPOR7+/M="
 
 install:
+- git clone https://github.com/Ymagis/ClairMeta_Data tests/resources
 - pip install pipenv
 - pipenv install --dev
 - pipenv graph
@@ -26,7 +27,7 @@ install:
 # This belong to default stage 'test'
 script:
 - pipenv run python -m compileall clairmeta
-- pipenv run nosetests --nocapture --with-doctest --doctest-options=+ELLIPSIS --with-coverage --cover-package=clairmeta --exclude='test_dcp_*' --exclude='test_mxf_*' --exclude='test_sequence*' --exclude='test_profile*' --exclude='test_cli*' --exclude='test_xml*'
+- pipenv run nosetests --nocapture --with-doctest --doctest-options=+ELLIPSIS --with-coverage --cover-package=clairmeta -v
 
 # Stage conditions
 stages:
