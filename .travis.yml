@@ -1,5 +1,4 @@
 
-sudo: required
 services:
   - docker
 dist: trusty
@@ -18,13 +17,14 @@ env:
     - secure: "IKV4DSNedoMP/uTPWHVnJp2E/K9JDKu/InMJGQkQR5hreJGpWw6Q2OWo9qIDXQ0PXX9k5Aw3k+w+/Utp6+lNHUzMuKk92CCZ5ieolTgzYzaN/eYDIPVnQhE/S7v06liQn8f1IgDl+/brEmDmWQm73aYGjlkt1jBWma0ZOXxPC3eBhUMIc/5pWJXwnGRSNREW1LxLami+C7uN02qZwd1eHU+RU71bt5uYFHKrhMHB40MGQx20YpJ/yMcGhhXNZHSvmzKIus27oPreP1hFc22xO3Mfjq4Vgz9qoEQolJZPe/v2bHtMKooTPAfeTAI36oNpiTvR3SHEYX3uVjOIcuG3QCNPkhXEWIgjUtj3SVlM19Nvb0qtGkQVZnVXHtRZKKdzWbnOYI0zwWj3OEhyCzUbsadUFqiWJ7FZwtkYCT7Kmdi6UzPAh2L7/gSOECj4RZgZgpjaApJ3ruSMz/pMzDq1U+Q25esj/JS9vJU8eaSrOjD2Fk1RxhI8WXMZutb6dcLo0eQIrYo5LN7UOVRzd19KoliWMOmUQrTYlSU08CK0IVog4+rVlw8PjJ71LP/+w/5IZtCyhkYqmFSdwdNkQNKrydQE7jNZ6iZnkMmx9LLzwQ2HbamyjCQeoGHuK7SVlMXgkg0msqiyj5lpPnc5oZaTDCLJBUY9cDjxSYQDPOR7+/M="
 
 install:
-# asdcplib dependency
+# dependencies
 - git clone https://github.com/Ymagis/ClairMeta_Data tests/resources
-- apt-get install dirmngr
+- sudo apt-get install dirmngr
 - gpg --keyserver hkp://keyserver.ubuntu.com:80 --recv 379CE192D401AB61
-- gpg --export --armor 379CE192D401AB61 | apt-key add -
-- echo "deb https://dl.bintray.com/ymagis/Clairmeta $(lsb_release --codename) main" | sudo tee /etc/apt/sources.list.d/clairmeta.list
-- apt-get install asdcplib
+- gpg --export --armor 379CE192D401AB61 | sudo apt-key add -
+- echo "deb https://dl.bintray.com/ymagis/Clairmeta $(lsb_release --codename | awk '{print $2}') main" | sudo tee /etc/apt/sources.list.d/clairmeta.list
+- wget https://mediaarea.net/repo/deb/repo-mediaarea_1.0-9_all.deb && sudo dpkg -i repo-mediaarea_1.0-9_all.deb
+- sudo apt-get update && sudo apt-get install asdcplib mediainfo sox
 # python environment
 - pip install pipenv
 - pipenv install --dev
