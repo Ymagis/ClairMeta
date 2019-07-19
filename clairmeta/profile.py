@@ -24,6 +24,7 @@ DCP_CHECK_PROFILE = {
         'check_cpl_contenttitle_pklannotationtext_match': 'WARNING',
         'check_assets_cpl_missing_from_vf': 'WARNING',
         'check_assets_cpl_labels_schema': 'WARNING',
+        'check_assets_cpl_filename_uuid': 'WARNING',
         'check_certif_multi_role': 'WARNING',
         'check_picture_cpl_avg_bitrate': 'WARNING',
         'check_picture_cpl_resolution': 'WARNING',
