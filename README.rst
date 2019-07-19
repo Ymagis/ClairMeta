@@ -6,11 +6,6 @@ Clairmeta
 Clairmeta is a python package for Digital Cinema Package (DCP) probing
 and checking.
 
-This project status is **Beta**, the following needs to be done for the
-release :
-
--  Large scale tests on lots of DCPs (including D-Box, DVIs, OCAP, CCAP, ...)
-
 Features
 --------
 
