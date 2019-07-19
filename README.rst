@@ -152,7 +152,7 @@ Custom profile check :
 ::
 
     from clairmeta import DCP
-    from clairmeta.profile include load_profile
+    from clairmeta.profile import load_profile
 
     dcp = DCP("path/to/dcp")
     profile = load_profile("/path/to/profile.json")

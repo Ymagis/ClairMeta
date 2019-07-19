@@ -62,7 +62,11 @@ class CliTest(unittest.TestCase):
         json_test = json.loads(msg, object_pairs_hook=OrderedDict)
         with open(self.get_file_path('ECL01.json')) as f:
             json_gold = json.load(f, object_pairs_hook=OrderedDict)
-        self.assertEqual(json_test, json_gold)
+
+        # Prefer comparing strings for better diagnostic messages
+        self.assertEqual(
+            json.dumps(json_test, indent=4, sort_keys=True),
+            json.dumps(json_gold, indent=4, sort_keys=True))
 
     def test_dcp_check_good(self):
         status, msg = self.launch_command([
