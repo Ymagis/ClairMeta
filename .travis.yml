@@ -26,10 +26,13 @@ install:
 - wget https://mediaarea.net/repo/deb/repo-mediaarea_1.0-9_all.deb && sudo dpkg -i repo-mediaarea_1.0-9_all.deb
 - sudo apt-get update && sudo apt-get install asdcplib mediainfo sox
 # python environment
-- pip install pipenv
+- pip install pipenv codecov
 - pipenv install --dev
 - pipenv graph
 # - pipenv check
+
+after_success:
+- codecov
 
 # This belong to default stage 'test'
 script:

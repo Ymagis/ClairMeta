@@ -1,4 +1,4 @@
-|Build Status| |PyPI version|
+|Build Status| |PyPI version| |Code coverage|
 
 Clairmeta
 =========
@@ -220,3 +220,5 @@ http://www.ymagis.com/
    :target: https://travis-ci.org/Ymagis/ClairMeta
 .. |PyPI version| image:: https://badge.fury.io/py/clairmeta.svg
    :target: https://badge.fury.io/py/clairmeta
+.. |Code coverage| image:: https://codecov.io/gh/Ymagis/ClairMeta/branch/develop/graph/badge.svg
+  :target: https://codecov.io/gh/Ymagis/ClairMeta
