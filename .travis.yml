@@ -42,7 +42,7 @@ script:
 # Stage conditions
 stages:
   - name: test
-    if: type IN (pull_request) OR tag =~ ^1
+    if: type IN (pull_request) OR tag =~ ^1 OR branch = develop
   - name: deploy
     if: tag =~ ^1
   - name: packaging
