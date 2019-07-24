@@ -444,22 +444,22 @@ class Checker(CheckerBase):
         if not st_dict:
             return
 
-        st_uuid = self.st_util.get_subtitle_uuid(st_dict)
+        st_uuid = self.st_util.get_subtitle_uuid(st_dict).lower()
         _, asset = asset
 
         if self.dcp.schema == 'Interop':
-            cpl_uuid = asset['Id']
+            cpl_uuid = asset['Id'].lower()
             if st_uuid != cpl_uuid:
                 raise CheckException(
-                    "Subtitle UUID mismatch, Subtitle claims {} but CPL "
-                    "{}".format(st_uuid, cpl_uuid))
-            folder_name = os.path.basename(folder)
+                    "Subtitle UUID mismatch, Subtitle claims {} but CPL {}"
+                    .format(st_uuid, cpl_uuid))
+            folder_name = os.path.basename(folder).lower()
             if st_uuid not in folder_name:
                 raise CheckException(
                     "Subtitle directory name unexpected, should contain {} but"
                     " got {}".format(st_uuid, folder_name))
         elif self.dcp.schema == 'SMPTE':
-            resource_uuid = asset['Probe'].get('AssetID', "")
+            resource_uuid = asset['Probe'].get('AssetID', "").lower()
             if resource_uuid != st_uuid:
                 raise CheckException(
                     "Subtitle UUID mismatch, Subtitle claims {} but MXF "
