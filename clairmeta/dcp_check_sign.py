@@ -271,7 +271,8 @@ class Checker(CheckerBase):
     def check_certif_role(self, cert, index):
         """ Certificate role check. """
         # 8. Check Role
-        roles_str = cert.get_subject().CN.split('.', 1)[0]
+        cn = cert.get_subject().CN
+        roles_str = cn.split('.', 1)[0]
         roles = roles_str.split()
 
         is_ca = index > 0
@@ -279,15 +280,20 @@ class Checker(CheckerBase):
 
         if is_leaf and self.dcp.schema == 'SMPTE':
             if not roles:
-                raise CheckException("Missing role in CommonName")
+                raise CheckException(
+                    "Missing role in CommonName ({})".format(cn))
             if self.context_role not in roles:
-                raise CheckException("Expecting {} role in CommonName".format(
-                    self.context_role))
+                raise CheckException(
+                    "Expecting {} role in CommonName ({})"
+                    .format(self.context_role, cn))
         if is_ca and roles:
-            raise CheckException("Roles found in authority certificate")
+            raise CheckException(
+                "Role(s) found in authority certificate CommonName ({})"
+                .format(cn))
 
     def check_certif_multi_role(self, cert, index):
-        roles_str = cert.get_subject().CN.split('.', 1)[0]
+        cn = cert.get_subject().CN
+        roles_str = cn.split('.', 1)[0]
         roles = roles_str.split()
 
         is_ca = index > 0
@@ -295,7 +301,8 @@ class Checker(CheckerBase):
 
         if is_leaf and self.dcp.schema == 'SMPTE':
             if roles and len(roles) > 1:
-                raise CheckException("Superfluous roles found in CommonName")
+                raise CheckException(
+                    "Superfluous roles found in CommonName ({})".format(cn))
 
     def check_certif_date(self, cert, index):
         """ Certificate date validation. """
