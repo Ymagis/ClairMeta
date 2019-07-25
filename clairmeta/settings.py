@@ -24,6 +24,7 @@ DCP_SETTINGS = {
         'interop_vl': 'http://www.digicine.com/PROTO-ASDCP-VL-20040311#',
         'interop_stereo': 'http://www.digicine.com/schemas/437-Y/2007/Main-Stereo-Picture-CPL',
         'interop_subtitle': 'interop_subtitle',
+        'interop_cc_cpl': 'http://www.digicine.com/PROTO-ASDCP-CC-CPL-20070926#',
         'smpte_pkl_2006': 'http://www.smpte-ra.org/schemas/429-8/2006/PKL',
         'smpte_pkl_2007': 'http://www.smpte-ra.org/schemas/429-8/2007/PKL',
         'smpte_cpl': 'http://www.smpte-ra.org/schemas/429-7/2006/CPL',

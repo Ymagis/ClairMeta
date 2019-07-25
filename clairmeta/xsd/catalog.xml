@@ -10,6 +10,7 @@
     <system systemId="http://www.digicine.com/schemas/437-Y/2007/Main-Stereo-Picture-CPL.xsd" uri="437-Y-2007-Main-Stereo-Picture-CPL.xsd"/>
     <!-- This is Interop DCSubtitle Schema backported from DCDMSubtitle-2014 -->
     <public publicId="interop_subtitle" uri="DCSubtitle.xsd"/>
+    <public publicId="http://www.digicine.com/PROTO-ASDCP-CC-CPL-20070926#" uri="PROTO-ASDCP-CC_CPL_20070926.xsd"/>
 
     <public publicId="http://www.smpte-ra.org/schemas/429-9/2007/AM" uri="SMPTE-429-9-2007-AM.xsd"/>
     <public publicId="http://www.smpte-ra.org/schemas/429-8/2007/PKL" uri="SMPTE-429-8-2006-PKL.xsd"/>
