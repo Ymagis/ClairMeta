@@ -262,7 +262,9 @@ class Checker(CheckerBase):
 
         if not is_found:
             asset_type = get_type_for_asset(playlist, uuid)
-            raise CheckException("Asset missing, multi CPL must be complete")
+            raise CheckException(
+                "Asset missing ({}), multi CPL must be complete".format(
+                    asset_type))
 
     def check_assets_cpl_labels(self, playlist, asset):
         """ CPL assets labels check. """
