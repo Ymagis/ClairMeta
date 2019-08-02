@@ -33,9 +33,19 @@ class Checker(CheckerBase):
         mxf_ul = asset['Probe'].get('DataEssenceCoding', '')
 
         if not cpl_ul:
-            raise CheckException("Missing DataType tag for Atmos Track")
-        elif not mxf_ul or cpl_ul != mxf_ul:
-            raise CheckException("Invalid Atmos Essence")
+            raise CheckException("Missing Atmos DataType tag (CPL/AuxData")
+        elif not mxf_ul:
+            raise CheckException("Missing Atmos Essence Coding UL (MXF)")
+
+        cpl_ul, mxf_ul = cpl_ul.lower(), mxf_ul.lower()
+        if cpl_ul != mxf_ul:
+            raise CheckException(
+                "Incoherent Atmos Data Essence Coding, CPL {} / MXF {}"
+                .format(cpl_ul, mxf_ul))
+        elif mxf_ul != ul:
+            raise CheckException(
+                "Unknown Atmos Data Essence Coding, expecting {} but got {}"
+                .format(ul, mxf_ul))
 
     def check_atmos_cpl_channels(self, playlist, asset):
         """ Atmos maximum channels count.

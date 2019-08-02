@@ -444,26 +444,48 @@ class Checker(CheckerBase):
         if not st_dict:
             return
 
-        st_uuid = self.st_util.get_subtitle_uuid(st_dict)
+        st_uuid = self.st_util.get_subtitle_uuid(st_dict).lower()
         _, asset = asset
 
         if self.dcp.schema == 'Interop':
-            cpl_uuid = asset['Id']
+            cpl_uuid = asset['Id'].lower()
             if st_uuid != cpl_uuid:
                 raise CheckException(
-                    "Subtitle UUID mismatch, Subtitle claims {} but CPL "
-                    "{}".format(st_uuid, cpl_uuid))
-            folder_name = os.path.basename(folder)
+                    "Subtitle UUID mismatch, Subtitle claims {} but CPL {}"
+                    .format(st_uuid, cpl_uuid))
+            folder_name = os.path.basename(folder).lower()
             if st_uuid not in folder_name:
                 raise CheckException(
                     "Subtitle directory name unexpected, should contain {} but"
                     " got {}".format(st_uuid, folder_name))
         elif self.dcp.schema == 'SMPTE':
-            resource_uuid = asset['Probe'].get('AssetID', "")
+            resource_uuid = asset['Probe'].get('AssetID', "").lower()
             if resource_uuid != st_uuid:
                 raise CheckException(
                     "Subtitle UUID mismatch, Subtitle claims {} but MXF "
                     "{}".format(st_uuid, resource_uuid))
+
+    def check_subtitle_cpl_uuid_case(self, playlist, asset, folder):
+        """ Subtitle UUID case mismatch. """
+        st_dict = self.st_util.get_subtitle_xml(asset, folder)
+        if not st_dict:
+            return
+
+        st_uuid = self.st_util.get_subtitle_uuid(st_dict)
+        _, asset = asset
+
+        if self.dcp.schema == 'Interop':
+            cpl_uuid = asset['Id']
+            if st_uuid != cpl_uuid and st_uuid.lower() == cpl_uuid.lower():
+                raise CheckException(
+                    "Subtitle UUID case mismatch, Subtitle {} - CPL {}".format(
+                        st_uuid, cpl_uuid))
+            folder_name = os.path.basename(folder)
+            if (st_uuid not in folder_name
+               and st_uuid.lower() in folder_name.lower()):
+                raise CheckException(
+                    "Subtitle directory name case mismatch, Folder {} - CPL {}"
+                    .format(st_uuid, folder_name))
 
     def check_subtitle_cpl_duplicated_uuid(self, playlist, asset, folder):
         """ Issue when using the same UUID for Subtitle XML and MXF.

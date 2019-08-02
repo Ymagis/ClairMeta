@@ -57,6 +57,6 @@ def compare_uuid(uuid_to_check, uuid_reference):
     if not check_uuid(uuid):
         raise CheckException("Invalid {} uuid found : {}".format(
             name, uuid))
-    if uuid != uuid_ref:
+    if uuid.lower() != uuid_ref.lower():
         raise CheckException("Uuid {} ({}) not equal to {} ({})".format(
             name, uuid, name_ref, uuid_ref))
