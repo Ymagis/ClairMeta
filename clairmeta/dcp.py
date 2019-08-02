@@ -77,7 +77,7 @@ class DCP(object):
 
         for c in candidates:
             nodes = parse_xml(c, namespaces=DCP_SETTINGS['xmlns'])
-            if root_name and root_name in nodes:
+            if nodes and root_name in nodes:
                 xml_list.append(c)
 
         return xml_list
@@ -86,6 +86,7 @@ class DCP(object):
         """ Find DCP AssetMap and build Asset List. """
         self._list_am_path = self.filter_files(['ASSETMAP', 'ASSETMAP.xml'])
         self._list_am = [assetmap_parse(f) for f in self._list_am_path]
+        self._list_am = [am for am in self._list_am if am is not None]
 
         # In the improbable case of multiple Assetmap found in the folder,
         # flatten asset list.
@@ -105,11 +106,13 @@ class DCP(object):
         """ Find DCP VolIndex. """
         self._list_vol_path = self.filter_files(['VOLINDEX', 'VOLINDEX.xml'])
         self._list_vol = [volindex_parse(f) for f in self._list_vol_path]
+        self._list_vol = [vol for vol in self._list_vol if vol is not None]
 
     def init_pkl(self):
         """ Find DCP PackingList. """
         self._list_pkl_path = self.filter_xml_by_root('PackingList')
         self._list_pkl = [pkl_parse(f) for f in self._list_pkl_path]
+        self._list_pkl = [pkl for pkl in self._list_pkl if pkl is not None]
 
         self.pkl_find_path()
 
@@ -126,6 +129,7 @@ class DCP(object):
         """ Find DCP CompositionPlayList. """
         self._list_cpl_path = self.filter_xml_by_root('CompositionPlaylist')
         self._list_cpl = [cpl_parse(f) for f in self._list_cpl_path]
+        self._list_cpl = [cpl for cpl in self._list_cpl if cpl is not None]
 
         self.cpl_find_pkl()
         self.cpl_link_assets()
@@ -136,6 +140,7 @@ class DCP(object):
         if self.kdm:
             self._list_kdm_path.append(self.kdm)
         self._list_kdm = [kdm_parse(f) for f in self._list_kdm_path]
+        self._list_kdm = [kdm for kdm in self._list_kdm if kdm is not None]
 
         if not self.pkey or not os.path.exists(self.pkey):
             return
