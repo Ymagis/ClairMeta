@@ -192,7 +192,7 @@ class Checker(CheckerBase):
         """ DCP Standard coherence check. """
         standard = fields['Standard'].get('Schema')
         if standard and standard != self.dcp.schema:
-            raise CheckException("ContentTitle claims {} but DCP is {}".format(
+            raise CheckException("ContentTitle claims {} but DCP schema is {}".format(
                 standard, self.dcp.schema))
 
     def check_dcnc_field_claim_dolbyvision(self, playlist, fields):
