@@ -54,7 +54,7 @@ def list_pkl_assets(packinglist):
 
 def list_cpl_assets(
     cpl,
-    filters=['Picture', 'Sound', 'AuxData', 'Subtitle'],
+    filters=['Picture', 'Sound', 'AuxData', 'Subtitle', 'ClosedCaption'],
     required_keys=[]
 ):
     """ Iterator on CompositionPlayList assets.
@@ -186,6 +186,7 @@ def cpl_extract_characteristics(cpl):
         'AuxData.EditRate': [],
         'AuxData.Encrypted': [],
         'Subtitle.EditRate': [],
+        'ClosedCaption.EditRate': [],
     }
 
     # These are per essence (picture, sound, ...) coherence keys, this means
@@ -193,6 +194,7 @@ def cpl_extract_characteristics(cpl):
     essence_keys = {
         'Sound.Language': [],
         'Subtitle.Language': []
+        'ClosedCaption.Language': []
     }
 
     # These check the presence of certain essence in the CPL
@@ -200,6 +202,7 @@ def cpl_extract_characteristics(cpl):
         'Picture': [],
         'Sound': [],
         'Subtitle': [],
+        'ClosedCaption': [],
         'AuxData': [],
         'Markers': [],
     }
