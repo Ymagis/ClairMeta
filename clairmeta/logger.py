@@ -30,7 +30,7 @@ def init_log():
 
 def init_console(log, formatter):
     """ Initialize console stream handler. """
-    stream_handler = logging.StreamHandler()
+    stream_handler = logging.StreamHandler() if not os.getenv("CLAIRMETA_LOGGING_QUIET") else logging.NullHandler()
     stream_handler.setFormatter(formatter)
     log.addHandler(stream_handler)
 
