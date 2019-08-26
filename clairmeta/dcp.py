@@ -57,7 +57,7 @@ class DCP(object):
         """ List all files present in DCP. """
         self._list_files = []
         for dirpath, dirnames, filenames in os.walk(self.path):
-            for f in filenames:
+            for f in sorted(filenames):
                 fullpath = os.path.join(dirpath, f)
                 self._list_files.append(fullpath)
 
