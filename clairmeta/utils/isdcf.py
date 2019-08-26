@@ -138,21 +138,13 @@ def parse_isdcf_string(str):
         error_list.append("ContentTitle must have 12 parts, {} found".format(
             len(fields_list)))
 
-        # Try to parse
-        for field in fields_list:
-            for (name, regex) in six.iteritems(rules):
-                pattern = re.compile(regex)
-                match = re.match(pattern, field)
-                if match:
-                    fields_dict[name]['Value'] = field
-                    fields_dict[name].update(match.groupdict(DEFAULT))
-    else:
-        for field, (name, regex) in zip(fields_list, six.iteritems(rules)):
+    # try to parse
+    for field in fields_list:
+        for (name, regex) in six.iteritems(rules):
             pattern = re.compile(regex)
             match = re.match(pattern, field)
-            fields_dict[name]['Value'] = field
-
             if match:
+                fields_dict[name]['Value'] = field
                 fields_dict[name].update(match.groupdict(DEFAULT))
             else:
                 error_list.append("ContentTitle Part {} : {} don't conform "
