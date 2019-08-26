@@ -45,24 +45,28 @@ class Checker(CheckerBase):
         # Interop DCP can be signed with SMPTE compliant certificate
         self.certif_sig_algorithm_map = {
             'SMPTE': ['sha256WithRSAEncryption'],
-            'Interop': ['sha256WithRSAEncryption', 'sha1WithRSAEncryption']
+            'Interop': ['sha256WithRSAEncryption', 'sha1WithRSAEncryption'],
+            'Unknown': 'sha256WithRSAEncryption'
         }
 
         self.sig_algorithm_map = {
             'SMPTE': 'sha256WithRSAEncryption',
-            'Interop': 'sha1WithRSAEncryption'
+            'Interop': 'sha1WithRSAEncryption',
+            'Unknown': 'sha256WithRSAEncryption'
         }
 
         self.sig_func_map = {
             'SMPTE': hashlib.sha256,
-            'Interop': hashlib.sha1
+            'Interop': hashlib.sha1,
+            'Unknown': hashlib.sha256,
         }
 
         self.digest_func = hashlib.sha1
 
         self.sig_ns_map = {
             'SMPTE': DCP_SETTINGS['xmluri']['smpte_sig'],
-            'Interop': DCP_SETTINGS['xmluri']['interop_sig']
+            'Interop': DCP_SETTINGS['xmluri']['interop_sig'],
+            'Unknown': DCP_SETTINGS['xmluri']['smpte_sig']
         }
 
     def issuer_to_str(self, issuer):
@@ -333,7 +337,7 @@ class Checker(CheckerBase):
         if signature_algorithm not in expected:
             raise CheckException(
                 "Invalid Signature Algorithm, expected {} but got {}".format(
-                    ",".join(expected), signature_algorithm))
+                    expected, signature_algorithm))
 
     def check_certif_rsa_validity(self, cert, index):
         """ Certificate characteristics (RSA 2048, 65537 exp) check. """
