@@ -97,7 +97,8 @@ class Checker(CheckerBase):
         if (dimension and cpl_stereo != "Mixed" and
                 is_stereo_map[dimension] != cpl_stereo):
             raise CheckException(
-                "ContentTitle suggest {} but CPL is not".format(dimension))
+                "ContentTitle suggest {} but CPL is {}".format(
+                    dimension, '3D' if cpl_stereo else '2D'))
 
     def check_dcnc_field_claim_aspectratio(self, playlist, fields):
         """ AspectRatio from CPL and ContentTitleText shall match. """
@@ -118,8 +119,15 @@ class Checker(CheckerBase):
         hasSub = fields['Language'].get('Subtitle', False)
         hasBurnedSub = fields['Language'].get('BurnedSubtitle', False)
         if not hasBurnedSub and hasSub != cpl_node['Subtitle']:
+            msg_map = {
+                True: 'Subtitle',
+                False: 'No Subtitle'
+            }
+
             raise CheckException(
-                "ContentTitle suggest Subtitle but CPL have none")
+                "ContentTitle suggest {} but CPL contains {}".format(
+                    msg_map[hasSub],
+                    msg_map[cpl_node['Subtitle']]))
 
     def check_dcnc_field_claim_audio(self, playlist, fields):
         """ Audio format from CPL and ContentTitleText shall match. """
@@ -184,7 +192,8 @@ class Checker(CheckerBase):
         """ DCP Standard coherence check. """
         standard = fields['Standard'].get('Schema')
         if standard and standard != self.dcp.schema:
-            raise CheckException("ContentTitle claims {} but DCP is not")
+            raise CheckException("ContentTitle claims {} but DCP schema is {}".format(
+                standard, self.dcp.schema))
 
     def check_dcnc_field_claim_dolbyvision(self, playlist, fields):
         """ DolbyVision metadata shall be present in CPL. """
