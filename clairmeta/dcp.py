@@ -168,8 +168,9 @@ class DCP(object):
         self.package_type = 'OV'
 
         for cpl in self._list_cpl:
-            for _, asset in list_cpl_assets(cpl):
+            for type, asset in list_cpl_assets(cpl):
                 asset_id = asset['Id']
+                asset["Type"] = type
                 asset['Path'] = ''
                 asset['AbsolutePath'] = ''
 
