@@ -20,9 +20,13 @@ def init_log():
     formatter = logging.Formatter(
         '%(asctime)s - %(name)s - %(levelname)s - %(message)s')
 
-    if LOG_SETTINGS['enable_console']:
+    stream_handler = logging.NullHandler()
+    stream_handler.setFormatter(formatter)
+    log.addHandler(stream_handler)
+
+    if LOG_SETTINGS['enable_console'] == 'ON':
         init_console(log, formatter)
-    if LOG_SETTINGS['enable_file'] and LOG_SETTINGS['file_name']:
+    if LOG_SETTINGS['enable_file'] == 'ON' and LOG_SETTINGS['file_name']:
         init_file(log, formatter)
 
     return log

@@ -1,13 +1,16 @@
 # Clairmeta - (C) YMAGIS S.A.
 # See LICENSE for more information
 
+import os
+
+
 LOG_SETTINGS = {
-    'level': 'INFO',
-    'enable_console': True,
-    'enable_file': False,
-    'file_name': '',
-    'file_size': 1e6,
-    'file_count': 10,
+    'level': os.getenv('CLAIRMETA_LOG_LEVEL', 'INFO'),
+    'enable_console': os.getenv('CLAIRMETA_LOG_CONSOLE', 'ON'),
+    'enable_file': os.getenv('CLAIRMETA_LOG_FILE', 'OFF'),
+    'file_name': os.getenv('CLAIRMETA_LOG_FILE_NAME', ''),
+    'file_size': os.getenv('CLAIRMETA_LOG_FILE_SIZE', 1e6),
+    'file_count': os.getenv('CLAIRMETA_LOG_FILE_COUNT', 10),
 }
 
 DCP_SETTINGS = {
@@ -218,4 +221,3 @@ SEQUENCE_SETTINGS = {
         'file_white_list': ['.DS_Store'],
     }
 }
-
