@@ -80,11 +80,17 @@ class CheckerBase(object):
 
         """
         member_list = inspect.getmembers(self, predicate=inspect.ismethod)
-        check_bypass = self.check_profile['bypass']
+        bypass = self.check_profile['bypass']
 
-        return [
-            v for k, v in member_list
-            if k.startswith('check_' + prefix) and k not in check_bypass]
+        checks = []
+        for k, v in member_list:
+            check_prefix = k.startswith('check_' + prefix)
+            check_bypass = any([k.startswith(c) for c in bypass])
+
+            if check_prefix and not check_bypass:
+                checks.append(v)
+
+        return checks
 
     def find_check_failed(self):
         """ Returns a list of all failed checks. """
