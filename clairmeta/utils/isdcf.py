@@ -4,6 +4,7 @@
 import re
 import six
 from collections import OrderedDict
+from itertools import islice
 
 from clairmeta.settings import DCP_SETTINGS
 
@@ -132,24 +133,46 @@ def parse_isdcf_string(str):
         key=lambda f: RULES_ORDER.index(f[0])))
 
     fields_dict = init_dict_isdcf(rules)
-
     fields_list = str.split('_')
-    if len(fields_list) != 12:
-        error_list.append("ContentTitle must have 12 parts, {} found".format(
-            len(fields_list)))
 
-    # try to parse
-    for field in fields_list:
-        for (name, regex) in six.iteritems(rules):
+    if len(fields_list) != 12:
+        error_list.append(
+            "ContentTitle must have 12 parts, {} found".format(len(fields_list)))
+
+    # Parsing title with some robustness to missing / additionals fields
+    # Find a match in nearby fields only
+    max_field_shift = 2
+
+    for idx_field, field in enumerate(fields_list):
+        matched = False
+
+        for idx_rule, (name, regex) in enumerate(six.iteritems(rules)):
             pattern = re.compile(regex)
             match = re.match(pattern, field)
-            if match:
-                fields_dict[name]['Value'] = field
+
+            if idx_field == 0 and not match:
+                error_list.append(
+                    "ContentTitle Film Name does not respect naming convention"
+                    " rules : {}".format(field))
+            elif match and idx_rule < max_field_shift:
                 fields_dict[name].update(match.groupdict(DEFAULT))
+                for idx_missing in range(idx_rule):
+                    error_list.append(
+                        "Field {} not found in ContentTitle".format(
+                            list(rules.keys())[idx_missing]))
             else:
-                error_list.append("ContentTitle Part {} : {} don't conform "
-                                  "with ISDCF naming convention version {}"
-                                  .format(name, field, dcnc_version))
+                continue
+
+            fields_dict[name]['Value'] = field
+            sliced = islice(six.iteritems(rules), idx_rule + 1, None)
+            rules = OrderedDict(sliced)
+            matched = True
+            break
+
+        if not matched:
+            error_list.append(
+                "ContentTitle Part {} not matching any naming convention field"
+                .format(field))
 
     fields_dict = post_parse_isdcf(fields_dict)
     return fields_dict, error_list
