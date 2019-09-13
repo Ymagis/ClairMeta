@@ -197,7 +197,8 @@ def cpl_reels_parse(cpl_node):
 
         if 'Metadata' in out_reel['Assets']:
             meta = out_reel['Assets']['Metadata']
-            exts = meta['ExtensionMetadataList'].get('ExtensionMetadata', [])
+            exts = meta.get(
+                'ExtensionMetadataList', {}).get('ExtensionMetadata', [])
             for ext in exts:
                 ext_name = ext.get('Name')
                 properties = ext.get('PropertyList')
