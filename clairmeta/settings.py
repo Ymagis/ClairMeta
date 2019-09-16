@@ -171,6 +171,10 @@ IMP_SETTINGS = {
 }
 
 SEQUENCE_SETTINGS = {
+    'ALL': {
+        # In percentage
+        'size_diff_tol': 2.5,
+    },
     'SCAN': {
         'allowed_extensions': {
             '.dpx': {

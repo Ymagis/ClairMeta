@@ -3,6 +3,7 @@
 
 import os
 
+from clairmeta.settings import SEQUENCE_SETTINGS
 from clairmeta.utils.sys import number_is_close
 from clairmeta.utils.file import parse_name
 
@@ -67,6 +68,9 @@ def check_sequence_folder(dirpath, filenames, allowed_extensions):
             ValueError: If image file sequence check failed.
 
     """
+    settings = SEQUENCE_SETTINGS['ALL']
+    size_rtol = settings['size_diff_tol'] / 1e2
+
     # First file in folder is the reference
     fileref = filenames[0]
     fullpath_ref = os.path.join(dirpath, fileref)
@@ -93,11 +97,12 @@ def check_sequence_folder(dirpath, filenames, allowed_extensions):
         if current_ext != extension:
             raise ValueError('File extension difference, {} but expected {}'
                              .format(current_filename, extension))
-        # Allow for small 0.01% variation (header might vary in size)
-        if not number_is_close(current_filesize, filesize, rtol=1e-04):
+        if not number_is_close(current_filesize, filesize,  rtol=size_rtol):
             raise ValueError(
                 '{} : file size difference got {} but expected {}'
-                .format(current_filename, current_filesize, filesize))
+                ' - tolerance of {}%'.format(
+                    current_filename, current_filesize,
+                    filesize, settings['size_diff_tol']))
 
     # Check for jump in sequence (ie. missing frame(s))
     sequence_idx.sort()
