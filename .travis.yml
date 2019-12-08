@@ -44,7 +44,7 @@ install:
     - sudo apt-get -y install repo-mediaarea=1.0-9
 
     # install python environment
-    - pip3 install pipenv codecov
+    - pip install pipenv codecov
     - pipenv install --dev
     - pipenv graph
 
