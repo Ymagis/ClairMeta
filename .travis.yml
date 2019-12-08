@@ -5,8 +5,8 @@ dist: trusty
 
 language: python
 python:
-- '2.7'
-- '3.6'
+    - '2.7'
+    - '3.6'
 
 env:
   global:
@@ -17,27 +17,47 @@ env:
     - secure: "IKV4DSNedoMP/uTPWHVnJp2E/K9JDKu/InMJGQkQR5hreJGpWw6Q2OWo9qIDXQ0PXX9k5Aw3k+w+/Utp6+lNHUzMuKk92CCZ5ieolTgzYzaN/eYDIPVnQhE/S7v06liQn8f1IgDl+/brEmDmWQm73aYGjlkt1jBWma0ZOXxPC3eBhUMIc/5pWJXwnGRSNREW1LxLami+C7uN02qZwd1eHU+RU71bt5uYFHKrhMHB40MGQx20YpJ/yMcGhhXNZHSvmzKIus27oPreP1hFc22xO3Mfjq4Vgz9qoEQolJZPe/v2bHtMKooTPAfeTAI36oNpiTvR3SHEYX3uVjOIcuG3QCNPkhXEWIgjUtj3SVlM19Nvb0qtGkQVZnVXHtRZKKdzWbnOYI0zwWj3OEhyCzUbsadUFqiWJ7FZwtkYCT7Kmdi6UzPAh2L7/gSOECj4RZgZgpjaApJ3ruSMz/pMzDq1U+Q25esj/JS9vJU8eaSrOjD2Fk1RxhI8WXMZutb6dcLo0eQIrYo5LN7UOVRzd19KoliWMOmUQrTYlSU08CK0IVog4+rVlw8PjJ71LP/+w/5IZtCyhkYqmFSdwdNkQNKrydQE7jNZ6iZnkMmx9LLzwQ2HbamyjCQeoGHuK7SVlMXgkg0msqiyj5lpPnc5oZaTDCLJBUY9cDjxSYQDPOR7+/M="
 
 install:
-# dependencies
-- git clone https://github.com/Ymagis/ClairMeta_Data tests/resources
-- sudo apt-get install dirmngr
-- gpg --keyserver hkp://keyserver.ubuntu.com:80 --recv 379CE192D401AB61
-- gpg --export --armor 379CE192D401AB61 | sudo apt-key add -
-- echo "deb https://dl.bintray.com/ymagis/Clairmeta $(lsb_release --codename | awk '{print $2}') main" | sudo tee /etc/apt/sources.list.d/clairmeta.list
-- wget https://mediaarea.net/repo/deb/repo-mediaarea_1.0-9_all.deb && sudo dpkg -i repo-mediaarea_1.0-9_all.deb
-- sudo apt-get update && sudo apt-get install asdcplib mediainfo sox
-# python environment
-- pip install pipenv codecov
-- pipenv install --dev
-- pipenv graph
-# - pipenv check
+    - export LC_ALL=C.UTF-8
+    - export LANG=C.UTF-8
+
+    # install keys
+    - sudo apt-get update
+    - sudo apt-get -y install dirmngr curl
+    # key for bintray
+    - gpg --keyserver hkp://keyserver.ubuntu.com:80 --recv 379CE192D401AB61
+    - gpg --export --armor 379CE192D401AB61 | sudo apt-key add -
+    # key fr mediaarea
+    - gpg --keyserver hkp://keyserver.ubuntu.com:80 --recv C10E11090EC0E438      # if used in future
+    - gpg --export --armor C10E11090EC0E438 | sudo apt-key add -                 # if used in future
+    - curl http://mediaarea.net/repo/deb/ubuntu/pubkey.gpg | sudo apt-key add -  # real key
+
+    # add apt list
+    - source /etc/lsb-release
+    - echo "deb https://dl.bintray.com/ymagis/Clairmeta ${DISTRIB_CODENAME} main" | sudo tee /etc/apt/sources.list.d/clairmeta.list
+    - echo "deb https://mediaarea.net/repo/deb/ubuntu/ ${DISTRIB_CODENAME} main" | sudo tee /etc/apt/sources.list.d/mediaarea.list
+
+    - sudo apt-get update
+    # environment dependencies
+    - sudo apt-get -y install git python3 python3-pip
+    # clairmeta dependencies
+    - sudo apt-get -y install asdcplib mediainfo sox
+    - sudo apt-get -y install repo-mediaarea=1.0-9
+
+    # install python environment
+    - pip3 install pipenv codecov
+    - pipenv install --dev
+    - pipenv graph
+
+    # metadatas for unittests
+    - git clone https://github.com/Ymagis/ClairMeta_Data tests/resources
 
 after_success:
-- codecov
+    - codecov
 
 # This belong to default stage 'test'
 script:
-- pipenv run python -m compileall clairmeta
-- pipenv run nosetests --nocapture --with-doctest --doctest-options=+ELLIPSIS --with-coverage --cover-package=clairmeta -v
+    - pipenv run python -m compileall clairmeta
+    - pipenv run nosetests --nocapture --with-doctest --doctest-options=+ELLIPSIS --with-coverage --cover-package=clairmeta -v
 
 # Stage conditions
 stages:
