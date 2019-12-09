@@ -26,29 +26,27 @@ install:
     # key for bintray
     - gpg --keyserver hkp://keyserver.ubuntu.com:80 --recv 379CE192D401AB61
     - gpg --export --armor 379CE192D401AB61 | sudo apt-key add -
-    # key fr mediaarea
-    - gpg --keyserver hkp://keyserver.ubuntu.com:80 --recv C10E11090EC0E438      # if used in future
-    - gpg --export --armor C10E11090EC0E438 | sudo apt-key add -                 # if used in future
-    - curl http://mediaarea.net/repo/deb/ubuntu/pubkey.gpg | sudo apt-key add -  # real key
+    # key for mediaarea
+    - curl http://mediaarea.net/repo/deb/ubuntu/pubkey.gpg | sudo apt-key add -
 
     # add apt list
     - source /etc/lsb-release
     - echo "deb https://dl.bintray.com/ymagis/Clairmeta ${DISTRIB_CODENAME} main" | sudo tee /etc/apt/sources.list.d/clairmeta.list
     - echo "deb https://mediaarea.net/repo/deb/ubuntu/ ${DISTRIB_CODENAME} main" | sudo tee /etc/apt/sources.list.d/mediaarea.list
 
-    - sudo apt-get update
-    # environment dependencies
-    - sudo apt-get -y install git python3 python3-pip
     # clairmeta dependencies
+    - sudo apt-get update
     - sudo apt-get -y install asdcplib mediainfo sox
     - sudo apt-get -y install repo-mediaarea=1.0-9
 
     # install python environment
     - pip install pipenv codecov
     - pipenv install --dev
+
+    # create graph dependencies
     - pipenv graph
 
-    # metadatas for unittests
+    # fetch metadatas for unittests
     - git clone https://github.com/Ymagis/ClairMeta_Data tests/resources
 
 after_success:
