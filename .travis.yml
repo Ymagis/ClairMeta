@@ -43,8 +43,9 @@ install:
     - pip install pipenv codecov
     - pipenv install --dev
 
-    # create graph dependencies
+    # create graph dependencies & checking
     - pipenv graph
+    - pipenv check
 
     # fetch metadatas for unittests
     - git clone https://github.com/Ymagis/ClairMeta_Data tests/resources
