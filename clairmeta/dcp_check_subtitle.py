@@ -128,9 +128,8 @@ class SubtitleUtils(object):
         f_s = st.get('Subtitle@FadeUpTime')
         f_d = st.get('Subtitle@FadeDownTime')
 
-        if all([f_s, f_d]):
-            f_s = self.st_tc_frames(f_s, editrate)
-            f_d = self.st_tc_frames(f_d, editrate)
+        f_s = self.st_tc_frames(f_s, editrate) if f_s else None
+        f_d = self.st_tc_frames(f_d, editrate) if f_d else None
 
         return f_s, f_d
 
