@@ -1,9 +1,10 @@
 # Clairmeta - (C) YMAGIS S.A.
 # See LICENSE for more information
 
+from __future__ import unicode_literals
+
 import six
 import operator
-
 from clairmeta.utils.sys import all_keys_in_dict
 from clairmeta.utils.uuid import check_uuid, extract_uuid, RFC4122_RE
 from clairmeta.utils.time import compare_ratio
