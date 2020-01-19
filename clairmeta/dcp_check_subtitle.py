@@ -286,12 +286,16 @@ class Checker(CheckerBase):
             return
 
         if self.dcp.schema == 'SMPTE':
-            text_elems = keys_by_name_dict(st_dict, 'Text')
-            loadfont_elems = keys_by_name_dict(st_dict, 'LoadFont@ID')
-            if text_elems and len(loadfont_elems) != 1:
-                raise CheckException(
-                    "Text based subtitle shall contain one and only one "
-                    "LoadFont element, found {}".format(len(loadfont_elems)))
+            loadfont_attribute = "LoadFont@ID"
+        else:
+            loadfont_attribute = "LoadFont@Id"  # Interop
+
+        text_elems = keys_by_name_dict(st_dict, 'Text')
+        loadfont_elems = keys_by_name_dict(st_dict, loadfont_attribute)
+        if text_elems and len(loadfont_elems) != 1:
+            raise CheckException(
+                "Text based subtitle shall contain one and only one "
+                "LoadFont element, found {}".format(len(loadfont_elems)))
 
     def check_subtitle_cpl_font_ref(self, playlist, asset, folder):
         """ Subtitle font references check. """
