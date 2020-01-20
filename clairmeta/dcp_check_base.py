@@ -12,7 +12,8 @@ from clairmeta.utils.file import human_size
 
 class CheckException(Exception):
     """ All check shall raise a CheckException in case of falure. """
-    pass
+    def __init__(self, msg):
+        super(CheckException, self).__init__(six.ensure_str(msg))
 
 
 class CheckExecution(object):
