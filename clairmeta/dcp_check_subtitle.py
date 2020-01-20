@@ -278,7 +278,10 @@ class Checker(CheckerBase):
         """ Text subtitle must contains one and only one LoadFont element.
 
             As specified in SMPTE 429-2 8.4.1, only exception is PNG based
-            subtitles.
+            subtitles. SMPTE 428-7-2014 5.11.1 also specify that the LoadFont ID
+            attribute shall be a string of one or more character. This is
+            not enforced at the XSD schema level so we explicitly check it
+            here.
         """
         st_dict = self.st_util.get_subtitle_xml(asset, folder)
         if not st_dict:
@@ -291,6 +294,8 @@ class Checker(CheckerBase):
                 raise CheckException(
                     "Text based subtitle shall contain one and only one "
                     "LoadFont element, found {}".format(len(loadfont_elems)))
+            if text_elems and not loadfont_elems[0]:
+                raise CheckException("LoadFont element with an empty ID attribute")
 
     def check_subtitle_cpl_font_ref(self, playlist, asset, folder):
         """ Subtitle font references check. """
