@@ -177,7 +177,7 @@ Contributing
 
    pip install pipenv
    git clone https://github.com/Ymagis/ClairMeta.git
-   cd clairmeta
+   cd ClairMeta
    pipenv install --dev [–two]
    pipenv check
    # Enter virtual environment
