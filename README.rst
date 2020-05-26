@@ -176,6 +176,7 @@ Contributing
 ::
 
    pip install pipenv
+   pip install codecov
    git clone https://github.com/Ymagis/ClairMeta.git
    cd ClairMeta
    pipenv install --dev [–two]
