@@ -152,7 +152,7 @@ def cpl_reels_parse(cpl_node):
             'MainMarkers': 'Markers',
             'CompositionMetadataAsset': 'Metadata',
             'ClosedCaption': 'ClosedCaption',
-            'MainClosedCaption': 'ClosedCaption'
+            'MainClosedCaption': 'ClosedCaption',
         }
 
         # Generic asset parsing
