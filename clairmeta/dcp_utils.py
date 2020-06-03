@@ -192,7 +192,8 @@ def cpl_extract_characteristics(cpl):
     # keys won't get merged.
     essence_keys = {
         'Sound.Language': [],
-        'Subtitle.Language': []
+        'Subtitle.Language': [],
+        'ClosedCaption.Language': [],
     }
 
     # These check the presence of certain essence in the CPL
