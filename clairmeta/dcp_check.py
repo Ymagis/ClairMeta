@@ -170,8 +170,8 @@ class DCPChecker(CheckerBase):
         """ DCP with encrypted content must be digitally signed.
 
             Reference :
-                DCI Spec 1.3 Section 5.4.3.7.
-                DCI Spec 1.3 Section 5.5.2.3.
+                DCI Spec 1.3 5.4.3.7.
+                DCI Spec 1.3 5.5.2.3.
         """
         for cpl in self.dcp._list_cpl:
             cpl_node = cpl['Info']['CompositionPlaylist']
