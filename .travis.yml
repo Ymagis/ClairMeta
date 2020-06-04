@@ -45,7 +45,7 @@ install:
 
     # create graph dependencies & checking
     - pipenv graph
-    - pipenv check
+    - pipenv check -v
 
     # fetch metadatas for unittests
     - git clone https://github.com/Ymagis/ClairMeta_Data tests/resources
