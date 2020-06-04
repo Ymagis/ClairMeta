@@ -354,9 +354,9 @@ class Checker(CheckerBase):
                     human_size(font_max_size), human_size(font_size)))
 
     def check_subtitle_cpl_font_glyph(self, playlist, asset, folder):
-        """ Check if font can render all glyphs (parsing the text used
-            in subtitles to have the list of glyphs).
+        """ Check for missing font glyphs.
 
+            Reference : N/A
         """
         st_dict = self.st_util.get_subtitle_xml(asset, folder)
         if not st_dict:
