@@ -26,7 +26,11 @@ class Checker(CheckerBase):
         return self.check_executions
 
     def check_atmos_cpl_essence_encoding(self, playlist, asset):
-        """ Atmos encoding. """
+        """ Atmos encoding.
+
+            Reference :
+                SMPTE 429-18-2019 11
+        """
         _, asset = asset
         ul = DCP_SETTINGS['atmos']['smpte_ul']
         cpl_ul = asset.get('DataType', '').replace('urn:smpte:ul:', '').strip()
@@ -50,7 +54,11 @@ class Checker(CheckerBase):
     def check_atmos_cpl_channels(self, playlist, asset):
         """ Atmos maximum channels count.
 
-            This field will be optional, cf. 429-18.
+            This field will be optional (429-18).
+
+            Reference :
+                Dolby Atmos Next-Generation Audio for Cinema (WhitePaper)
+                SMPTE 429-18-2019 12 Table 4
         """
         _, asset = asset
         max_atmos = DCP_SETTINGS['atmos']['max_channel_count']
@@ -66,7 +74,11 @@ class Checker(CheckerBase):
     def check_atmos_cpl_objects(self, playlist, asset):
         """ Atmos maximum objects count.
 
-            This field will be optional, cf. 429-18.
+            This field will be optional (429-18).
+
+            Reference :
+                Dolby Atmos Next-Generation Audio for Cinema (WhitePaper)
+                SMPTE 429-18-2019 12 Table 4
         """
         _, asset = asset
         max_atmos = DCP_SETTINGS['atmos']['max_object_count']
