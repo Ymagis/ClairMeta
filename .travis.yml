@@ -1,7 +1,7 @@
 
 services:
   - docker
-dist: trusty
+dist: xenial
 
 language: python
 python:
@@ -45,7 +45,6 @@ install:
 
     # create graph dependencies & checking
     - pipenv graph
-    - pipenv check
 
     # fetch metadatas for unittests
     - git clone https://github.com/Ymagis/ClairMeta_Data tests/resources

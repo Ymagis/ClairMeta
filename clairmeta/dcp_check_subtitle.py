@@ -3,6 +3,8 @@
 
 import os
 import re
+import six
+import freetype
 import pycountry
 
 from clairmeta.utils.time import tc_to_frame, frame_to_tc
@@ -386,12 +388,44 @@ class Checker(CheckerBase):
                 "Subtitle font maximum size is {}, got {}".format(
                     human_size(font_max_size), human_size(font_size)))
 
-    # def check_subtitle_cpl_font_glyph(self, playlist, asset, folder):
-    #     """ Check if font can render all glyphs (parsing the text used
-    #         in subtitles to have the list of glyphs).
-    #
-    #         Note : To be implemented.
-    #     """
+    def check_subtitle_cpl_font_glyph(self, playlist, asset, folder):
+        """ Check for missing font glyphs.
+
+            Reference : N/A
+        """
+        st_dict = self.st_util.get_subtitle_xml(asset, folder)
+        if not st_dict:
+            return
+
+        subtitles = keys_by_name_dict(st_dict, 'Subtitle')
+        if not subtitles:
+            return
+
+        unique_chars = set()
+        all_text = [st.get('Text', '') for st in subtitles[0]]
+        for text in all_text:
+            for char in text:
+                unique_chars.add(char)
+
+        path, uri = self.st_util.get_font_path(st_dict, folder)
+        if not path:
+            return
+        if not os.path.exists(path):
+            return
+
+        face = freetype.Face(path)
+        font_chars = [six.unichr(c) for c, n in face.get_chars()]
+
+        missing_glyphs = []
+        for char in unique_chars:
+            if char not in font_chars:
+                missing_glyphs.append(char)
+
+        if missing_glyphs:
+            raise CheckException(
+                "Font ({}) is missing required glyphs : {}"
+                .format(os.path.basename(path), ", ".join(missing_glyphs)))
+
 
     def check_subtitle_cpl_st_timing(self, playlist, asset, folder):
         """ Subtitle individual duration / fade time check.
