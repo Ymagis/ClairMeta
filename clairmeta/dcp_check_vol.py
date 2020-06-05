@@ -18,7 +18,12 @@ class Checker(CheckerBase):
         return self.check_executions
 
     def check_vol_xml(self, vol):
-        """ VolIndex XML syntax and structure check. """
+        """ VolIndex XML syntax and structure check.
+
+            Reference :
+                SMPTE ST 429-9
+                Interop Delivery Media Representation and Segmentation 3.2
+        """
         if self.dcp.schema == 'Interop':
             return
 
@@ -29,7 +34,10 @@ class Checker(CheckerBase):
             self.dcp.schema)
 
     def check_vol_name(self, vol):
-        """ VolIndex file name respect DCP standard. """
+        """ VolIndex file name respect DCP standard.
+
+            Reference : N/A
+        """
         schema = vol['Info']['VolumeIndex']['Schema']
         mandatory_name = {
             'Interop': 'VOLINDEX',

@@ -53,7 +53,12 @@ class Checker(CheckerBase):
         return bitrate_map[bitrate]
 
     def check_picture_cpl_resolution(self, playlist, asset):
-        """ Picture resolution DCI compliance. """
+        """ Picture resolution DCI compliance.
+
+            Reference :
+                SMPTE 428-1-2006 3
+                SMPTE 429-2-2013 8.2
+        """
         dci_resolutions = [
             self.settings['resolutions']['2K'] +
             self.settings['resolutions']['4K']
@@ -69,7 +74,11 @@ class Checker(CheckerBase):
                 raise CheckException("Picture have non-DCI Resolution")
 
     def check_picture_cpl_encoding(self, playlist, asset):
-        """ Picture wavelet transform levels SMPTE compliance. """
+        """ Picture wavelet transform levels SMPTE compliance.
+
+            Reference :
+                SMPTE 429-2-2013 10.2.2
+        """
         resolutions = self.settings['resolutions']
         levels_map = {
             '2K': self.settings['dwt_levels_2k'],
@@ -94,7 +103,12 @@ class Checker(CheckerBase):
                     " found".format(levels_map[resolution_name], levels))
 
     def check_picture_cpl_max_bitrate(self, playlist, asset):
-        """ Picture maximum bitrate DCI compliance. """
+        """ Picture maximum bitrate DCI compliance.
+
+            Reference :
+                DCI Spec 1.3 4.3.3
+                https://www.dcimovies.com/Recommended_Practice/ 2.
+        """
         tolerance = self.settings['bitrate_tolerance']
 
         _, asset = asset
@@ -109,7 +123,10 @@ class Checker(CheckerBase):
                         t_bitrate, max_bitrate))
 
     def check_picture_cpl_avg_bitrate(self, playlist, asset):
-        """ Picture average bitrate DCI compliance. """
+        """ Picture average bitrate DCI compliance.
+
+            Reference : N/A
+        """
         margin = self.settings['average_bitrate_margin']
 
         _, asset = asset
@@ -124,7 +141,12 @@ class Checker(CheckerBase):
                     ": {} Mb/s".format(t_bitrate, avg_bitrate))
 
     def check_picture_cpl_framerate(self, playlist, asset):
-        """ Picture framerate DCI compliance. """
+        """ Picture framerate DCI compliance.
+
+            Reference :
+                SMPTE 428-11-2013 5.1
+                SMPTE 429-13-2009 7.2
+        """
         _, asset = asset
 
         if 'Probe' in asset:
@@ -145,7 +167,12 @@ class Checker(CheckerBase):
                         .format(editrate, dimension))
 
     def check_picture_cpl_archival_framerate(self, playlist, asset):
-        """ Picture archival framerate. """
+        """ Picture archival framerate.
+
+            Reference :
+                SMPTE 428-21-2011 5
+                D-Cinema FAQs release FIAF 2012 1.1 5
+        """
         _, asset = asset
         editrate = asset['EditRate']
         archival_editrates = self.settings['editrates_archival']
@@ -157,7 +184,11 @@ class Checker(CheckerBase):
                     .format(editrate))
 
     def check_picture_cpl_hfr_framerate(self, playlist, asset):
-        """ Picture HFR capable (Series II) framerate. """
+        """ Picture HFR capable (Series II) framerate.
+
+            Reference :
+                https://www.imago.org/index.php/technical/item/462-frame-rate-support-of-digital-cinema.html
+        """
         _, asset = asset
         editrate = asset['EditRate']
         dimension = '3D' if asset['Stereoscopic'] else '2D'
@@ -170,7 +201,12 @@ class Checker(CheckerBase):
                     editrate))
 
     def check_picture_cpl_editrate_framerate(self, playlist, asset):
-        """ Picture editrate / framerate coherence check. """
+        """ Picture editrate / framerate coherence check.
+
+            Reference :
+                SMPTE 429-7-2006 8.1.3
+                SMPTE 429-10-2008 5.2
+        """
         _, asset = asset
         editrate = asset['EditRate']
         framerate = asset['FrameRate']

@@ -92,7 +92,10 @@ class DCPChecker(CheckerBase):
             self.check_executions += checker.run_checks()
 
     def check_dcp_empty_dir(self):
-        """ Empty directory detection. """
+        """ Empty directory detection.
+
+            Reference : N/A
+        """
         list_empty_dir = []
         for dirpath, dirnames, filenames in os.walk(self.dcp.path):
             for d in dirnames:
@@ -106,7 +109,10 @@ class DCPChecker(CheckerBase):
                 list_empty_dir))
 
     def check_dcp_hidden_files(self):
-        """ Hidden files detection. """
+        """ Hidden files detection.
+
+            Reference : N/A
+        """
         hidden_files = [
             os.path.relpath(f, self.dcp.path)
             for f in self.dcp._list_files
@@ -116,7 +122,10 @@ class DCPChecker(CheckerBase):
                 hidden_files))
 
     def check_dcp_foreign_files(self):
-        """ Foreign files detection (not listed in AssetMap). """
+        """ Foreign files detection (not listed in AssetMap).
+
+            Reference : N/A
+        """
         list_asset_path = [
             os.path.join(self.dcp.path, a)
             for a in self.dcp._list_asset.values()]
@@ -132,7 +141,10 @@ class DCPChecker(CheckerBase):
                 self.dcp.foreign_files))
 
     def check_dcp_multiple_am_or_vol(self):
-        """ Only one AssetMap and VolIndex shall be present. """
+        """ Only one AssetMap and VolIndex shall be present.
+
+            Reference : N/A
+        """
         restricted_lists = {
             'VolIndex': self.dcp._list_vol,
             'Assetmap': self.dcp._list_am,
@@ -145,7 +157,7 @@ class DCPChecker(CheckerBase):
                 raise CheckException("Multiple {} files found".format(k))
 
     def setup_dcp_link_ov(self):
-        """ Setup the link VF to OV check and run for each assets . """
+        """ Setup the link VF to OV check and run for each assets. """
         if not self.ov_path:
             return
 
@@ -155,24 +167,29 @@ class DCPChecker(CheckerBase):
                 self.run_check(self.check_link_ov_asset, asset, essence)
 
     def check_dcp_signed(self):
-        """ DCP with encrypted content must be digitally signed. """
-        if self.dcp.schema != "SMPTE":
-            return
+        """ DCP with encrypted content must be digitally signed.
 
+            Reference :
+                DCI Spec 1.3 5.4.3.7.
+                DCI Spec 1.3 5.5.2.3.
+        """
         for cpl in self.dcp._list_cpl:
             cpl_node = cpl['Info']['CompositionPlaylist']
-            docs = [
+            xmls = [
                 pkl['Info']['PackingList'] for pkl in self.dcp._list_pkl
                 if pkl['Info']['PackingList']['Id'] == cpl_node.get('PKLId')]
-            docs.append(cpl_node)
+            xmls.append(cpl_node)
 
-            for doc in docs:
-                signed = all_keys_in_dict(doc, ['Signer', 'Signature'])
+            for xml in xmls:
+                signed = all_keys_in_dict(xml, ['Signer', 'Signature'])
                 if not signed and cpl_node['Encrypted'] is True:
                     raise CheckException("Encrypted DCP must be signed")
 
     def check_link_ov_coherence(self):
-        """ Relink OV/VF sanity checks. """
+        """ Relink OV/VF sanity checks.
+
+            Reference : N/A
+        """
         if self.ov_path and self.dcp.package_type != 'VF':
             raise CheckException("Package checked must be a VF")
 
@@ -183,7 +200,10 @@ class DCPChecker(CheckerBase):
             raise CheckException("Package referenced must be a OV")
 
     def check_link_ov_asset(self, asset, essence):
-        """ VF package shall reference assets present in OV. """
+        """ VF package shall reference assets present in OV.
+
+            Reference : N/A
+        """
         ov_dcp_dict = self.ov_dcp.parse()
 
         if not asset.get('Path'):

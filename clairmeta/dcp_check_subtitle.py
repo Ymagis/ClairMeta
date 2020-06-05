@@ -195,7 +195,12 @@ class Checker(CheckerBase):
              for check in checks]
 
     def check_subtitle_dcp_format(self, playlist, asset):
-        """ Subtitle format (related to DCP Standard) check. """
+        """ Subtitle format (related to DCP Standard) check.
+
+            Reference :
+                SMPTE ST 429-5
+                Interop Closed Captions Packaging 1.9
+        """
         _, asset = asset
         asset_path = asset['Path']
         extension_by_schema = {
@@ -209,7 +214,12 @@ class Checker(CheckerBase):
                 asset_path))
 
     def check_subtitle_cpl_xml(self, playlist, asset, folder):
-        """ Subtitle XML file syntax and structure validation. """
+        """ Subtitle XML file syntax and structure validation.
+
+            Reference :
+                SMPTE ST 428-7
+                Interop TI Subtitle Spec 1.1
+        """
         _, asset = asset
         asset_path = asset['Path']
 
@@ -230,7 +240,12 @@ class Checker(CheckerBase):
         check_xml(path, namespace, label, self.dcp.schema)
 
     def check_subtitle_cpl_reel_number(self, playlist, asset, folder):
-        """ Subtitle reel number coherence with CPL. """
+        """ Subtitle reel number coherence with CPL.
+
+            Reference :
+                SMPTE 428-7-2014 5.6
+                Interop TI Subtitle Spec 1.1 2.5
+        """
         st_dict = self.st_util.get_subtitle_xml(asset, folder)
         if not st_dict:
             return
@@ -244,7 +259,10 @@ class Checker(CheckerBase):
                                  "used in Reel {}".format(reel_no, reel_cpl))
 
     def check_subtitle_cpl_language(self, playlist, asset, folder):
-        """ Subtitle language coherence with CPL. """
+        """ Subtitle language coherence with CPL.
+
+            Reference : N/A
+        """
         st_dict = self.st_util.get_subtitle_xml(asset, folder)
         if not st_dict:
             return
@@ -282,6 +300,11 @@ class Checker(CheckerBase):
             attribute shall be a string of one or more character. This is
             not enforced at the XSD schema level so we explicitly check it
             here.
+
+            Reference :
+                SMPTE ST 428-7-2014 5.11.1
+                SMPTE ST 429-2-2013 8.4.1
+
         """
         st_dict = self.st_util.get_subtitle_xml(asset, folder)
         if not st_dict:
@@ -302,7 +325,12 @@ class Checker(CheckerBase):
             raise CheckException("LoadFont element with an empty ID attribute")
 
     def check_subtitle_cpl_font_ref(self, playlist, asset, folder):
-        """ Subtitle font references check. """
+        """ Subtitle font references check.
+
+            Reference :
+                SMPTE ST 428-7-2014 5.11.1
+                Interop TI Subtitle Spec 1.1 2.7
+        """
         st_dict = self.st_util.get_subtitle_xml(asset, folder)
         if not st_dict:
             return
@@ -321,7 +349,10 @@ class Checker(CheckerBase):
                         ref, font_id))
 
     def check_subtitle_cpl_font(self, playlist, asset, folder):
-        """ Subtitle font file exists. """
+        """ Subtitle font file exists.
+
+            Reference : N/A
+        """
         st_dict = self.st_util.get_subtitle_xml(asset, folder)
         if not st_dict:
             return
@@ -333,7 +364,11 @@ class Checker(CheckerBase):
             raise CheckException("Subtitle missing font file : {}".format(uri))
 
     def check_subtitle_cpl_font_size(self, playlist, asset, folder):
-        """ Subtitle maximum font size. """
+        """ Subtitle maximum font size.
+
+            Reference :
+                Interop TI Subtitle Spec 1.1 2.7
+        """
         st_dict = self.st_util.get_subtitle_xml(asset, folder)
         if not st_dict:
             return
@@ -359,7 +394,10 @@ class Checker(CheckerBase):
     #     """
 
     def check_subtitle_cpl_st_timing(self, playlist, asset, folder):
-        """ Subtitle individual duration / fade time check. """
+        """ Subtitle individual duration / fade time check.
+
+            Reference : N/A
+        """
         st_dict = self.st_util.get_subtitle_xml(asset, folder)
         if not st_dict:
             return
@@ -391,7 +429,10 @@ class Checker(CheckerBase):
                         st_idx))
 
     def check_subtitle_cpl_duration(self, playlist, asset, folder):
-        """ Subtitle duration coherence with CPL. """
+        """ Subtitle duration coherence with CPL.
+
+            Reference : N/A
+        """
         st_dict = self.st_util.get_subtitle_xml(asset, folder)
         if not st_dict:
             return
@@ -423,7 +464,10 @@ class Checker(CheckerBase):
                     reel_cpl))
 
     def check_subtitle_cpl_editrate(self, playlist, asset, folder):
-        """ Subtitle editrate coherence with CPL. """
+        """ Subtitle editrate coherence with CPL.
+
+            Reference : N/A
+        """
         st_dict = self.st_util.get_subtitle_xml(asset, folder)
         if not st_dict:
             return
@@ -446,7 +490,10 @@ class Checker(CheckerBase):
             For SMPTE, XML SubtitleReel/Id should match the
             MXF ResourceId, here we rely on the fact that asdcp-info parser
             (As_02_TimedText parser) store the TimedTextDescriptor/ResourceID
-            (from SMPTE 429-5) in a global AssetID key.
+            in a global AssetID key.
+
+            Reference :
+                SMPTE 429-5-2017
         """
         st_dict = self.st_util.get_subtitle_xml(asset, folder)
         if not st_dict:
@@ -504,6 +551,8 @@ class Checker(CheckerBase):
             (as in subtitles/captions) from the MXF file that was incorrectly
             created using the same universally unique identifier (UUID) for
             the MXF file and the main XML inside the MXF files. [DCPLYR-3418]
+
+            Reference : N/A
         """
         st_dict = self.st_util.get_subtitle_xml(asset, folder)
         if not st_dict:
@@ -520,7 +569,10 @@ class Checker(CheckerBase):
                     "cause issue on Dolby server prior to 2.8.18 firmware.")
 
     def check_subtitle_cpl_empty(self, playlist, asset, folder):
-        """ Empty Subtitle file check. """
+        """ Empty Subtitle file check.
+
+            Reference : N/A
+        """
         st_dict = self.st_util.get_subtitle_xml(asset, folder)
         if not st_dict:
             return
@@ -530,7 +582,12 @@ class Checker(CheckerBase):
             raise CheckException("Subtitle file is empty")
 
     def check_subtitle_cpl_content(self, playlist, asset, folder):
-        """ Subtitle individual structure check. """
+        """ Subtitle individual structure check.
+
+            Reference :
+                Interop TI Subtitle Spec 1.1 2.9
+                SMPTE 428-7-2014 6
+        """
         st_dict = self.st_util.get_subtitle_xml(asset, folder)
         if not st_dict:
             return
@@ -552,6 +609,10 @@ class Checker(CheckerBase):
 
             VAlign="top", VPosition="0" : out of the top of the screen
             VAlign="bottom", VPosition="0" : some char like 'g' will be cut
+
+            Reference :
+                Interop TI Subtitle Spec 1.1 2.10
+                SMPTE 428-7-2014 6.2.4
         """
         st_dict = self.st_util.get_subtitle_xml(asset, folder)
         if not st_dict:
@@ -575,7 +636,11 @@ class Checker(CheckerBase):
                         "characters will be cut".format(st_idx))
 
     def check_subtitle_cpl_image(self, playlist, asset, folder):
-        """ Subtitle image element must reference a valid PNG file. """
+        """ Subtitle image element must reference a valid PNG file.
+
+            Reference :
+                Interop TI Subtitle Spec 1.1 2.17
+        """
         st_dict = self.st_util.get_subtitle_xml(asset, folder)
         if not st_dict:
             return

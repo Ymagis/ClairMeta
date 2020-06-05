@@ -30,7 +30,10 @@ class Checker(CheckerBase):
         return self.check_executions
 
     def check_am_xml(self, am):
-        """ AssetMap XML syntax and structure check. """
+        """ AssetMap XML syntax and structure check.
+
+            Reference : N/A
+        """
         check_xml(
             am['FilePath'],
             am['Info']['AssetMap']['__xmlns__'],
@@ -38,7 +41,10 @@ class Checker(CheckerBase):
             self.dcp.schema)
 
     def check_am_name(self, am):
-        """ AssetMap file name respect DCP standard. """
+        """ AssetMap file name respect DCP standard.
+
+            Reference : N/A
+        """
         schema = am['Info']['AssetMap']['Schema']
         mandatory_name = {
             'Interop': 'ASSETMAP',
@@ -52,7 +58,10 @@ class Checker(CheckerBase):
             )
 
     def check_am_empty_text_fields(self, am):
-        """ AssetMap empty text fields check. """
+        """ AssetMap empty text fields check.
+
+            Reference : N/A
+        """
         fields = ['Creator', 'Issuer', 'AnnotationText']
         empty_fields = []
 
@@ -66,14 +75,22 @@ class Checker(CheckerBase):
                 ", ".join(empty_fields)))
 
     def check_assets_am_uuid(self, am, asset):
-        """ AssetMap UUIDs validation. """
+        """ AssetMap UUIDs validation.
+
+            Reference :
+                SMPTE 429-9-2014 6.1
+        """
         uuid, _, _ = asset
         if not check_uuid(uuid):
             raise CheckException(
-                "Invalid uuid found : {}".format(uuid))
+                "Invalid uuid found : {}".format(uuid, RFC4122_RE))
 
     def check_assets_am_volindex(self, am, asset):
-        """ AssetMap assets shall reference existing VolIndex. """
+        """ AssetMap assets shall reference existing VolIndex.
+
+            Reference :
+                Deprecated in SMPTE 429-9-2014
+        """
         _, _, asset = asset
         # Note : schema already check for positive integer
         asset_vol = asset['ChunkList']['Chunk'].get('VolumeIndex')
@@ -84,7 +101,8 @@ class Checker(CheckerBase):
     def check_assets_am_volindex_one(self, am, asset):
         """ AssetMap assets VolIndex shall be one or absent.
 
-            As per SMPTE 429-9:2014.
+            Reference :
+                SMPTE 429-9-2014 7.2
         """
         _, _, asset = asset
         asset_vol = asset['ChunkList']['Chunk'].get('VolumeIndex')
@@ -94,7 +112,11 @@ class Checker(CheckerBase):
                 .format(asset_vol))
 
     def check_assets_am_path(self, am, asset):
-        """ AssetMap assets path validation. """
+        """ AssetMap assets path validation.
+
+            Reference :
+                SMPTE 429-9-2014 7.1
+        """
         uuid, path, _ = asset
 
         if path == '':
@@ -107,7 +129,11 @@ class Checker(CheckerBase):
             raise CheckException("Missing asset")
 
     def check_assets_am_size(self, am, asset):
-        """ AssetMap assets size check. """
+        """ AssetMap assets size check.
+
+            Reference :
+                SMPTE 429-9-2014 7.4
+        """
         _, path, asset = asset
         path = os.path.join(self.dcp.path, path)
         chunk = asset['ChunkList']['Chunk']

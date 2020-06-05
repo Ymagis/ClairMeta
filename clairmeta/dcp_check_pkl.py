@@ -42,7 +42,10 @@ class Checker(CheckerBase):
             self.dcp.schema)
 
     def check_pkl_empty_text_fields(self, am):
-        """ PKL empty text fields check. """
+        """ PKL empty text fields check.
+
+            Reference : N/A
+        """
         fields = ['Creator', 'Issuer', 'AnnotationText']
         empty_fields = []
 
@@ -56,18 +59,28 @@ class Checker(CheckerBase):
                 ", ".join(empty_fields)))
 
     def check_pkl_issuedate(self, pkl):
-        """ PKL Issue Date validation. """
+        """ PKL Issue Date validation.
+
+            Reference : N/A
+        """
         check_issuedate(pkl['Info']['PackingList']['IssueDate'])
 
     def check_assets_pkl_referenced_by_assetamp(self, pkl, asset):
-        """ PKL assets shall be present in AssetMap. """
+        """ PKL assets shall be present in AssetMap.
+
+            Reference : N/A
+        """
         uuid, _, _ = asset
         # Note : dcp._list_asset is directly extracted from Assetmap
         if uuid not in self.dcp._list_asset.keys():
             raise CheckException("Not present in Assetmap")
 
     def check_assets_pkl_size(self, pkl, asset):
-        """ PKL assets size check. """
+        """ PKL assets size check.
+
+            Reference :
+                SMPTE 429-8-2007 6.4
+        """
         _, path, asset = asset
         if not path or not os.path.exists(path):
             return
@@ -81,7 +94,11 @@ class Checker(CheckerBase):
                     asset_size, actual_size))
 
     def check_assets_pkl_hash(self, pkl, asset):
-        """ PKL assets hash check. """
+        """ PKL assets hash check.
+
+            Reference :
+                SMPTE 429-8-2007 6.3
+        """
         _, path, asset = asset
         if not path or not os.path.exists(path):
             return
