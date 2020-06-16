@@ -70,11 +70,14 @@ class Sequence(object):
         for key, expect_val in six.iteritems(check_keys):
             val = key_by_path_dict(probe_keys, key)
 
+            if key == 'ProbeImage.BitDepth' and ' bits' in val:
+                expect_val += ' bits'
+
             if isinstance(expect_val, list):
                 if val not in expect_val:
                     raise ValueError("{} - Invalid {}, got {} but expected"
-                    .format(folder, key, val, expect_val))
+                                     .format(folder, key, val, expect_val))
             else:
                 if val != expect_val:
                     raise ValueError("{} - Invalid {}, got {} but expected {}"
-                    .format(folder, key, val, expect_val))
+                                     .format(folder, key, val, expect_val))
