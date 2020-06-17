@@ -343,6 +343,11 @@ def probe_mediainfo(path):
             track_type = track.pop('@type')
             track = transform_keys_dict(track, camelize)
 
+            # Mediainfo 0.7
+            bitdepth = track.get('BitDepth')
+            if bitdepth and ' bits' in bitdepth and track_type == 'Image':
+                track['BitDepth'] = bitdepth.split()[0]
+
             if track_type == 'General':
                 metadata = track
             else:
