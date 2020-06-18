@@ -5,6 +5,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     dput \
     curl \
     wget \
+    libxslt-dev \
     libxml2-dev \
     build-essential \
     devscripts \
