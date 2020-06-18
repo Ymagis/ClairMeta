@@ -58,6 +58,7 @@ setup(
         'pyopenssl',
         'pycountry',
         'shutilwhich',
+        'freetype-py'
     ],
 
     # 2.7 or 3.4+
