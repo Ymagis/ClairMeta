@@ -141,7 +141,9 @@ def parse_isdcf_string(str):
 
     # Parsing title with some robustness to missing / additionals fields
     # Find a match in nearby fields only
-    max_field_shift = 2
+    max_field_shift = 3
+
+    fields_matched = []
 
     for idx_field, field in enumerate(fields_list):
         matched = False
@@ -156,14 +158,11 @@ def parse_isdcf_string(str):
                     " rules : {}".format(field))
             elif match and idx_rule < max_field_shift:
                 fields_dict[name].update(match.groupdict(DEFAULT))
-                for idx_missing in range(idx_rule):
-                    error_list.append(
-                        "Field {} not found in ContentTitle".format(
-                            list(rules.keys())[idx_missing]))
             else:
                 continue
 
             fields_dict[name]['Value'] = field
+            fields_matched.append(name)
             sliced = islice(six.iteritems(rules), idx_rule + 1, None)
             rules = OrderedDict(sliced)
             matched = True
@@ -173,6 +172,11 @@ def parse_isdcf_string(str):
             error_list.append(
                 "ContentTitle Part {} not matching any naming convention field"
                 .format(field))
+
+    for name, _ in six.iteritems(RULES[dcnc_version]):
+        if name not in fields_matched:
+            error_list.append(
+                "Field {} not found in ContentTitle".format(name))
 
     fields_dict = post_parse_isdcf(fields_dict)
     return fields_dict, error_list
