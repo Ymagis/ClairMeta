@@ -12,14 +12,17 @@ from clairmeta.settings import DCP_SETTINGS
 class Checker(CheckerBase):
     def __init__(self, dcp, profile):
         super(Checker, self).__init__(dcp, profile)
+        self.fields = None
 
     def run_checks(self):
         for source in self.dcp._list_cpl:
-            valid, fields = self.run_check(self.check_dcnc_compliance, source)
-            if valid:
-                checks = self.find_check('dcnc_field')
-                [self.run_check(check, source, fields, message="{}".format(
-                    source['FileName'])) for check in checks]
+            msg_prefix = "{}".format(source['FileName'])
+            self.run_check(
+                self.check_dcnc_compliance, source, message=msg_prefix)
+
+            checks = self.find_check('dcnc_field')
+            [self.run_check(check, source, self.fields, message=msg_prefix)
+             for check in checks]
 
         return self.check_executions
 
@@ -27,11 +30,9 @@ class Checker(CheckerBase):
         """ Digital Cinema Naming Convention compliance (9.3). """
         cpl_node = playlist['Info']['CompositionPlaylist']
         ct = cpl_node['ContentTitleText']
-        fields, errors = parse_isdcf_string(ct)
+        self.fields, errors = parse_isdcf_string(ct)
         if errors:
-            raise CheckException('\n'.join(errors))
-
-        return fields
+            raise CheckException('\n\t\t' + '\n\t\t'.join(errors))
 
     def check_dcnc_field_redband(self, playlist, fields):
         """ RedBand qualifier is restricted to Trailer. """
