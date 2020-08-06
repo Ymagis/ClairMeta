@@ -402,7 +402,13 @@ class Checker(CheckerBase):
             return
 
         unique_chars = set()
-        all_text = [st.get('Text', '') for st in subtitles[0]]
+        all_text = []
+        for st in subtitles[0]:
+            if isinstance(st['Text'], str):
+                all_text.append(st['Text'])
+            else:
+                for st2 in st['Text']:
+                    all_text.append(st2['Text'])
         for text in all_text:
             for char in text:
                 unique_chars.add(char)
