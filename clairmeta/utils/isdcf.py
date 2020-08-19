@@ -225,7 +225,8 @@ def post_parse_isdcf(fields):
         fields['Standard']['Schema'] = schema_map[schema]
 
     # See Appendix 1. Subtitles
-    has_subtitle = fields['Language'].get('SubtitleLanguage') != 'XX'
+    st_lang = fields['Language'].get('SubtitleLanguage')
+    has_subtitle = st_lang != '' and st_lang != 'XX'
     has_burn_st = fields['Language'].get('SubtitleLanguage', '').islower()
     fields['Language']['BurnedSubtitle'] = has_burn_st
     fields['Language']['Subtitle'] = has_subtitle
