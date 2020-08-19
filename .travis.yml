@@ -35,9 +35,9 @@ install:
     - echo "deb https://mediaarea.net/repo/deb/ubuntu/ ${DISTRIB_CODENAME} main" | sudo tee /etc/apt/sources.list.d/mediaarea.list
 
     # clairmeta dependencies
+    - wget https://mediaarea.net/repo/deb/repo-mediaarea_1.0-13_all.deb && sudo dpkg -i repo-mediaarea_1.0-13_all.deb
     - sudo apt-get update
     - sudo apt-get -y install asdcplib mediainfo sox
-    - sudo apt-get -y install repo-mediaarea=1.0-9
 
     # install python environment
     - pip install pipenv codecov
