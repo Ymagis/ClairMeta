@@ -16,7 +16,9 @@ class Checker(CheckerBase):
 
     def run_checks(self):
         for source in self.dcp._list_cpl:
-            msg_prefix = "{}".format(source['FileName'])
+            msg_prefix = "{} ({})".format(
+                source['Info']['CompositionPlaylist']['ContentTitleText'],
+                source['FileName'])
             self.run_check(
                 self.check_dcnc_compliance, source, message=msg_prefix)
 
