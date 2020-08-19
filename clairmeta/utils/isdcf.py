@@ -137,7 +137,9 @@ def parse_isdcf_string(str):
 
     if len(fields_list) != 12:
         error_list.append(
-            "ContentTitle must have 12 parts, {} found".format(len(fields_list)))
+            "ContentTitle should have 12 parts to be fully compliant with"
+            " ISDCF naming convention version {}, {} part(s) found"
+            .format(dcnc_version, len(fields_list)))
 
     # Parsing title with some robustness to missing / additionals fields
     # Find a match in nearby fields only
