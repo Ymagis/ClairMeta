@@ -265,6 +265,13 @@ class Checker(CheckerBase):
 
             Reference : N/A
         """
+        def lookup_language(lang):
+            """ Detect language from `lang` name. """
+            if re.match(r"^[A-Za-z]{2}$", lang):
+                return pycountry.languages.get(alpha_2=lang)
+            else:
+                return pycountry.languages.lookup(lang)
+
         st_dict = self.st_util.get_subtitle_xml(asset, folder)
         if not st_dict:
             return
@@ -275,7 +282,7 @@ class Checker(CheckerBase):
             return
 
         try:
-            st_lang_obj = pycountry.languages.lookup(st_lang)
+            st_lang_obj = lookup_language(st_lang)
         except LookupError:
             raise CheckException("Subtitle language from XML could not "
                                  "be detected : {}".format(st_lang))
@@ -284,7 +291,7 @@ class Checker(CheckerBase):
         if not cpl_lang:
             return
 
-        cpl_lang_obj = pycountry.languages.lookup(cpl_lang)
+        cpl_lang_obj = lookup_language(cpl_lang)
         if not cpl_lang_obj:
             raise CheckException("Subtitle language from CPL could not "
                                  "be detected : {}".format(cpl_lang))
