@@ -87,16 +87,24 @@ def temporary_dir():
         shutil.rmtree(dirpath)
 
 
-def console_progress_bar(file_path, file_progress, total_progress, dcp_size, elapsed, done):
+def console_progress_bar(
+    file_path,
+    file_progress,
+    file_processed,
+    elapsed,
+    done,
+    total_processed,
+    total_size):
     """ Console Progress Bar callback for shaone_b64.
 
         Args:
             file_path (str): File absolute path.
             file_progress (float): Progression of current file, interval 0..1.
-            total_progress (float): Progression of all files in DCP, interval 0..1.
-            dcp_size (int): total size of dcp
+            file_processed (int): Progression of current file, in Bytes
             elapsed (float): Seconds elapsed.
             done (boolean): Completion status.
+            total_processed (int): Bytes currently processed
+            total_size (int): Total size in Bytes to process
 
     """
     col_width = 15
@@ -105,11 +113,11 @@ def console_progress_bar(file_path, file_progress, total_progress, dcp_size, ela
     if not done:
         file_progress_size = int(file_progress * col_width)
         file_eta_size = col_width - file_progress_size
+        total_progress = min(1, ((total_processed + file_processed) / total_size))
         total_progress_size = int(total_progress * col_width)
         total_eta_size = col_width - total_progress_size
 
-
-        sys.stdout.write("Total[{}] {:.2f}% - File[{}] {:.2f}% - {}\r".format(
+        sys.stdout.write("Total [{}] {:.2f}% - File [{}] {:.2f}% - {}\r".format(
             "{}{}".format('=' * total_progress_size, ' ' * total_eta_size),
             total_progress * 100.0,
             "{}{}".format('=' * file_progress_size, ' ' * file_eta_size),
@@ -127,13 +135,13 @@ def console_progress_bar(file_path, file_progress, total_progress, dcp_size, ela
         sys.stdout.write("\n")
 
 
-def shaone_b64(file_path, dcp_size, total_data_processed, callback=None):
+def shaone_b64(file_path, callback=None):
     """ Compute file hash using sha1 algorithm.
 
         Args:
             file_path (str): File absolute path.
-            callback (func): Callback function, see ``console_progress_bar``
-            for an example implementation.
+            callback (func, optional): Callback function, see
+              ``console_progress_bar`` for an example implementation.
 
         Returns:
             String representation of ``file`` sha1 (encoded in base 64).
@@ -160,12 +168,11 @@ def shaone_b64(file_path, dcp_size, total_data_processed, callback=None):
             run_size += BUF_SIZE
             sha1.update(data)
             progress = min(1, (run_size / file_size))
-            total_progress = min(1, ((total_data_processed + run_size) / dcp_size))
             if callback:
-                callback(file_path, progress, total_progress, dcp_size, time.time() - start, False)
+                callback(file_path, progress, run_size, time.time() - start, False)
 
     if callback:
-        callback(file_path, progress, total_progress, dcp_size, time.time() - start, True)
+        callback(file_path, progress, run_size, time.time() - start, True)
 
     # Encode base64 and remove carriage return
     sha1b64 = base64.b64encode(sha1.digest())

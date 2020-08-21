@@ -1,6 +1,7 @@
 # Clairmeta - (C) YMAGIS S.A.
 # See LICENSE for more information
 
+from functools import partial
 import os
 
 from clairmeta.utils.file import shaone_b64
@@ -13,7 +14,8 @@ class Checker(CheckerBase):
 
     def __init__(self, dcp, profile):
         super(Checker, self).__init__(dcp, profile)
-        self.total_data_processes = 0
+
+        self.total_processed = 0
 
     def run_checks(self):
         # Accumulate hash by UUID, useful for multi PKL package
@@ -106,9 +108,16 @@ class Checker(CheckerBase):
 
         asset_hash = asset['Hash']
         asset_id = asset['Id']
+
+        if self.hash_callback:
+            self.hash_callback = partial(
+                self.hash_callback,
+                total_processed=self.total_processed,
+                total_size=self.dcp.size)
+
         if asset_id not in self.hash_map:
-            self.hash_map[asset_id] = shaone_b64(path, self.dcp.size, self.total_data_processes, self.hash_callback)
-            self.total_data_processes += os.path.getsize(path)
+            self.hash_map[asset_id] = shaone_b64(path, self.hash_callback)
+            self.total_processed += os.path.getsize(path)
 
         if self.hash_map[asset_id] != asset_hash:
             raise CheckException(
