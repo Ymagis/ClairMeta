@@ -15,8 +15,6 @@ class Checker(CheckerBase):
     def __init__(self, dcp, profile):
         super(Checker, self).__init__(dcp, profile)
 
-        self.total_processed = 0
-
     def run_checks(self):
         # Accumulate hash by UUID, useful for multi PKL package
         self.hash_map = {}
@@ -109,15 +107,8 @@ class Checker(CheckerBase):
         asset_hash = asset['Hash']
         asset_id = asset['Id']
 
-        if self.hash_callback:
-            self.hash_callback = partial(
-                self.hash_callback,
-                total_processed=self.total_processed,
-                total_size=self.dcp.size)
-
         if asset_id not in self.hash_map:
             self.hash_map[asset_id] = shaone_b64(path, self.hash_callback)
-            self.total_processed += os.path.getsize(path)
 
         if self.hash_map[asset_id] != asset_hash:
             raise CheckException(
