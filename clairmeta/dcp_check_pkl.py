@@ -1,7 +1,6 @@
 # Clairmeta - (C) YMAGIS S.A.
 # See LICENSE for more information
 
-from functools import partial
 import os
 
 from clairmeta.utils.file import shaone_b64
