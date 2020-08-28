@@ -137,11 +137,15 @@ def parse_isdcf_string(str):
 
     if len(fields_list) != 12:
         error_list.append(
-            "ContentTitle must have 12 parts, {} found".format(len(fields_list)))
+            "ContentTitle should have 12 parts to be fully compliant with"
+            " ISDCF naming convention version {}, {} part(s) found"
+            .format(dcnc_version, len(fields_list)))
 
     # Parsing title with some robustness to missing / additionals fields
     # Find a match in nearby fields only
-    max_field_shift = 2
+    max_field_shift = 3
+
+    fields_matched = []
 
     for idx_field, field in enumerate(fields_list):
         matched = False
@@ -156,14 +160,11 @@ def parse_isdcf_string(str):
                     " rules : {}".format(field))
             elif match and idx_rule < max_field_shift:
                 fields_dict[name].update(match.groupdict(DEFAULT))
-                for idx_missing in range(idx_rule):
-                    error_list.append(
-                        "Field {} not found in ContentTitle".format(
-                            list(rules.keys())[idx_missing]))
             else:
                 continue
 
             fields_dict[name]['Value'] = field
+            fields_matched.append(name)
             sliced = islice(six.iteritems(rules), idx_rule + 1, None)
             rules = OrderedDict(sliced)
             matched = True
@@ -173,6 +174,11 @@ def parse_isdcf_string(str):
             error_list.append(
                 "ContentTitle Part {} not matching any naming convention field"
                 .format(field))
+
+    for name, _ in six.iteritems(RULES[dcnc_version]):
+        if name not in fields_matched:
+            error_list.append(
+                "Field {} not found in ContentTitle".format(name))
 
     fields_dict = post_parse_isdcf(fields_dict)
     return fields_dict, error_list
@@ -219,7 +225,8 @@ def post_parse_isdcf(fields):
         fields['Standard']['Schema'] = schema_map[schema]
 
     # See Appendix 1. Subtitles
-    has_subtitle = fields['Language'].get('SubtitleLanguage') != 'XX'
+    st_lang = fields['Language'].get('SubtitleLanguage')
+    has_subtitle = st_lang != '' and st_lang != 'XX'
     has_burn_st = fields['Language'].get('SubtitleLanguage', '').islower()
     fields['Language']['BurnedSubtitle'] = has_burn_st
     fields['Language']['Subtitle'] = has_subtitle
