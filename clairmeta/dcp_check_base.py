@@ -18,8 +18,10 @@ class CheckException(Exception):
 
 class CheckExecution(object):
     """ Check execution with status and time elapsed. """
+
     def __init__(self, name):
         self.name = name
+        self.doc = ""
         self.message = ""
         self.valid = False
         self.seconds_elapsed = 0
@@ -115,6 +117,7 @@ class CheckerBase(object):
         start = time.time()
         name, func = check.__name__, check
         check_exec = CheckExecution(name)
+        check_exec.doc = check.__doc__
         check_res = None
 
         try:
@@ -193,7 +196,9 @@ class CheckerBase(object):
                 if 'messages' not in node:
                     node['messages'] = []
 
-            node['messages'] += [c.msg]
+            docstring_lines = c.doc.split('\n')
+            desc = docstring_lines[0] if docstring_lines else c.name
+            node['messages'] += ['.' + desc + '\n' + c.msg]
 
         self.check_log.info("DCP : {}".format(self.dcp.path))
         self.check_log.info("Size : {}".format(human_size(self.dcp.size)))
@@ -243,8 +248,7 @@ class CheckerBase(object):
         messages = values.pop('messages', [])
 
         out_str = '' if indent_level == 0 else '\n'
-        out_str += indent_char * ind
-        out_str += '+ ' if indent_level == 0 else '- '
+        out_str += indent_char * ind + '+ '
         out_str += filename
         out_str += ' ' + desc if desc else ''
 
@@ -253,7 +257,7 @@ class CheckerBase(object):
             out_str += "\n"
             out_str += indent_char * ind
             # Correct indentation for multi-lines messages
-            out_str += ("\n" + indent_char * (ind + 1)).join(m.split("\n"))
+            out_str += ("\n" + indent_char * (ind + 2)).join(m.split("\n"))
         ind -= indent_step
 
         for k, v in six.iteritems(values):
