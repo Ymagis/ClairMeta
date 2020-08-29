@@ -34,7 +34,7 @@ class Checker(CheckerBase):
         ct = cpl_node['ContentTitleText']
         self.fields, errors = parse_isdcf_string(ct)
         if errors:
-            raise CheckException('\n\t\t' + '\n\t\t'.join(errors))
+            raise CheckException('ISDCF naming convention\n' + '\n'.join(errors))
 
     def check_dcnc_field_redband(self, playlist, fields):
         """ RedBand qualifier is restricted to Trailer. """
