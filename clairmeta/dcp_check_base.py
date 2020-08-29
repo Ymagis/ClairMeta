@@ -240,11 +240,7 @@ class CheckerBase(object):
         ind = indent_offset + indent_level
 
         filename = key
-        desc = ""
-        for cpl in self.dcp._list_cpl:
-            if cpl['FileName'] == filename:
-                desc = "({})".format(
-                    cpl['Info']['CompositionPlaylist']['ContentTitleText'])
+        desc = self.title_from_filename(filename)
         messages = values.pop('messages', [])
 
         out_str = '' if indent_level == 0 else '\n'
@@ -265,6 +261,23 @@ class CheckerBase(object):
                 out_str, k, v, indent_level + indent_step)
 
         return out_str
+
+    def title_from_filename(self, filename):
+        """ Returns a human friendly title for the given file. """
+        for cpl in self.dcp._list_cpl:
+            if cpl['FileName'] == filename:
+                desc = "({})".format(
+                    cpl['Info']['CompositionPlaylist'].get(
+                        'ContentTitleText', ''))
+                return desc
+
+        for pkl in self.dcp._list_pkl:
+            if pkl['FileName'] == filename:
+                desc = "({})".format(
+                    pkl['Info']['PackingList'].get('AnnotationText', ''))
+                return desc
+
+        return ''
 
     def get_valid(self):
         """ Check status is valid. """
