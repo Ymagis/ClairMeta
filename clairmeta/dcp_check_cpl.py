@@ -24,14 +24,16 @@ class Checker(CheckerBase):
 
     def run_checks(self):
         for source in self.dcp._list_cpl:
+            asset_stack = [source['FileName']]
+
             checks = self.find_check('cpl')
-            [self.run_check(check, source, message=source['FileName'])
+            [self.run_check(check, source, stack=asset_stack)
              for check in checks]
 
             asset_checks = self.find_check('assets_cpl')
-            [self.run_check(
-                check, source, asset, message="{} (Asset {})".format(
-                    source['FileName'], asset[1].get('Path', asset[1]['Id'])))
+            [self.run_check(check, source, asset,
+             stack=asset_stack + [
+                 asset[1].get('Path') or asset[1]['Id']])
              for asset in list_cpl_assets(source)
              for check in asset_checks]
 

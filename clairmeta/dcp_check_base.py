@@ -18,11 +18,13 @@ class CheckException(Exception):
 
 class CheckExecution(object):
     """ Check execution with status and time elapsed. """
-    def __init__(self, name='', msg='', valid=False, time=0):
+    def __init__(self, name):
         self.name = name
-        self.message = msg
-        self.valid = valid
-        self.seconds_elapsed = time
+        self.message = ""
+        self.valid = False
+        self.seconds_elapsed = 0
+        self.asset_stack = []
+        self.criticality = ""
 
 
 class CheckerBase(object):
@@ -48,13 +50,13 @@ class CheckerBase(object):
         self.hash_callback = None
 
     def find_check_criticality(self, name):
-        """ Find criticity of a particular check (using profile).
+        """ Find criticality of a particular check (using profile).
 
             Args:
                 name (str): Name of the check function.
 
             Returns:
-                Criticity level string.
+                Criticality level string.
 
         """
         check_level = self.check_profile['criticality']
@@ -104,7 +106,7 @@ class CheckerBase(object):
                 check (tuple): Tuple (function name, function).
                 *args: Variable list of check function arguments.
                 **kwargs: Variable list of keywords arguments.
-                    message (str): error message prefix
+                    error_prefix (str): error message prefix
 
             Returns:
                 Tuple (status, return_value)
@@ -120,16 +122,19 @@ class CheckerBase(object):
             check_exec.valid = True
             check_exec.msg = "Check valid"
         except CheckException as e:
-            if kwargs.get('message'):
-                msg = "{} : {}".format(kwargs.get('message'), str(e))
+            if kwargs.get('error_prefix'):
+                msg = "{}\n\t{}".format(kwargs.get('error_prefix'), str(e))
             else:
                 msg = str(e)
             check_exec.msg = msg
+            check_exec.criticality = self.find_check_criticality(name)
         except Exception as e:
             check_exec.msg = "Check unknown error\n{}".format(
                 traceback.format_exc())
+            check_exec.criticality = "ERROR"
             self.check_log.error(check_exec.msg)
         finally:
+            check_exec.asset_stack = kwargs.get('stack', [])
             check_exec.seconds_elapsed = time.time() - start
             self.check_executions.append(check_exec)
             return check_exec.valid, check_res
@@ -144,8 +149,7 @@ class CheckerBase(object):
         }
 
         for c in self.find_check_failed():
-            level = self.find_check_criticality(c.name)
-            self.check_report[level].append((c.name, c.msg))
+            self.check_report[c.criticality].append((c.name, c.msg))
 
         check_unique = set([c.name for c in self.check_executions])
         self.check_elapsed = {}
@@ -168,28 +172,94 @@ class CheckerBase(object):
             'WARNING': 'Warning(s)',
             'INFO': 'Info(s)',
             'SILENT': 'Supressed(s)',
+            'BYPASS': 'Bypass(s)',
         }
-        status_list = []
 
-        for status, label in six.iteritems(pretty_status):
-            checks = ["\t{} - {}".format(name, msg)
-                      for name, msg in self.check_report[status]]
-            if len(checks) > 0:
-                checks_str = '\n'.join(checks)
-                status_list.append("{} :\n{}".format(label, checks_str))
+        map_status = {
+            'ERROR': {},
+            'WARNING': {},
+            'INFO': {},
+            'SILENT': {},
+        }
 
-        bypass_list = self.check_profile['bypass']
-        if len(bypass_list) > 0:
-            bypass_list = ['\t' + b for b in bypass_list]
-            checks_str = '\n'.join(bypass_list)
-            status_list.append("Bypass(s) :\n{}".format(checks_str))
+        # Accumulate all failed check and stack them by asset
+        for c in self.find_check_failed():
+            node = map_status[c.criticality]
+            for filename in c.asset_stack:
+                if filename not in node:
+                    node[filename] = {}
+
+                node = node[filename]
+                node['messages'] = []
+
+            node['messages'] += [c.msg]
 
         self.check_log.info("DCP : {}".format(self.dcp.path))
         self.check_log.info("Size : {}".format(human_size(self.dcp.size)))
-        [self.check_log.info(msg) for msg in status_list]
+
+        for status, vals in six.iteritems(map_status):
+            out_stack = []
+            for k, v in six.iteritems(vals):
+                out_stack += [self.dump_stack("", k, v, indent_level=0)]
+            if out_stack:
+                self.check_log.info("{}\n{}".format(
+                    pretty_status[status] + ':',
+                    "\n".join(out_stack)))
+
+        if self.check_profile['bypass']:
+            checks_str = '  ' + '\n  '.join(self.check_profile['bypass'])
+            self.check_log.info("{}\n{}".format(
+                pretty_status['BYPASS'] + ':', checks_str))
+
         self.check_log.info("Total check : {}".format(self.total_check))
         self.check_log.info("Total time : {:.2f} sec".format(self.total_time))
         self.check_log.info("Validation : {}\n".format(valid_str))
+
+    def dump_stack(self, out_str, key, values, indent_level):
+        """ Recursively iterate through the error message stack.
+
+            Args:
+                out_str (str): Accumulate messages to ``out_str``
+                key (str): Filename of the current asset.
+                values (dict): Message stack to dump.
+                indent_level (int): Current indentation level.
+
+            Returns:
+                Output error message string
+
+        """
+        indent_offset = 2
+        indent_step = 2
+        indent_char = ' '
+        ind = indent_offset + indent_level
+
+        filename = key
+        desc = ""
+        for cpl in self.dcp._list_cpl:
+            if cpl['FileName'] == filename:
+                desc = "({})".format(
+                    cpl['Info']['CompositionPlaylist']['ContentTitleText'])
+        messages = values.pop('messages', [])
+
+        out_str = '' if indent_level == 0 else '\n'
+        out_str += indent_char * ind
+        out_str += '+ ' if indent_level == 0 else '- '
+        out_str += filename
+        out_str += ' ' + desc if desc else ''
+
+        ind += indent_step
+        for m in messages:
+            out_str += "\n"
+            out_str += indent_char * ind
+            # Correct indentation for multi-lines messages
+            out_str += ("\n" + indent_char * (ind + 1)).join(m.split("\n"))
+        ind -= indent_step
+
+        for k, v in six.iteritems(values):
+            out_str += self.dump_stack(
+                out_str, k, v, indent_level + indent_step)
+
+        return out_str
 
     def get_valid(self):
         """ Check status is valid. """

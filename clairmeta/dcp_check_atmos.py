@@ -13,11 +13,11 @@ class Checker(CheckerBase):
 
     def run_checks(self):
         for source in self.dcp._list_cpl:
-
             asset_checks = self.find_check('atmos_cpl')
-            [self.run_check(
-                check, source, asset, message="{} (Asset {})".format(
-                    source['FileName'], asset[1].get('Path', asset[1]['Id'])))
+            [self.run_check(check, source, asset,
+             stack=[
+                 source['FileName'],
+                 asset[1].get('Path') or asset[1]['Id']])
              for asset in list_cpl_assets(
                 source, filters='AuxData', required_keys=['Probe'])
              if asset[1]['Schema'] == 'Atmos'

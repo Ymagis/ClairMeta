@@ -12,7 +12,7 @@ class Checker(CheckerBase):
     def run_checks(self):
         for source in self.dcp._list_vol:
             checks = self.find_check('vol')
-            [self.run_check(check, source, message=source['FileName'])
+            [self.run_check(check, source, stack=[source['FileName']])
              for check in checks]
 
         return self.check_executions

@@ -88,7 +88,7 @@ class DCPChecker(CheckerBase):
 
         # Run own tests
         dcp_checks = self.find_check('dcp')
-        [self.run_check(c) for c in dcp_checks]
+        [self.run_check(c, stack=[self.dcp.path]) for c in dcp_checks]
         self.setup_dcp_link_ov()
 
         # Run external modules tests
