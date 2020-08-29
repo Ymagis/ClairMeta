@@ -190,7 +190,8 @@ class CheckerBase(object):
                     node[filename] = {}
 
                 node = node[filename]
-                node['messages'] = []
+                if 'messages' not in node:
+                    node['messages'] = []
 
             node['messages'] += [c.msg]
 
