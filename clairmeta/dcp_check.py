@@ -141,8 +141,7 @@ class DCPChecker(CheckerBase):
             for a in self.dcp._list_files
             if a not in list_asset_path]
         if self.dcp.foreign_files:
-            raise CheckException("Foreign files detected\n{}".format(
-                '\n'.join(self.dcp.foreign_files)))
+            raise CheckException('\n'.join(self.dcp.foreign_files))
 
     def check_dcp_multiple_am_or_vol(self):
         """ Only one AssetMap and VolIndex shall be present.
