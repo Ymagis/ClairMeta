@@ -17,7 +17,7 @@ from clairmeta.info import __version__
 from clairmeta.profile import load_profile, DCP_CHECK_PROFILE
 from clairmeta.settings import SEQUENCE_SETTINGS
 from clairmeta.utils.xml import prettyprint_xml
-from clairmeta.utils.file import console_progress_bar
+from clairmeta.utils.file import ConsoleProgress
 
 
 package_type_map = {
@@ -46,7 +46,7 @@ def cli_check(args):
             if args.log:
                 check_profile['log_level'] = args.log
             if args.progress:
-                callback = console_progress_bar
+                callback = ConsoleProgress
 
             status, _ = DCP(args.path, kdm=args.kdm, pkey=args.key).check(
                 profile=check_profile, ov_path=args.ov, hash_callback=callback)

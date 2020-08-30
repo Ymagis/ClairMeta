@@ -4,6 +4,7 @@
 import os
 import six
 import importlib
+import inspect
 
 from clairmeta.settings import DCP_CHECK_SETTINGS
 from clairmeta.profile import get_default_profile
@@ -29,7 +30,10 @@ class DCPChecker(CheckerBase):
         """
         super(DCPChecker, self).__init__(dcp, profile)
         self.ov_path = ov_path
+
         self.hash_callback = hash_callback
+        if self.hash_callback and inspect.isclass(self.hash_callback):
+            self.hash_callback = hash_callback(self.dcp.size)
 
         self.check_modules = {}
         self.load_modules()
