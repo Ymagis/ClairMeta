@@ -105,6 +105,7 @@ class Checker(CheckerBase):
 
         asset_hash = asset['Hash']
         asset_id = asset['Id']
+
         if asset_id not in self.hash_map:
             self.hash_map[asset_id] = shaone_b64(path, self.hash_callback)
 

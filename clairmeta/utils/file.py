@@ -87,36 +87,67 @@ def temporary_dir():
         shutil.rmtree(dirpath)
 
 
-def console_progress_bar(file_path, progress, elapsed, done):
-    """ Console Progress Bar callback for shaone_b64.
+class ConsoleProgress(object):
 
-        Args:
-            file_path (str): File absolute path.
-            progress (float): Progression, interval 0..1.
-            elapsed (float): Seconds elapsed.
-            done (boolean): Completion status.
+    def __init__(self, total_size):
+        """ ConsoleProgress constructor.
 
-    """
-    col_width = 50
+            Args:
+                total_size (int): Total size in Bytes to process
 
-    if not done:
-        progress_size = int(progress * col_width)
-        eta_size = col_width - progress_size
+        """
+        self.total_processed = 0
+        self.total_size = total_size
+        self.total_elapsed = 0
 
-        sys.stdout.write("[{}] {:.2f}% - {}\r".format(
-            "{}{}".format('=' * progress_size, ' ' * eta_size),
-            progress * 100.,
-            os.path.basename(file_path)))
-        sys.stdout.flush()
-    else:
-        file_size = os.path.getsize(file_path)
-        speed_report = "{} in {:.2f} sec (at {:.2f} MBytes/s)".format(
-            human_size(file_size), elapsed, (file_size / 1e6) / elapsed)
+    def __call__(self, file_path, file_processed, file_size, file_elapsed):
+        """ Callback for shaone_b64.
 
-        sys.stdout.write("[  {}] 100.00% - {}\r".format(
-            speed_report.ljust(col_width - 2),
-            os.path.basename(file_path)))
-        sys.stdout.write("\n")
+            Args:
+                file_path (str): File absolute path.
+                file_processed (int): Bytes processed for the current file
+                file_size (int): Size of the current file
+                file_elapsed (float): Seconds elapsed for the current file
+
+        """
+        col_width = 15
+        complete_col_width = 60
+
+        if file_processed != file_size:
+            elapsed = self.total_elapsed + file_elapsed
+            processed = self.total_processed + file_processed
+
+            file_progress = min(1, (file_processed / file_size))
+            file_progress_size = int(file_progress * col_width)
+            file_bar_size = col_width - file_progress_size
+
+            total_progress = min(1, (processed / self.total_size))
+            total_progress_size = int(total_progress * col_width)
+            total_bar_size = col_width - total_progress_size
+
+            eta_sec = (self.total_size - processed) / (processed / elapsed)
+            eta_str = time.strftime("%H:%M:%S", time.gmtime(eta_sec))
+
+            sys.stdout.write("ETA {} [{}] {:.2f}% - File [{}] {:.2f}% - {}\r".format(
+                eta_str,
+                "{}{}".format('=' * total_progress_size, ' ' * total_bar_size),
+                total_progress * 100.0,
+                "{}{}".format('=' * file_progress_size, ' ' * file_bar_size),
+                file_progress * 100.0,
+                os.path.basename(file_path)))
+            sys.stdout.flush()
+        else:
+            file_size = os.path.getsize(file_path)
+            speed_report = "{} in {:.2f} sec (at {:.2f} MBytes/s)".format(
+                human_size(file_size), file_elapsed, (file_size / 1e6) / file_elapsed)
+
+            sys.stdout.write("[  {}] 100.00% - {}\r".format(
+                speed_report.ljust(complete_col_width - 2),
+                os.path.basename(file_path)))
+            sys.stdout.write("\n")
+
+            self.total_processed += file_size
+            self.total_elapsed += file_elapsed
 
 
 def shaone_b64(file_path, callback=None):
@@ -124,8 +155,8 @@ def shaone_b64(file_path, callback=None):
 
         Args:
             file_path (str): File absolute path.
-            callback (func): Callback function, see ``console_progress_bar``
-            for an example implementation.
+            callback (func, optional): Callback function, see
+              ``console_progress_bar`` for an example implementation.
 
         Returns:
             String representation of ``file`` sha1 (encoded in base 64).
@@ -142,6 +173,7 @@ def shaone_b64(file_path, callback=None):
     run_size = 0
     sha1 = hashlib.sha1()
     start = time.time()
+    last_cb_time = 0
 
     with open(file_path, 'rb') as f:
         while True:
@@ -149,15 +181,14 @@ def shaone_b64(file_path, callback=None):
             if not data:
                 break
 
-            run_size += BUF_SIZE
+            run_size += len(data)
             sha1.update(data)
-            progress = min(1, (run_size / file_size))
 
-            if callback:
-                callback(file_path, progress, time.time() - start, False)
-
-    if callback:
-        callback(file_path, progress, time.time() - start, True)
+            call_cb = time.time() - last_cb_time > 0.2
+            complete = run_size == file_size
+            if callback and (call_cb or complete):
+                last_cb_time = time.time()
+                callback(file_path, run_size, file_size, time.time() - start)
 
     # Encode base64 and remove carriage return
     sha1b64 = base64.b64encode(sha1.digest())

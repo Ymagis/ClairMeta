@@ -108,8 +108,8 @@ As a python library :
     status, report = dcp.check(ov_path="/path/to/dcp_ov")
 
     # Check DCP with console progression report
-    from clairmeta.utils.file import console_progress_bar
-    status, report = dcp.check(hash_callback=console_progress_bar)
+    from clairmeta.utils.file import ConsoleProgress
+    status, report = dcp.check(hash_callback=ConsoleProgress)
 
 Profiles
 ~~~~~~~~
