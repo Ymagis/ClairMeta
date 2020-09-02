@@ -137,7 +137,7 @@ class CheckerBase(object):
             check_exec.criticality = "ERROR"
             self.check_log.error(check_exec.msg)
         finally:
-            check_exec.asset_stack = kwargs.get('stack', [])
+            check_exec.asset_stack = kwargs.get('stack', [self.dcp.path])
             check_exec.seconds_elapsed = time.time() - start
             self.check_executions.append(check_exec)
             return check_exec.valid, check_res
