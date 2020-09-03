@@ -175,8 +175,11 @@ class Checker(CheckerBase):
                 cpl, filters='Subtitle', required_keys=['Path'])
 
             for asset in assets:
+                stack = [cpl['FileName'], asset[1].get('Path', asset[1]['Id'])]
+
                 checks = self.find_check('subtitle_dcp')
-                [self.run_check(check, cpl, asset) for check in checks]
+                [self.run_check(check, cpl, asset, stack=stack) for check in checks]
+
                 checks = self.find_check('subtitle_cpl')
                 self.run_checks_prepare(checks, cpl, asset)
 
@@ -186,6 +189,8 @@ class Checker(CheckerBase):
         _, asset_node = asset
         path = os.path.join(self.dcp.path, asset_node['Path'])
         can_unwrap = path.endswith('.mxf') and os.path.isfile(path)
+
+        asset_stack = [cpl['FileName'], asset[1].get('Path', asset[1]['Id'])]
 
         if self.dcp.schema == 'SMPTE' and can_unwrap:
             unwrap_args = []
@@ -199,15 +204,12 @@ class Checker(CheckerBase):
                 return
 
             with unwrap_mxf(path, args=unwrap_args) as folder:
-                [self.run_check(
-                    check, cpl, asset, folder, message="{} (Asset {})".format(
-                        cpl['FileName'], asset[1].get('Path', asset[1]['Id'])))
-                    for check in checks]
+                [self.run_check(check, cpl, asset, folder, stack=asset_stack)
+                 for check in checks]
+
         elif self.dcp.schema == 'Interop':
             folder = os.path.dirname(path)
-            [self.run_check(
-                check, cpl, asset, folder, message="{} (Asset {})".format(
-                    cpl['FileName'], asset[1].get('Path', asset[1]['Id'])))
+            [self.run_check(check, cpl, asset, folder, stack=asset_stack)
              for check in checks]
 
     def check_subtitle_dcp_format(self, playlist, asset):

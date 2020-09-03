@@ -30,7 +30,7 @@ class DCPChecker(CheckerBase):
         """
         super(DCPChecker, self).__init__(dcp, profile)
         self.ov_path = ov_path
-
+        self.ov_dcp = None
         self.hash_callback = hash_callback
         if self.hash_callback and inspect.isclass(self.hash_callback):
             self.hash_callback = hash_callback(self.dcp.size)
@@ -88,7 +88,7 @@ class DCPChecker(CheckerBase):
 
         # Run own tests
         dcp_checks = self.find_check('dcp')
-        [self.run_check(c) for c in dcp_checks]
+        [self.run_check(c, stack=[self.dcp.path]) for c in dcp_checks]
         self.setup_dcp_link_ov()
 
         # Run external modules tests
@@ -141,8 +141,7 @@ class DCPChecker(CheckerBase):
             for a in self.dcp._list_files
             if a not in list_asset_path]
         if self.dcp.foreign_files:
-            raise CheckException("Foreign files detected : {}".format(
-                self.dcp.foreign_files))
+            raise CheckException('\n'.join(self.dcp.foreign_files))
 
     def check_dcp_multiple_am_or_vol(self):
         """ Only one AssetMap and VolIndex shall be present.
@@ -165,10 +164,12 @@ class DCPChecker(CheckerBase):
         if not self.ov_path:
             return
 
-        self.run_check(self.check_link_ov_coherence)
+        self.run_check(self.check_link_ov_coherence, stack=[self.dcp.path])
         for cpl in self.dcp._list_cpl:
             for essence, asset in list_cpl_assets(cpl):
-                self.run_check(self.check_link_ov_asset, asset, essence)
+                self.run_check(
+                    self.check_link_ov_asset,
+                    asset, essence, stack=[self.dcp.path])
 
     def check_dcp_signed(self):
         """ DCP with encrypted content must be digitally signed.
@@ -208,6 +209,9 @@ class DCPChecker(CheckerBase):
 
             Reference : N/A
         """
+        if not self.ov_dcp:
+            return
+
         ov_dcp_dict = self.ov_dcp.parse()
 
         if not asset.get('Path'):

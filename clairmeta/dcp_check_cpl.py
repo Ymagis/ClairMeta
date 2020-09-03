@@ -24,14 +24,16 @@ class Checker(CheckerBase):
 
     def run_checks(self):
         for source in self.dcp._list_cpl:
+            asset_stack = [source['FileName']]
+
             checks = self.find_check('cpl')
-            [self.run_check(check, source, message=source['FileName'])
+            [self.run_check(check, source, stack=asset_stack)
              for check in checks]
 
             asset_checks = self.find_check('assets_cpl')
-            [self.run_check(
-                check, source, asset, message="{} (Asset {})".format(
-                    source['FileName'], asset[1].get('Path', asset[1]['Id'])))
+            [self.run_check(check, source, asset,
+             stack=asset_stack + [
+                 asset[1].get('Path') or asset[1]['Id']])
              for asset in list_cpl_assets(source)
              for check in asset_checks]
 
@@ -183,10 +185,12 @@ class Checker(CheckerBase):
             'SoundLanguage',
         ]
 
+        errors = []
         for k in coherence_keys:
             if cpl[k] == "Mixed":
-                raise CheckException(
-                    "{} is not coherent for all reels".format(k))
+                errors.append("{} is not coherent for all reels".format(k))
+        if errors:
+            raise CheckException("\n".join(errors))
 
     def check_cpl_reel_coherence_encryption(self, playlist):
         """ Encryption should be coherent across all reeels.
@@ -206,13 +210,15 @@ class Checker(CheckerBase):
             Reference :
                 SMPTE 429-7-2006 9.2
         """
+        errors = []
         for reel in playlist['Info']['CompositionPlaylist']['ReelList']:
             pic = reel['Assets']['Picture']
             edit = pic['EditRate']
             if pic['Duration'] < edit or pic['IntrinsicDuration'] < edit:
-                raise CheckException(
-                    "Reel {} last less than one second".format(
-                        reel['Position']))
+                errors.append("Reel {} last less than one second".format(
+                    reel['Position']))
+        if errors:
+            raise CheckException("\n".join(errors))
 
     def check_cpl_reel_duration_picture_sound(self, playlist):
         """ CPL reels picture and audio tracks duration shall match.
@@ -264,6 +270,7 @@ class Checker(CheckerBase):
         cpl_position = 0
         cut_keys = ['CPLEntryPoint', 'CPLOutPoint', 'Duration']
 
+        errors = []
         for reel in playlist['Info']['CompositionPlaylist']['ReelList']:
             assets = [
                 v for k, v in six.iteritems(reel['Assets'])
@@ -278,14 +285,17 @@ class Checker(CheckerBase):
                 pos_reel = reel['Position']
 
                 if start != cpl_position:
-                    raise CheckException(
+                    errors.append(
                         "Invalid CPLEntryPoint in Reel {}".format(pos_reel))
 
                 if end - start != dur:
-                    raise CheckException(
+                    errors.append(
                         "Invalid Duration in Reel {}".format(pos_reel))
 
             cpl_position += assets[0]['Duration']
+
+        if errors:
+            raise CheckException("\n".join(errors))
 
     def check_assets_cpl_missing_from_vf(self, playlist, asset):
         """ CPL assets referencing external package.
@@ -419,21 +429,25 @@ class Checker(CheckerBase):
             'KeyId': 'CryptographicKeyID',
         }
 
-        if 'Probe' in asset:
-            for k, v in six.iteritems(metadata_map):
-                if k in asset and v in asset['Probe']:
-                    cpl_val = asset[k]
-                    mxf_val = asset['Probe'][v]
-                    is_float = type(cpl_val) is float or type(mxf_val) is float
+        if 'Probe' not in asset:
+            return
 
-                    matching = is_float and compare_ratio(cpl_val, mxf_val)
-                    matching = matching or not is_float and cpl_val == mxf_val
-                    if not matching:
-                        raise CheckException(
-                            "{} metadata mismatch, CPL claims {} but MXF {}"
-                            .format(k, cpl_val, mxf_val))
-                if k in asset and v not in asset['Probe']:
-                    raise CheckException("Missing MXF Metadata {}".format(v))
-                if k not in asset and v in asset['Probe']:
-                    raise CheckException("Missing CPL Metadata {} for asset {}"
-                                         "".format(k))
+        errors = []
+        for k, v in six.iteritems(metadata_map):
+            if k in asset and v in asset['Probe']:
+                cpl_val = asset[k]
+                mxf_val = asset['Probe'][v]
+                is_float = type(cpl_val) is float or type(mxf_val) is float
+
+                matching = is_float and compare_ratio(cpl_val, mxf_val)
+                matching = matching or not is_float and cpl_val == mxf_val
+                if not matching:
+                    errors.append(
+                        "{} metadata mismatch, CPL claims {} but MXF {}"
+                        .format(k, cpl_val, mxf_val))
+            if k in asset and v not in asset['Probe']:
+                errors.append("Missing MXF Metadata {}".format(v))
+            if k not in asset and v in asset['Probe']:
+                errors.append("Missing CPL Metadata {} for asset {}".format(k))
+        if errors:
+            raise CheckException("\n".join(errors))

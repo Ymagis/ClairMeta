@@ -74,6 +74,20 @@ class CliTest(unittest.TestCase):
             '-type', 'dcp', '-log', 'CRITICAL'])
         self.assertTrue(status)
 
+    def test_dcp_check_good_relink(self):
+        status, msg = self.launch_command([
+            'check', self.get_dcp_path(2),
+            '-type', 'dcp', '-log', 'CRITICAL',
+            '-ov', self.get_dcp_path(1)])
+        self.assertTrue(status)
+
+    def test_dcp_check_wrong_relink(self):
+        status, msg = self.launch_command([
+            'check', self.get_dcp_path(1),
+            '-type', 'dcp', '-log', 'CRITICAL',
+            '-ov', self.get_dcp_path(2)])
+        self.assertFalse(status)
+
     def test_dcp_check_bad(self):
         status, msg = self.launch_command([
             'check', self.get_dcp_path(25),

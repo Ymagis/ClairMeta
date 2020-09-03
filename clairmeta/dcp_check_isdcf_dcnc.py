@@ -16,14 +16,12 @@ class Checker(CheckerBase):
 
     def run_checks(self):
         for source in self.dcp._list_cpl:
-            msg_prefix = "{} ({})".format(
-                source['Info']['CompositionPlaylist']['ContentTitleText'],
-                source['FileName'])
+            asset_stack = [source['FileName']]
             self.run_check(
-                self.check_dcnc_compliance, source, message=msg_prefix)
+                self.check_dcnc_compliance, source, stack=asset_stack)
 
             checks = self.find_check('dcnc_field')
-            [self.run_check(check, source, self.fields, message=msg_prefix)
+            [self.run_check(check, source, self.fields, stack=asset_stack)
              for check in checks]
 
         return self.check_executions
@@ -34,7 +32,7 @@ class Checker(CheckerBase):
         ct = cpl_node['ContentTitleText']
         self.fields, errors = parse_isdcf_string(ct)
         if errors:
-            raise CheckException('\n\t\t' + '\n\t\t'.join(errors))
+            raise CheckException('\n'.join(errors))
 
     def check_dcnc_field_redband(self, playlist, fields):
         """ RedBand qualifier is restricted to Trailer. """

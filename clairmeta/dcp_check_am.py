@@ -15,15 +15,16 @@ class Checker(CheckerBase):
 
     def run_checks(self):
         for source in self.dcp._list_am:
+            asset_stack = [source['FileName']]
+
             checks = self.find_check('am')
-            [self.run_check(check, source, message=source['FileName'])
+            [self.run_check(check, source, stack=asset_stack)
              for check in checks]
 
             asset_checks = self.find_check('assets_am')
             [self.run_check(
-                check, source, asset, message="{} (Asset {})".format(
-                    source['FileName'],
-                    asset[2]['ChunkList']['Chunk']['Path']))
+                check, source, asset,
+                stack=asset_stack + [asset[2]['ChunkList']['Chunk']['Path']])
              for asset in list_am_assets(source)
              for check in asset_checks]
 

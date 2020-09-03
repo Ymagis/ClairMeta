@@ -19,14 +19,15 @@ class Checker(CheckerBase):
         self.hash_map = {}
 
         for source in self.dcp._list_pkl:
+            asset_stack = [source['FileName']]
+
             checks = self.find_check('pkl')
-            [self.run_check(check, source, message=source['FileName'])
+            [self.run_check(check, source, stack=asset_stack)
              for check in checks]
 
             asset_checks = self.find_check('assets_pkl')
-            [self.run_check(
-                check, source, asset, message="{} (Asset {})".format(
-                    source['FileName'], asset[2].get('Path', asset[2]['Id'])))
+            [self.run_check(check, source, asset,
+             stack=asset_stack + [asset[2].get('Path', asset[2]['Id'])])
              for asset in list_pkl_assets(source)
              for check in asset_checks]
 

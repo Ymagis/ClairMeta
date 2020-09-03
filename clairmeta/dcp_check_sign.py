@@ -112,6 +112,8 @@ class Checker(CheckerBase):
         sources = self.dcp._list_pkl + self.dcp._list_cpl
 
         for source in sources:
+            asset_stack = [source['FileName']]
+
             if 'PackingList' in source['Info']:
                 source_xml = source['Info']['PackingList']
             else:
@@ -129,26 +131,22 @@ class Checker(CheckerBase):
                 self.cert_store.add_cert(cert_x509)
                 self.cert_list.append(cert_x509)
 
-                [self.run_check(
-                    check, cert_x509, index,
-                    message="{} (Certificate : {})".format(
-                        source['FileName'], cert_x509.get_serial_number()))
+                stack = asset_stack + ["Certificate {}".format(
+                    cert_x509.get_serial_number())]
+
+                [self.run_check(check, cert_x509, index, stack=stack)
                  for check in self.find_check('certif')]
 
-                [self.run_check(
-                    check, cert_x509, cert,
-                    message="{} (Certificate : {})".format(
-                        source['FileName'], cert_x509.get_serial_number()))
+                [self.run_check(check, cert_x509, cert, stack=stack)
                  for check in self.find_check('xml_certif')]
 
             checks = self.find_check('sign')
-            [self.run_check(check, source_xml, message=source['FileName'])
+            [self.run_check(check, source_xml, stack=asset_stack)
              for check in checks]
 
             checks = self.find_check('document')
-            [self.run_check(
-                check, source_xml,
-                source['FilePath'], message=source['FileName'])
+            [self.run_check(check, source_xml,
+                source['FilePath'], stack=asset_stack)
              for check in checks]
 
         return self.check_executions
