@@ -159,7 +159,16 @@ def cpl_reels_parse(cpl_node):
         for key, val in six.iteritems(asset_mapping):
             if key in assetlist:
                 out_reel['Assets'][val] = assetlist[key]
+
                 asset = out_reel['Assets'][val]
+                # Duplicated assets is a fatal error
+                if isinstance(asset, list):
+                    raise Exception(
+                        "Duplicated {} asset in CPL {}, Reel {}".format(
+                            key,
+                            cpl_node.get('ContentTitleText', ''),
+                            pos))
+
                 discover_schema(asset)
 
                 # Encryption
