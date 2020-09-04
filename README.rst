@@ -107,9 +107,12 @@ As a python library :
     # Check DCP VF against OV
     status, report = dcp.check(ov_path="/path/to/dcp_ov")
 
-    # Check DCP with console progression report
+    # Check DCP with default console progression report
     from clairmeta.utils.file import ConsoleProgress
-    status, report = dcp.check(hash_callback=ConsoleProgress)
+    status, report = dcp.check(hash_callback=ConsoleProgress())
+    # Alternatives
+    # - function matching utils.file.ConsoleProgress.__call__ signature
+    # - derived class from utils.file.ConsoleProgress
 
 Profiles
 ~~~~~~~~
