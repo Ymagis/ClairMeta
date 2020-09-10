@@ -153,10 +153,12 @@ class SubtitleUtils(object):
 
         if isinstance(node, list):
             for elem in node:
-                text += self.extract_subtitle_text(elem, text)
+                text += self.extract_subtitle_text(elem, [])
         elif isinstance(node, dict):
-            text += self.extract_subtitle_text(node.get('Font', ''), text)
-            text += self.extract_subtitle_text(node.get('Text', ''), text)
+            if 'Font' in node:
+                text += self.extract_subtitle_text(node['Font'], [])
+            if 'Text' in node:
+                text += self.extract_subtitle_text(node['Text'], [])
         else:
             text += [node]
 
