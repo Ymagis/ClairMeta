@@ -187,7 +187,7 @@ Contributing
    pipenv shell
    # Code...
    # Get tests resources
-   git clone https://github.com/Ymagis/ClairMeta_Data tests/resources 
+   git clone https://github.com/Ymagis/ClairMeta_Data tests/resources
    # Run tests
    nosetests --nocapture --with-doctest --doctest-options=+ELLIPSIS --with-coverage --cover-package=clairmeta
    # Leave virtual environment
