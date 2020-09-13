@@ -148,19 +148,21 @@ class SubtitleUtils(object):
 
         return path, uri
 
-    def extract_subtitle_text(self, node, out_text):
+    def extract_subtitle_text(self, node):
         text = []
 
         if isinstance(node, list):
             for elem in node:
-                text += self.extract_subtitle_text(elem, text)
+                text += self.extract_subtitle_text(elem)
         elif isinstance(node, dict):
-            text += self.extract_subtitle_text(node.get('Font', ''), text)
-            text += self.extract_subtitle_text(node.get('Text', ''), text)
+            if 'Font' in node:
+                text = self.extract_subtitle_text(node['Font'])
+            if 'Text' in node:
+                text = self.extract_subtitle_text(node['Text'])
         else:
-            text += [node]
+            text = [node]
 
-        return out_text + text
+        return text
 
 
 class Checker(CheckerBase):
@@ -428,7 +430,7 @@ class Checker(CheckerBase):
         # Subtitle Text and Font hierarchy. Note that here we just
         # recursively iterate to extract all relevant childs whitout
         # checking if the specific hierarchy is valid or not.
-        all_text = self.st_util.extract_subtitle_text(subtitles[0], [])
+        all_text = self.st_util.extract_subtitle_text(subtitles[0])
         unique_chars = set()
         for text in all_text:
             for char in text:

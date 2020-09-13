@@ -10,6 +10,7 @@ from clairmeta.settings import DCP_CHECK_SETTINGS
 from clairmeta.profile import get_default_profile
 from clairmeta.dcp_utils import list_cpl_assets, cpl_probe_asset
 from clairmeta.dcp_check_base import CheckerBase, CheckException
+from clairmeta.utils.file import ConsoleProgress
 from clairmeta.utils.sys import all_keys_in_dict
 
 
@@ -31,9 +32,16 @@ class DCPChecker(CheckerBase):
         super(DCPChecker, self).__init__(dcp, profile)
         self.ov_path = ov_path
         self.ov_dcp = None
+
         self.hash_callback = hash_callback
-        if self.hash_callback and inspect.isclass(self.hash_callback):
-            self.hash_callback = hash_callback(self.dcp.size)
+        if not self.hash_callback:
+            pass
+        elif isinstance(self.hash_callback, ConsoleProgress):
+            self.hash_callback._total_size = self.dcp.size
+        elif inspect.isclass(self.hash_callback):
+            raise CheckException(
+                "Invalid callback, please provide a function"
+                " or instance of ConsoleProgress (or derivate).")
 
         self.check_modules = {}
         self.load_modules()

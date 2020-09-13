@@ -46,7 +46,7 @@ def cli_check(args):
             if args.log:
                 check_profile['log_level'] = args.log
             if args.progress:
-                callback = ConsoleProgress
+                callback = ConsoleProgress()
 
             status, _ = DCP(args.path, kdm=args.kdm, pkey=args.key).check(
                 profile=check_profile, ov_path=args.ov, hash_callback=callback)

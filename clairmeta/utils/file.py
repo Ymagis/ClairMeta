@@ -89,15 +89,11 @@ def temporary_dir():
 
 class ConsoleProgress(object):
 
-    def __init__(self, total_size):
-        """ ConsoleProgress constructor.
+    def __init__(self):
+        """ ConsoleProgress constructor. """
+        self._total_size = None
 
-            Args:
-                total_size (int): Total size in Bytes to process
-
-        """
         self.total_processed = 0
-        self.total_size = total_size
         self.total_elapsed = 0
 
     def __call__(self, file_path, file_processed, file_size, file_elapsed):
@@ -121,11 +117,11 @@ class ConsoleProgress(object):
             file_progress_size = int(file_progress * col_width)
             file_bar_size = col_width - file_progress_size
 
-            total_progress = min(1, (processed / self.total_size))
+            total_progress = min(1, (processed / self._total_size))
             total_progress_size = int(total_progress * col_width)
             total_bar_size = col_width - total_progress_size
 
-            eta_sec = (self.total_size - processed) / (processed / elapsed)
+            eta_sec = (self._total_size - processed) / (processed / elapsed)
             eta_str = time.strftime("%H:%M:%S", time.gmtime(eta_sec))
 
             sys.stdout.write("ETA {} [{}] {:.2f}% - File [{}] {:.2f}% - {}\r".format(
