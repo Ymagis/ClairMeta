@@ -12,6 +12,12 @@ from clairmeta.settings import DCP_SETTINGS
 from clairmeta.logger import get_log
 
 
+class ProbeException(Exception):
+    """ Raised when probing a DCP fails. """
+    def __init__(self, msg):
+        super(ProbeException, self).__init__(six.ensure_str(msg))
+
+
 def discover_schema(node):
     """ Assign file Schema using detected namespace """
     xmlns = node.get('__xmlns__', None)
@@ -163,7 +169,7 @@ def cpl_reels_parse(cpl_node):
                 asset = out_reel['Assets'][val]
                 # Duplicated assets is a fatal error
                 if isinstance(asset, list):
-                    raise Exception(
+                    raise ProbeException(
                         "Duplicated {} asset in CPL {}, Reel {}".format(
                             key,
                             cpl_node.get('ContentTitleText', ''),
