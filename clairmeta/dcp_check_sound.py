@@ -23,7 +23,7 @@ class Checker(CheckerBase):
                 source, filters='Sound', required_keys=['Probe'])
              for check in asset_checks]
 
-        return self.check_executions
+        return self.checks
 
     def check_sound_cpl_channels(self, playlist, asset):
         """ Sound max channels count.

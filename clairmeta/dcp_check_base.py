@@ -45,9 +45,9 @@ class CheckerBase(object):
 
         """
         self.dcp = dcp
-        self.check_profile = profile
-        self.check_log = get_log()
-        self.check_executions = []
+        self.profile = profile
+        self.log = get_log()
+        self.checks = []
         self.check_report = {}
         self.hash_callback = None
 
@@ -61,7 +61,7 @@ class CheckerBase(object):
                 Criticality level string.
 
         """
-        check_level = self.check_profile['criticality']
+        check_level = self.profile['criticality']
         default = check_level.get('default', 'ERROR')
         score_profile = {
             0: default
@@ -85,7 +85,7 @@ class CheckerBase(object):
 
         """
         member_list = inspect.getmembers(self, predicate=inspect.ismethod)
-        bypass = self.check_profile['bypass']
+        bypass = self.profile['bypass']
 
         checks = []
         for k, v in member_list:
@@ -139,7 +139,7 @@ class CheckerBase(object):
         finally:
             check_exec.asset_stack = kwargs.get('stack', [self.dcp.path])
             check_exec.seconds_elapsed = time.time() - start
-            self.check_executions.append(check_exec)
+            self.checks.append(check_exec)
             return check_exec.valid, check_res
 
     def make_report(self):

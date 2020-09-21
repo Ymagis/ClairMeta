@@ -15,7 +15,7 @@ class Checker(CheckerBase):
             [self.run_check(check, source, stack=[source['FileName']])
              for check in checks]
 
-        return self.check_executions
+        return self.checks
 
     def check_vol_xml(self, vol):
         """ VolIndex XML syntax and structure check.

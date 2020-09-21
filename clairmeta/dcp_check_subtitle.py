@@ -185,7 +185,7 @@ class Checker(CheckerBase):
                 checks = self.find_check('subtitle_cpl')
                 self.run_checks_prepare(checks, cpl, asset)
 
-        return self.check_executions
+        return self.checks
 
     def run_checks_prepare(self, checks, cpl, asset):
         _, asset_node = asset

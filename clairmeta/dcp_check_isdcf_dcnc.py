@@ -24,7 +24,7 @@ class Checker(CheckerBase):
             [self.run_check(check, source, self.fields, stack=asset_stack)
              for check in checks]
 
-        return self.check_executions
+        return self.checks
 
     def check_dcnc_compliance(self, playlist):
         """ Digital Cinema Naming Convention compliance (9.3). """

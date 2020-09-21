@@ -28,7 +28,7 @@ class Checker(CheckerBase):
              for asset in list_cpl_assets(source, filters='Picture')
              for check in asset_checks]
 
-        return self.check_executions
+        return self.checks
 
     def get_picture_max_bitrate(self, playlist, asset):
         bitrate_map = {

@@ -28,7 +28,7 @@ class Checker(CheckerBase):
              for asset in list_am_assets(source)
              for check in asset_checks]
 
-        return self.check_executions
+        return self.checks
 
     def check_am_xml(self, am):
         """ AssetMap XML syntax and structure check.
