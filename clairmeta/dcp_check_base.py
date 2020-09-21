@@ -5,6 +5,7 @@ import six
 import time
 import inspect
 import traceback
+from datetime import datetime
 
 from clairmeta.logger import get_log
 from clairmeta.utils.file import human_size
@@ -17,16 +18,60 @@ class CheckException(Exception):
 
 
 class CheckExecution(object):
-    """ Check execution with status and time elapsed. """
+    """ Check execution with status and related metadatas. """
 
-    def __init__(self, name):
-        self.name = name
-        self.doc = ""
+    def __init__(self, func):
+        """ Constructor for CheckExecution.
+
+            Args:
+                func (function): Check function.
+
+        """
+        self.name = func.__name__
+        self.doc = func.__doc__
         self.message = ""
         self.valid = False
+        self.bypass = False
         self.seconds_elapsed = 0
         self.asset_stack = []
         self.criticality = ""
+
+    def short_desc(self):
+        """ Returns first line of the docstring or function name. """
+        docstring_lines = self.doc.split('\n')
+        return docstring_lines[0] if docstring_lines else c.name
+
+
+class CheckReport(object):
+    """ Check report listing all checks executions. """
+
+    def __init(self):
+        """ Constructor for CheckReport. """
+        self.checks = []
+        self.profile = ""
+        self.date = ""
+        self.duration = ""
+
+    def checks_count(self):
+        """ Return the number of different checks executed. """
+        check_unique = set([c.name for c in self.checks if not c.bypass])
+        return len(check_unique)
+
+    def checks_failed(self):
+        """ Returns a list of all failed checks. """
+        return [c for c in self.checks if not c.valid if not c.bypass]
+
+    def checks_succeeded(self):
+        """ Returns a list of all succeeded checks. """
+        return [c for c in self.checks if c.valid if not c.bypass]
+
+    def checks_bypassed(self):
+        """ Returns a set of all bypassed unique checks. """
+        return [c for c in self.checks if c.bypass]
+
+    def valid(self):
+        """ Returns validity of checked DCP. """
+        return not any([c.criticality == "ERROR" for c in self.checks if not c.valid])
 
 
 class CheckerBase(object):
@@ -48,7 +93,7 @@ class CheckerBase(object):
         self.profile = profile
         self.log = get_log()
         self.checks = []
-        self.check_report = {}
+        self.report = None
         self.hash_callback = None
 
     def find_check_criticality(self, name):
@@ -94,18 +139,18 @@ class CheckerBase(object):
 
             if check_prefix and not check_bypass:
                 checks.append(v)
+            elif check_bypass:
+                check_exec = CheckExecution(v)
+                check_exec.bypass = True
+                self.checks.append(check_exec)
 
         return checks
-
-    def find_check_failed(self):
-        """ Returns a list of all failed checks. """
-        return [c for c in self.check_executions if not c.valid]
 
     def run_check(self, check, *args, **kwargs):
         """ Execute a check.
 
             Args:
-                check (tuple): Tuple (function name, function).
+                check (function): Check function.
                 *args: Variable list of check function arguments.
                 **kwargs: Variable list of keywords arguments.
                     error_prefix (str): error message prefix
@@ -114,28 +159,25 @@ class CheckerBase(object):
                 Tuple (status, return_value)
 
         """
-        start = time.time()
-        name, func = check.__name__, check
-        check_exec = CheckExecution(name)
-        check_exec.doc = check.__doc__
-        check_res = None
+        check_exec = CheckExecution(check)
+        check_exec.criticality = self.find_check_criticality(check_exec.name)
+        check_exec.valid = False
 
         try:
-            check_res = func(*args)
-            check_exec.valid = True
-            check_exec.msg = "Check valid"
+            start = time.time()
+            check_res = None
+            check_res = check(*args)
         except CheckException as e:
-            if kwargs.get('error_prefix'):
-                msg = "{}\n\t{}".format(kwargs.get('error_prefix'), str(e))
-            else:
-                msg = str(e)
-            check_exec.msg = msg
-            check_exec.criticality = self.find_check_criticality(name)
+            prefix = kwargs.get('error_prefix', '')
+            check_exec.message = "{}{}".format(
+                prefix + "\n\t" if prefix else '', str(e))
         except Exception as e:
-            check_exec.msg = "Check unknown error\n{}".format(
+            check_exec.message = "Check unknown error\n{}".format(
                 traceback.format_exc())
             check_exec.criticality = "ERROR"
-            self.check_log.error(check_exec.msg)
+            self.log.error(check.msg)
+        else:
+            check_exec.valid = True
         finally:
             check_exec.asset_stack = kwargs.get('stack', [self.dcp.path])
             check_exec.seconds_elapsed = time.time() - start
@@ -144,32 +186,16 @@ class CheckerBase(object):
 
     def make_report(self):
         """ Check report generation. """
-        self.check_report = {
-            'ERROR': [],
-            'WARNING': [],
-            'INFO': [],
-            'SILENT': []
-        }
+        report = CheckReport()
+        report.checks = self.checks
+        report.profile = self.profile
+        report.date = datetime.now().strftime("%d/%m/%Y %H:%M:%S")
+        report.duration = sum([c.seconds_elapsed for c in self.checks])
 
-        for c in self.find_check_failed():
-            self.check_report[c.criticality].append((c.name, c.msg))
-
-        check_unique = set([c.name for c in self.check_executions])
-        self.check_elapsed = {}
-        self.total_time = 0
-        self.total_check = len(check_unique)
-
-        for name in check_unique:
-            execs = [c.seconds_elapsed
-                     for c in self.check_executions if c.name == name]
-            elapsed = sum(execs)
-            self.total_time += elapsed
-            self.check_elapsed[name] = elapsed
+        self.report = report
 
     def dump_report(self):
         """ Dump check report. """
-        valid_str = 'Success' if self.get_valid() else 'Fail'
-
         pretty_status = {
             'ERROR': 'Error(s)',
             'WARNING': 'Warning(s)',
@@ -186,7 +212,7 @@ class CheckerBase(object):
         }
 
         # Accumulate all failed check and stack them by asset
-        for c in self.find_check_failed():
+        for c in self.report.checks_failed():
             node = map_status[c.criticality]
             for filename in c.asset_stack:
                 if filename not in node:
@@ -196,30 +222,29 @@ class CheckerBase(object):
                 if 'messages' not in node:
                     node['messages'] = []
 
-            docstring_lines = c.doc.split('\n')
-            desc = docstring_lines[0] if docstring_lines else c.name
-            node['messages'] += ['.' + desc + '\n' + c.msg]
+            node['messages'] += ['.' + c.short_desc() + '\n' + c.message]
 
-        self.check_log.info("DCP : {}".format(self.dcp.path))
-        self.check_log.info("Size : {}".format(human_size(self.dcp.size)))
+        self.log.info("DCP : {}".format(self.dcp.path))
+        self.log.info("Size : {}".format(human_size(self.dcp.size)))
 
         for status, vals in six.iteritems(map_status):
             out_stack = []
             for k, v in six.iteritems(vals):
                 out_stack += [self.dump_stack("", k, v, indent_level=0)]
             if out_stack:
-                self.check_log.info("{}\n{}".format(
+                self.log.info("{}\n{}".format(
                     pretty_status[status] + ':',
                     "\n".join(out_stack)))
 
-        if self.check_profile['bypass']:
-            checks_str = '  ' + '\n  '.join(self.check_profile['bypass'])
-            self.check_log.info("{}\n{}".format(
-                pretty_status['BYPASS'] + ':', checks_str))
+        bypassed = "\n".join(set(
+            ['  .' + c.short_desc() for c in self.report.checks_bypassed()]))
+        if bypassed:
+            self.log.info("{}\n{}".format(pretty_status['BYPASS'] + ':', bypassed))
 
-        self.check_log.info("Total check : {}".format(self.total_check))
-        self.check_log.info("Total time : {:.2f} sec".format(self.total_time))
-        self.check_log.info("Validation : {}\n".format(valid_str))
+        self.log.info("Total check : {}".format(self.report.checks_count()))
+        self.log.info("Total time : {:.2f} sec".format(self.report.duration))
+        self.log.info("Validation : {}\n".format(
+            'Success' if self.report.valid() else 'Fail'))
 
     def dump_stack(self, out_str, key, values, indent_level):
         """ Recursively iterate through the error message stack.
@@ -278,7 +303,3 @@ class CheckerBase(object):
                 return desc
 
         return ''
-
-    def get_valid(self):
-        """ Check status is valid. """
-        return self.check_report['ERROR'] == []
