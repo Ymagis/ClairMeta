@@ -203,6 +203,7 @@ def cpl_extract_characteristics(cpl):
         'Subtitle': [],
         'AuxData': [],
         'Markers': [],
+        'Metadata': [],
     }
 
     for reel in cpl['ReelList']:
