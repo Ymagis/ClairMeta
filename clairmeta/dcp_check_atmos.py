@@ -26,7 +26,7 @@ class Checker(CheckerBase):
         return self.checks
 
     def check_atmos_cpl_essence_encoding(self, playlist, asset):
-        """ Atmos encoding.
+        """ Atmos data essence coding universal label.
 
             Reference :
                 SMPTE 429-18-2019 11
