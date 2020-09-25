@@ -3,6 +3,7 @@
 
 import unittest
 import os
+from datetime import datetime
 
 from tests import DCP_MAP, KDM_MAP, KEY
 from clairmeta.logger import disable_log
@@ -46,7 +47,7 @@ class CheckerTestBase(unittest.TestCase):
         return self.status
 
     def has_failed(self, check_name):
-        failed = self.dcp._checker.find_check_failed()
+        failed = self.report.checks_failed()
         return check_name in [c.name for c in failed]
 
 
@@ -144,6 +145,61 @@ class DCPCheckTest(CheckerTestBase):
     def test_multi_pkl(self):
         self.assertTrue(self.check(47))
 
+
+class DCPCheckReportTest(CheckerTestBase):
+
+    def __init__(self, *args, **kwargs):
+        super(DCPCheckReportTest, self).__init__(*args, **kwargs)
+        self.profile['bypass'] = ['check_assets_pkl_hash']
+        self.check(25)
+
+    def test_report_metadata(self):
+        self.assertTrue(isinstance(self.report.profile, dict))
+        self.assertTrue(datetime.strptime(self.report.date, "%d/%m/%Y %H:%M:%S"))
+        self.assertGreaterEqual(self.report.duration, 0)
+
+    def test_report_checks(self):
+        self.assertGreaterEqual(
+            len(self.report.checks), self.report.checks_count())
+
+        failed = self.report.checks_failed()
+        success = self.report.checks_succeeded()
+        bypass = self.report.checks_bypassed()
+
+        all_names = []
+        for checks in [failed, success, bypass]:
+            all_names += [c.name for c in checks]
+        self.assertEqual(sorted(all_names), sorted([c.name for c in self.report.checks]))
+        self.assertEqual(
+            len(failed) + len(success) + len(bypass),
+            len(self.report.checks))
+
+        errors = self.report.checks_failed_by_status('ERROR')
+        self.assertEqual(3, len(self.report.checks_failed()))
+        self.assertEqual(1, len(self.report.checks_failed_by_status('ERROR')))
+        self.assertEqual(2, len(self.report.checks_failed_by_status('WARNING')))
+
+        error = errors[0]
+        self.assertEqual(error.name, "check_picture_cpl_max_bitrate")
+        self.assertEqual(
+            error.short_desc(),
+            "Picture maximum bitrate DCI compliance.")
+        self.assertEqual(
+            error.message,
+            "Exceed DCI maximum bitrate (250.05 Mb/s) : 358.25 Mb/s")
+        self.assertFalse(error.valid)
+        self.assertFalse(error.bypass)
+        self.assertGreaterEqual(error.seconds_elapsed, 0)
+        self.assertEqual(error.asset_stack, [
+            'CPL_ECL25SingleCPL_TST-48-600_S_EN-XX_UK-U_51_2K_DI_20180301_ECL_SMPTE_OV.xml',
+            'ECL25SingleCPL_TST-48-600_S_EN-XX_UK-U_51_2K_DI_20180301_ECL_SMPTE_OV_01.mxf'])
+        self.assertTrue(error.criticality == "ERROR")
+
+    def test_report_status(self):
+        self.assertEqual(False, self.report.valid())
+
+        report = self.report.pretty_str()
+        self.assertTrue("Picture maximum bitrate DCI compliance." in report)
 
 if __name__ == '__main__':
     unittest.main()
