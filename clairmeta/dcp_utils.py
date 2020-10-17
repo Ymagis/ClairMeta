@@ -54,7 +54,10 @@ def list_pkl_assets(packinglist):
 
 def list_cpl_assets(
     cpl,
-    filters=['Picture', 'Sound', 'AuxData', 'Subtitle'],
+    filters=[
+        'Picture', 'Sound', 'AuxData', 'Subtitle',
+        'OpenCaption', 'ClosedCaption'
+    ],
     required_keys=[]
 ):
     """ Iterator on CompositionPlayList assets.
@@ -193,6 +196,7 @@ def cpl_extract_characteristics(cpl):
     essence_keys = {
         'Sound.Language': [],
         'Subtitle.Language': [],
+        'OpenCaption.Language': [],
         'ClosedCaption.Language': [],
     }
 
@@ -201,6 +205,8 @@ def cpl_extract_characteristics(cpl):
         'Picture': [],
         'Sound': [],
         'Subtitle': [],
+        'OpenCaption': [],
+        'ClosedCaption': [],
         'AuxData': [],
         'Markers': [],
         'Metadata': [],

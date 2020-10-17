@@ -157,6 +157,7 @@ def cpl_reels_parse(cpl_node):
             'MainSubtitle': 'Subtitle',
             'MainMarkers': 'Markers',
             'CompositionMetadataAsset': 'Metadata',
+            'MainCaption' : 'OpenCaption',
             'ClosedCaption': 'ClosedCaption',
             'MainClosedCaption': 'ClosedCaption',
         }

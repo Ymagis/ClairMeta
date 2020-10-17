@@ -174,7 +174,8 @@ class Checker(CheckerBase):
     def run_checks(self):
         for cpl in self.dcp._list_cpl:
             assets = list_cpl_assets(
-                cpl, filters='Subtitle', required_keys=['Path'])
+                cpl, filters=['Subtitle', 'ClosedCaption'],
+                required_keys=['Path'])
 
             for asset in assets:
                 stack = [cpl['FileName'], asset[1].get('Path', asset[1]['Id'])]
