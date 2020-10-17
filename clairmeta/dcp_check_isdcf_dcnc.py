@@ -119,7 +119,10 @@ class Checker(CheckerBase):
 
         hasSub = fields['Language'].get('Subtitle', False)
         hasBurnedSub = fields['Language'].get('BurnedSubtitle', False)
-        if not hasBurnedSub and hasSub != cpl_node['Subtitle']:
+        cplHasSub = cpl_node['Subtitle']
+        cplHasCaption = cpl_node['OpenCaption'] or cpl_node['ClosedCaption']
+        captionLanguage = hasSub and not cplHasSub and cplHasCaption
+        if not hasBurnedSub and hasSub != cplHasSub and not captionLanguage:
             msg_map = {
                 True: 'Subtitle',
                 False: 'No Subtitle'
@@ -128,7 +131,8 @@ class Checker(CheckerBase):
             raise CheckException(
                 "ContentTitle suggest {} but CPL contains {}".format(
                     msg_map[hasSub],
-                    msg_map[cpl_node['Subtitle']]))
+                    msg_map[cplHasSub]))
+
 
     def check_dcnc_field_claim_caption(self, playlist, fields):
         """ Captions (presence) from CPL and ContentTitleText shall match. """
