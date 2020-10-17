@@ -61,10 +61,18 @@ class Checker(CheckerBase):
     def check_dcnc_field_date(self, playlist, fields):
         """ Composition Date validation. """
         date_str = fields['Date'].get('Value')
-        date = datetime.strptime(date_str, '%Y%m%d')
-        now = datetime.now()
-        if date > now:
-            raise CheckException("Date suggest a composition from the future")
+        if date_str:
+            try:
+                date = datetime.strptime(date_str, '%Y%m%d')
+            except ValueError as e:
+                raise CheckException(
+                    "Date can't be parsed, expecting YYYYMMDD : {}"
+                    .format(date_str))
+
+            now = datetime.now()
+            if date > now:
+                raise CheckException(
+                    "Date suggest a composition from the future")
 
     def check_dcnc_field_package_type(self, playlist, fields):
         """ Version qualifier is forbidden for OV package. """
