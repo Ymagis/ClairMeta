@@ -160,7 +160,7 @@ class SubtitleUtils(object):
             if 'Text' in node:
                 text = self.extract_subtitle_text(node['Text'])
         else:
-            text = [node]
+            text = [str(node)]
 
         return text
 
