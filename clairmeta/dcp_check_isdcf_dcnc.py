@@ -130,6 +130,25 @@ class Checker(CheckerBase):
                     msg_map[hasSub],
                     msg_map[cpl_node['Subtitle']]))
 
+    def check_dcnc_field_claim_caption(self, playlist, fields):
+        """ Captions (presence) from CPL and ContentTitleText shall match. """
+        cpl_node = playlist['Info']['CompositionPlaylist']
+
+        titleCaption = fields['Language'].get('Caption', '')
+        if titleCaption is False:
+            titleCaption = ''
+
+        if 'OCAP' in titleCaption and not cpl_node['OpenCaption']:
+            raise CheckException("ContentTitle suggest OCAP but CPL has none")
+        if 'CCAP' in titleCaption and not cpl_node['ClosedCaption']:
+            raise CheckException("ContentTitle suggest CCAP but CPL has none")
+        if titleCaption == '' and cpl_node['OpenCaption']:
+            raise CheckException(
+                "ContentTitle suggest no caption but CPL has OCAP")
+        if titleCaption == '' and cpl_node['ClosedCaption']:
+            raise CheckException(
+                "ContentTitle suggest no caption but CPL has CCAP")
+
     def check_dcnc_field_claim_audio(self, playlist, fields):
         """ Audio format from CPL and ContentTitleText shall match. """
         # NOTE : MXF track count don't seems to be related to the actual
