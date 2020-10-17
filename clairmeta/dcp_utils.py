@@ -72,7 +72,7 @@ def list_cpl_assets(
 
     """
     for reel in cpl['Info']['CompositionPlaylist']['ReelList']:
-        assets = reel.get('Assets', [])
+        assets = reel.get('Assets', {})
         assets = {k: v for k, v in six.iteritems(assets) if k in filters}
 
         if required_keys:
