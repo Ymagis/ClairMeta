@@ -149,7 +149,7 @@ class Checker(CheckerBase):
                 source['FilePath'], stack=asset_stack)
              for check in checks]
 
-        return self.check_executions
+        return self.checks
 
     def check_certif_version(self, cert, index):
         """ Certificate version check (X509 v3).

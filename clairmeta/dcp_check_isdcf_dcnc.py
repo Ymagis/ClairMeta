@@ -24,7 +24,7 @@ class Checker(CheckerBase):
             [self.run_check(check, source, self.fields, stack=asset_stack)
              for check in checks]
 
-        return self.check_executions
+        return self.checks
 
     def check_dcnc_compliance(self, playlist):
         """ Digital Cinema Naming Convention compliance (9.3). """
@@ -61,10 +61,18 @@ class Checker(CheckerBase):
     def check_dcnc_field_date(self, playlist, fields):
         """ Composition Date validation. """
         date_str = fields['Date'].get('Value')
-        date = datetime.strptime(date_str, '%Y%m%d')
-        now = datetime.now()
-        if date > now:
-            raise CheckException("Date suggest a composition from the future")
+        if date_str:
+            try:
+                date = datetime.strptime(date_str, '%Y%m%d')
+            except ValueError as e:
+                raise CheckException(
+                    "Date can't be parsed, expecting YYYYMMDD : {}"
+                    .format(date_str))
+
+            now = datetime.now()
+            if date > now:
+                raise CheckException(
+                    "Date suggest a composition from the future")
 
     def check_dcnc_field_package_type(self, playlist, fields):
         """ Version qualifier is forbidden for OV package. """
@@ -119,7 +127,10 @@ class Checker(CheckerBase):
 
         hasSub = fields['Language'].get('Subtitle', False)
         hasBurnedSub = fields['Language'].get('BurnedSubtitle', False)
-        if not hasBurnedSub and hasSub != cpl_node['Subtitle']:
+        cplHasSub = cpl_node['Subtitle']
+        cplHasCaption = cpl_node['OpenCaption'] or cpl_node['ClosedCaption']
+        captionLanguage = hasSub and not cplHasSub and cplHasCaption
+        if not hasBurnedSub and hasSub != cplHasSub and not captionLanguage:
             msg_map = {
                 True: 'Subtitle',
                 False: 'No Subtitle'
@@ -128,7 +139,27 @@ class Checker(CheckerBase):
             raise CheckException(
                 "ContentTitle suggest {} but CPL contains {}".format(
                     msg_map[hasSub],
-                    msg_map[cpl_node['Subtitle']]))
+                    msg_map[cplHasSub]))
+
+
+    def check_dcnc_field_claim_caption(self, playlist, fields):
+        """ Captions (presence) from CPL and ContentTitleText shall match. """
+        cpl_node = playlist['Info']['CompositionPlaylist']
+
+        titleCaption = fields['Language'].get('Caption', '')
+        if titleCaption is False:
+            titleCaption = ''
+
+        if 'OCAP' in titleCaption and not cpl_node['OpenCaption']:
+            raise CheckException("ContentTitle suggest OCAP but CPL has none")
+        if 'CCAP' in titleCaption and not cpl_node['ClosedCaption']:
+            raise CheckException("ContentTitle suggest CCAP but CPL has none")
+        if titleCaption == '' and cpl_node['OpenCaption']:
+            raise CheckException(
+                "ContentTitle suggest no caption but CPL has OCAP")
+        if titleCaption == '' and cpl_node['ClosedCaption']:
+            raise CheckException(
+                "ContentTitle suggest no caption but CPL has CCAP")
 
     def check_dcnc_field_claim_audio(self, playlist, fields):
         """ Audio format from CPL and ContentTitleText shall match. """

@@ -293,9 +293,7 @@ class DCP(object):
                 ov_path (str, optional): Absolute path of OriginalVersion DCP.
 
             Returns:
-                Tuple (boolean, dict) of DCP check status and report. Report
-                    is a Dictionary where check failure are grouped by
-                    criticity.
+                Tuple (boolean, CheckReport) of DCP check status and report.
 
         """
         if not self._parsed or not self._probeb:

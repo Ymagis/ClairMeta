@@ -31,7 +31,7 @@ class Checker(CheckerBase):
              for asset in list_pkl_assets(source)
              for check in asset_checks]
 
-        return self.check_executions
+        return self.checks
 
     def check_pkl_xml(self, pkl):
         """ PKL XML syntax and structure check. """

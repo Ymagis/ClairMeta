@@ -36,7 +36,9 @@ def check_xml(xml_path, xml_ns, schema_type, schema_dcp):
     except LookupError as e:
         get_log().info("Schema validation skipped : {}".format(xml_path))
     except Exception as e:
-        raise CheckException("Schema validation error : {}".format(str(e)))
+        raise CheckException(
+            "Schema validation error : {}\n"
+            "Using schema : {}".format(str(e), schema_id))
 
 
 def check_issuedate(date):

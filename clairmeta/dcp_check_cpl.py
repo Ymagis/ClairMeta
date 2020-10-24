@@ -37,7 +37,7 @@ class Checker(CheckerBase):
              for asset in list_cpl_assets(source)
              for check in asset_checks]
 
-        return self.check_executions
+        return self.checks
 
     def metadata_cmp_pair(
         self,

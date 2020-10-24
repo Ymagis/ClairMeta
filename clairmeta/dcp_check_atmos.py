@@ -23,10 +23,10 @@ class Checker(CheckerBase):
              if asset[1]['Schema'] == 'Atmos'
              for check in asset_checks]
 
-        return self.check_executions
+        return self.checks
 
     def check_atmos_cpl_essence_encoding(self, playlist, asset):
-        """ Atmos encoding.
+        """ Atmos data essence coding universal label.
 
             Reference :
                 SMPTE 429-18-2019 11

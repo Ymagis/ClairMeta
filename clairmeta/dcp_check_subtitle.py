@@ -160,7 +160,7 @@ class SubtitleUtils(object):
             if 'Text' in node:
                 text = self.extract_subtitle_text(node['Text'])
         else:
-            text = [node]
+            text = [str(node)]
 
         return text
 
@@ -174,7 +174,8 @@ class Checker(CheckerBase):
     def run_checks(self):
         for cpl in self.dcp._list_cpl:
             assets = list_cpl_assets(
-                cpl, filters='Subtitle', required_keys=['Path'])
+                cpl, filters=['Subtitle', 'ClosedCaption'],
+                required_keys=['Path'])
 
             for asset in assets:
                 stack = [cpl['FileName'], asset[1].get('Path', asset[1]['Id'])]
@@ -185,7 +186,7 @@ class Checker(CheckerBase):
                 checks = self.find_check('subtitle_cpl')
                 self.run_checks_prepare(checks, cpl, asset)
 
-        return self.check_executions
+        return self.checks
 
     def run_checks_prepare(self, checks, cpl, asset):
         _, asset_node = asset
