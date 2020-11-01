@@ -491,6 +491,87 @@ class Checker(CheckerBase):
                 raise CheckException(
                     "Subtitle {} FadeDownTime longer than duration".format(
                         st_idx))
+    def check_subtitle_cpl_concurrent_visibility(self, playlist, asset, folder):
+        """ Maximum number of subtitle visible on screen at once.
+
+            Up to two (2) subtitle instances may be visible on screen
+            at any time. The visibility period of an instance shall include
+            fade-in and fade-out times.
+
+            Reference :
+                SMPTE 429-2-2013 8.4.4
+        """
+        if self.dcp.schema != 'SMPTE':
+            return
+
+        st_dict = self.st_util.get_subtitle_xml(asset, folder)
+        if not st_dict:
+            return
+
+        subtitles = keys_by_name_dict(st_dict, 'Subtitle')
+        editrate = self.st_util.get_subtitle_editrate(asset, st_dict)
+        if not subtitles:
+            return
+
+        st_list = []
+        for idx, st in enumerate(subtitles[0]):
+            st_in, st_out = st['Subtitle@TimeIn'], st['Subtitle@TimeOut']
+            st_list.append((idx, self.st_util.st_tc_frames(st_in, editrate), 0))
+            st_list.append((idx, self.st_util.st_tc_frames(st_out, editrate), 1))
+
+        st_list = sorted(st_list, key=lambda x: (x[1], -x[0]))
+
+        visibility_list = []
+        for idx, st in enumerate(subtitles[0]):
+            idx_in = next(i for i, v in enumerate(st_list) if v[0] == idx)
+            offset_out = next(i for i, v in enumerate(st_list[idx_in+1:]) if v[0] == idx) + 1
+            visibility_list.append(offset_out)
+
+        errors = []
+        for idx, v in enumerate(visibility_list):
+            if v > 2:
+                st = subtitles[0][idx]
+                st_in, st_out = st['Subtitle@TimeIn'], st['Subtitle@TimeOut']
+                errors.append(
+                    "Too many subtitles ({}) visible at once between {} and {}"
+                    .format(v, st_in, st_out))
+        if errors:
+            raise CheckException("\n".join(errors))
+
+    def check_subtitle_cpl_max_elements(self, playlist, asset, folder):
+        """ Maximum number of subtitle Text or Image elements.
+
+            A subtitle instance shall contain no more than six (6) Text
+            elements or three (3) Image elements.
+
+            Reference :
+                SMPTE 429-2-2013 8.4.4
+        """
+        if self.dcp.schema != 'SMPTE':
+            return
+
+        st_dict = self.st_util.get_subtitle_xml(asset, folder)
+        if not st_dict:
+            return
+
+        subtitles = keys_by_name_dict(st_dict, 'Subtitle')
+        if not subtitles:
+            return
+
+        errors = []
+        for idx, st in enumerate(subtitles[0]):
+            text_count = len(keys_by_name_dict(st, 'Text'))
+            if text_count > 6:
+                errors.append(
+                    "Too many Text elements ({}) for subtitle {}"
+                    .format(text_count, st['Subtitle@SpotNumber']))
+            img_count = len(keys_by_name_dict(st, 'Image'))
+            if img_count > 6:
+                errors.append(
+                    "Too many Image elements ({}) for subtitle {}"
+                    .format(img_count, st['Subtitle@SpotNumber']))
+        if errors:
+            raise CheckException("\n".join(errors))
 
     def check_subtitle_cpl_duration(self, playlist, asset, folder):
         """ Subtitle duration coherence with CPL.
