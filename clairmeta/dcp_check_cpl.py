@@ -297,14 +297,14 @@ class Checker(CheckerBase):
         if errors:
             raise CheckException("\n".join(errors))
 
-    def check_cpl_reels_timed_text(self, playlist):
+    def check_cpl_reels_timed_text_coherence(self, playlist):
         """ Timed text track coherence.
 
-        If a MainSubtitle timed text track is present on any reel, a
-        MainSubtitle timed text track shall be present on all reels.
-        If (1) or more ClosedCaption timed text track(s) are present on any
-        reel, the same number of ClosedCaption timed text tracks shall be
-        present on all reels.
+            If a MainSubtitle timed text track is present on any reel, a
+            MainSubtitle timed text track shall be present on all reels.
+            If (1) or more ClosedCaption timed text track(s) are present on any
+            reel, the same number of ClosedCaption timed text tracks shall be
+            present on all reels.
 
             Reference :
                 SMPTE RDD 52-2020 8.3.1

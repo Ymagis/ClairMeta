@@ -491,6 +491,7 @@ class Checker(CheckerBase):
                 raise CheckException(
                     "Subtitle {} FadeDownTime longer than duration".format(
                         st_idx))
+
     def check_subtitle_cpl_concurrent_visibility(self, playlist, asset, folder):
         """ Maximum number of subtitle visible on screen at once.
 
@@ -626,6 +627,24 @@ class Checker(CheckerBase):
                 raise CheckException(
                     "Subtitle EditRate mismatch, Subtitle claims {} but CPL "
                     "{}".format(st_rate, cpl_rate))
+
+    def check_subtitle_cpl_entry_point(self, playlist, asset, folder):
+        """ Subtitle entrypoint must be 0.
+
+            For all MainSubtitle or ClosedCaption timed text tracks, the
+            Composition Playlist’s EntryPoint element as defined in
+            SMPTE ST 429-7 shall be present and have a value of "0".
+
+            Reference :
+                SMPTE RDD 52-2020 8.3.2
+        """
+        _, asset = asset
+        cpl_entry = asset['EntryPoint']
+
+        if cpl_entry != 0:
+            raise CheckException(
+                "Timed Text EntryPoint must be 0 but found {}".format(
+                    cpl_entry))
 
     def check_subtitle_cpl_uuid(self, playlist, asset, folder):
         """ Subtitle UUID coherence.
