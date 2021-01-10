@@ -148,3 +148,17 @@ class CheckReport(object):
                 return desc
 
         return ''
+
+    def to_dict(self):
+        """ Returns a dictionary representation. """
+        return {
+            'dcp_path': self.dcp.path,
+            'dcp_size': self.dcp.size,
+            'valid': self.valid(),
+            'profile': self.profile,
+            'date': self.date,
+            'duration_seconds': self.duration,
+            'message': self.pretty_str(),
+            'unique_checks_count': self.checks_count(),
+            'checks': [c.to_dict() for c in self.checks],
+        }

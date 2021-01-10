@@ -41,6 +41,21 @@ class CheckExecution(object):
         docstring_lines = self.doc.split('\n')
         return docstring_lines[0].strip() if docstring_lines else c.name
 
+    def to_dict(self):
+        """ Returns a dictionary representation. """
+        return {
+            'name': self.name,
+            'pretty_name': self.short_desc(),
+            'doc': self.doc,
+            'message': self.message,
+            'valid': self.valid,
+            'bypass': self.bypass,
+            'seconds_elapsed': self.seconds_elapsed,
+            'asset_stack': self.asset_stack,
+            'criticality': self.criticality
+        }
+
+
 
 class CheckerBase(object):
     """ Base class for check module, provide check discover and run utilities.

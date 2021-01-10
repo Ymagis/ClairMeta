@@ -47,9 +47,27 @@ def cli_check(args):
                 check_profile['log_level'] = args.log
             if args.progress:
                 callback = ConsoleProgress()
+            if args.format != 'text':
+                disable_log()
 
-            status, _ = DCP(args.path, kdm=args.kdm, pkey=args.key).check(
+            status, report = DCP(args.path, kdm=args.kdm, pkey=args.key).check(
                 profile=check_profile, ov_path=args.ov, hash_callback=callback)
+
+            if args.format == "dict":
+                msg = pprint.pformat(report.to_dict())
+            elif args.format == "json":
+                msg = json.dumps(
+                    report.to_dict(), sort_keys=True, indent=2,
+                    separators=(',', ': '))
+            elif args.format == "xml":
+                xml_str = dicttoxml.dicttoxml(
+                    report.to_dict(), custom_root='ClairmetaCheck',
+                    ids=False, attr_type=False)
+                msg = prettyprint_xml(xml_str)
+
+            if args.format != 'text':
+                return True, msg
+
         else:
             obj_type = package_type_map[args.type]
             setting = package_check_settings[args.type]
@@ -103,8 +121,13 @@ def get_parser():
     parser.add_argument('path', help="absolute package path")
     parser.add_argument('-log', default=None, help="logging level [dcp]")
     parser.add_argument('-profile', default=None, help="json profile [dcp]")
-    parser.add_argument('-kdm', default=None, help="kdm with encrypted keys")
-    parser.add_argument('-key', default=None, help="recipient private key")
+    parser.add_argument('-kdm', default=None,
+        help="kdm with encrypted keys [dcp]")
+    parser.add_argument('-key', default=None,
+        help="recipient private key [dcp]")
+    parser.add_argument(
+        '-format', default="text", choices=['text', 'dict', 'xml', 'json'],
+        help="output format [dcp]")
     parser.add_argument(
         '-progress', action='store_true', help="hash progress bar [dcp]")
     parser.add_argument('-ov', default=None, help="ov package path [dcp]")
