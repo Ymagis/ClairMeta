@@ -1,6 +1,7 @@
 # Clairmeta - (C) YMAGIS S.A.
 # See LICENSE for more information
 
+import collections
 import unittest
 import os
 import json
@@ -48,6 +49,12 @@ class CliTest(unittest.TestCase):
         args = parser.parse_args(args)
         return args.func(args)
 
+    def test_dcp_probe_formating_dict(self):
+        status, msg = self.launch_command([
+            'probe', self.get_dcp_path(1),
+            '-type', 'dcp', '-format', 'dict'])
+        self.assertTrue(isinstance(eval(msg), collections.Mapping))
+
     def test_dcp_probe_formating_xml(self):
         status, msg = self.launch_command([
             'probe', self.get_dcp_path(1),
@@ -67,6 +74,24 @@ class CliTest(unittest.TestCase):
         self.assertEqual(
             json.dumps(json_test, indent=4, sort_keys=True),
             json.dumps(json_gold, indent=4, sort_keys=True))
+
+    def test_dcp_check_formating_dict(self):
+        status, msg = self.launch_command([
+            'check', self.get_dcp_path(1),
+            '-type', 'dcp', '-format', 'dict'])
+        self.assertTrue(isinstance(eval(msg), collections.Mapping))
+
+    def test_dcp_check_formating_xml(self):
+        status, msg = self.launch_command([
+            'check', self.get_dcp_path(1),
+            '-type', 'dcp', '-format', 'xml'])
+        ET.XML(msg)
+
+    def test_dcp_check_formating_json(self):
+        status, msg = self.launch_command([
+            'check', self.get_dcp_path(1),
+            '-type', 'dcp', '-format', 'json'])
+        json.loads(msg, object_pairs_hook=OrderedDict)
 
     def test_dcp_check_good(self):
         status, msg = self.launch_command([
