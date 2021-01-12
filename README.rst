@@ -36,7 +36,7 @@ Requirements :
 
 -  Python :
 
-   -  Should work on python 2.7 and python 3.3+
+   -  Should work on python 2.7 and python 3.4+
    -  Tested on : python 2.7, python 3.6
 
 -  Platform :
@@ -90,6 +90,8 @@ As a command line tool :
     python3 -m clairmeta.cli probe -type dcp path/to/dcp -format json > dcp.json
     python3 -m clairmeta.cli probe -type dcp path/to/dcp -format xml > dcp.xml
     python3 -m clairmeta.cli check -type dcp path/to/dcp
+    python3 -m clairmeta.cli check -type dcp path/to/dcp -format json > check.json
+    python3 -m clairmeta.cli check -type dcp path/to/dcp -format xml > check.xml
     python3 -m clairmeta.cli check -type dcp path/to/dcp -kdm /path/to/kdm -key /path/to/privatekey
     python3 -m clairmeta.cli check -type dcp path/to/dcp -progress
 
@@ -181,7 +183,7 @@ Contributing
    pip install pipenv
    git clone https://github.com/Ymagis/ClairMeta.git
    cd clairmeta
-   pipenv install --dev [–two]
+   pipenv install --dev [--two]
    pipenv check
    # Enter virtual environment
    pipenv shell
