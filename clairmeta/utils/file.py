@@ -139,8 +139,14 @@ class ConsoleProgress(object):
             sys.stdout.flush()
         else:
             file_size = os.path.getsize(file_path)
-            speed_report = "{} in {:.2f} sec (at {:.2f} MBytes/s)".format(
-                human_size(file_size), file_elapsed, (file_size / 1e6) / file_elapsed)
+
+            try:
+                speed_report = "{} in {:.2f} sec (at {:.2f} MBytes/s)".format(
+                    human_size(file_size), file_elapsed, (file_size / 1e6) / file_elapsed)
+            except ZeroDivisionError as e:
+                raise ZeroDivisionError(
+                    "ConsoleProgress callback error: {} Size {} Elapsed {}"
+                    .format(str(e), (file_size / 1e6), file_elapsed))
 
             sys.stdout.write("[  {}] 100.00% - {}\r".format(
                 speed_report.ljust(complete_col_width - 2),
