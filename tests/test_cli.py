@@ -99,6 +99,12 @@ class CliTest(unittest.TestCase):
             '-type', 'dcp', '-log', 'CRITICAL'])
         self.assertTrue(status)
 
+    def test_dcp_check_good_progress(self):
+        status, msg = self.launch_command([
+            'check', self.get_dcp_path(1),
+            '-type', 'dcp', '-log', 'CRITICAL', '-progress'])
+        self.assertTrue(status)
+
     def test_dcp_check_good_relink(self):
         status, msg = self.launch_command([
             'check', self.get_dcp_path(2),
