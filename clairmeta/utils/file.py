@@ -108,6 +108,8 @@ class ConsoleProgress(object):
         """
         col_width = 15
         complete_col_width = 60
+        # Avoid division by zero if time resolution is too small
+        file_elapsed = max(sys.float_info.epsilon, file_elapsed)
 
         if file_processed != file_size:
             elapsed = self.total_elapsed + file_elapsed
@@ -121,13 +123,8 @@ class ConsoleProgress(object):
             total_progress_size = int(total_progress * col_width)
             total_bar_size = col_width - total_progress_size
 
-            try:
-                eta_sec = (self._total_size - processed) / (processed / elapsed)
-                eta_str = time.strftime("%H:%M:%S", time.gmtime(eta_sec))
-            except ZeroDivisionError as e:
-                raise ZeroDivisionError(
-                    "ConsoleProgress callback error: {} Processed {} Elapsed {}"
-                    .format(str(e), processed, elapsed))
+            eta_sec = (self._total_size - processed) / (processed / elapsed)
+            eta_str = time.strftime("%H:%M:%S", time.gmtime(eta_sec))
 
             sys.stdout.write("ETA {} [{}] {:.2f}% - File [{}] {:.2f}% - {}\r".format(
                 eta_str,
@@ -140,13 +137,8 @@ class ConsoleProgress(object):
         else:
             file_size = os.path.getsize(file_path)
 
-            try:
-                speed_report = "{} in {:.2f} sec (at {:.2f} MBytes/s)".format(
-                    human_size(file_size), file_elapsed, (file_size / 1e6) / file_elapsed)
-            except ZeroDivisionError as e:
-                raise ZeroDivisionError(
-                    "ConsoleProgress callback error: {} Size {} Elapsed {}"
-                    .format(str(e), (file_size / 1e6), file_elapsed))
+            speed_report = "{} in {:.2f} sec (at {:.2f} MBytes/s)".format(
+                human_size(file_size), file_elapsed, (file_size / 1e6) / file_elapsed)
 
             sys.stdout.write("[  {}] 100.00% - {}\r".format(
                 speed_report.ljust(complete_col_width - 2),
