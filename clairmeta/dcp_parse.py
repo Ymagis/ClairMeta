@@ -204,12 +204,10 @@ def cpl_reels_parse(cpl_node):
             marker['EditRate'] = editrate_r
 
             marker_list = marker['MarkerList']['Marker']
-            if type(marker_list) is list:
-                marker['MarkerList'] = marker_list
+            if not type(marker_list) is list:
+                marker['MarkerList'] = [marker_list]
             else:
-                marker['MarkerList'] = [{
-                    marker_list["Label"]: marker_list["Offset"]
-                }]
+                marker['MarkerList'] = marker_list
 
         if 'Metadata' in out_reel['Assets']:
             meta = out_reel['Assets']['Metadata']
