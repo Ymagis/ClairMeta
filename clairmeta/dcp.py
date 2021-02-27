@@ -242,6 +242,7 @@ class DCP(object):
             'package_type': self.package_type,
             'path': self.path,
             'size': human_size(self.size),
+            'size_bytes': self.size,
             'count_file': len(self._list_asset),
             'schema': self.schema,
             'type': 'DCP'
