@@ -68,17 +68,24 @@ def assetmap_parse(path):
 
     if am:
         total_size = 0
+        total_size_ondisk = 0
 
         # Two ways of identifying a PKL inside the assetmap :
         # <PackingList></PackingList> (Interop)
         # <PackingList>true</PackingList> (SMPTE)
         # Hide these specificities and return PackingList: True in both cases
-        for asset in am['Info']['AssetMap']["AssetList"]["Asset"]:
+        for asset in am['Info']['AssetMap']['AssetList']['Asset']:
             total_size += asset['ChunkList']['Chunk'].get('Length', 0)
+            filename = asset['ChunkList']['Chunk']['Path']
+            filepath = os.path.join(os.path.dirname(path), filename)
+            if os.path.exists(filepath):
+                total_size_ondisk += os.path.getsize(filepath)
+
             if 'PackingList' in asset:
                 asset['PackingList'] = True
 
         am['Info']['AssetMap']['AssetsSizeBytes'] = total_size
+        am['Info']['AssetMap']['AssetsOnDiskSizeBytes'] = total_size_ondisk
 
     return am
 
