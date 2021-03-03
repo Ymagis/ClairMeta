@@ -329,20 +329,22 @@ class Checker(CheckerBase):
             not enforced at the XSD schema level so we explicitly check it
             here.
 
+            On the other hand, Interop spec doesn't have strict requirement
+            on the presence of LoadFont tag.
+
             Reference :
                 SMPTE ST 428-7-2014 5.11.1
                 SMPTE ST 429-2-2013 8.4.1
+                Interop TI Subtitle Spec 1.1 2.7
 
         """
         st_dict = self.st_util.get_subtitle_xml(asset, folder)
         if not st_dict:
             return
+        if self.dcp.schema == 'Interop':
+            return
 
-        if self.dcp.schema == 'SMPTE':
-            loadfont_attribute = "LoadFont@ID"
-        else:
-            loadfont_attribute = "LoadFont@Id"  # Interop
-
+        loadfont_attribute = "LoadFont@ID"
         text_elems = keys_by_name_dict(st_dict, 'Text')
         loadfont_elems = keys_by_name_dict(st_dict, loadfont_attribute)
         if text_elems and len(loadfont_elems) != 1:
@@ -558,6 +560,7 @@ class Checker(CheckerBase):
 
             Reference :
                 SMPTE 429-5-2017
+                SMPTE-RDD 52-2020 10.4
         """
         st_dict = self.st_util.get_subtitle_xml(asset, folder)
         if not st_dict:
