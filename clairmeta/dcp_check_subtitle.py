@@ -560,6 +560,7 @@ class Checker(CheckerBase):
 
             Reference :
                 SMPTE 429-5-2017
+                SMPTE-RDD 52-2020 10.4
         """
         st_dict = self.st_util.get_subtitle_xml(asset, folder)
         if not st_dict:
