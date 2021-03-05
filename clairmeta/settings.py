@@ -62,6 +62,11 @@ DCP_SETTINGS = {
             'HD': ['1920x1080'],
             'UHD': ['3840x2160'],
         },
+        # Valid pixel array sizes according to SMPTE RDD 52:2020
+        'pixel_array_sizes': {
+            '2K': ['1998x1080', '2048x858'],
+            '4K': ['4096x1716', '4096x2160'],
+        },
         # Standard editrate
         'editrates': {
             '2K': {'2D': [24, 25, 30, 48, 50, 60], '3D': [24, 25, 30, 48, 50, 60]},
