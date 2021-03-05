@@ -65,7 +65,7 @@ DCP_SETTINGS = {
         # Valid pixel array sizes according to SMPTE RDD 52:2020
         'pixel_array_sizes': {
             '2K': ['1998x1080', '2048x858'],
-            '4K': ['4096x1716', '4096x2160'],
+            '4K': ['3996x2160', '4096x1716'],
         },
         # Standard editrate
         'editrates': {
