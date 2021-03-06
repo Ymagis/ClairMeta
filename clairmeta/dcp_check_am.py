@@ -44,7 +44,10 @@ class Checker(CheckerBase):
     def check_am_name(self, am):
         """ AssetMap file name respect DCP standard.
 
-            Reference : N/A
+            References:
+                mpeg_ii_am_spec.doc (v3.4) 6.2
+                SMPTE ST 429-9:2014 A.4
+
         """
         schema = am['Info']['AssetMap']['Schema']
         mandatory_name = {
@@ -78,8 +81,16 @@ class Checker(CheckerBase):
     def check_assets_am_uuid(self, am, asset):
         """ AssetMap UUIDs validation.
 
-            Reference :
-                SMPTE 429-9-2014 6.1
+            References:
+                mpeg_ii_am_spec.doc (v3.4) 4.1.1
+                SMPTE ST 429-9:2014 5.1
+
+            ST 429-9 references the final version of RFC 4122 (July 2005)
+            whereas mpeg_ii_am_spec.doc references Draft 03 (January 2004).
+
+            Diff here:
+            https://tools.ietf.org/rfcdiff?url1=draft-mealling-uuid-urn-03.txt&url2=rfc4122.txt
+
         """
         uuid, _, _ = asset
         if not check_uuid(uuid):
@@ -100,10 +111,10 @@ class Checker(CheckerBase):
                 "Invalid VolIndex found : {}".format(asset_vol))
 
     def check_assets_am_volindex_one(self, am, asset):
-        """ AssetMap assets VolIndex shall be one or absent.
+        """ AssetMap Asset VolumeIndex element shall be 1 or absent.
 
-            Reference :
-                SMPTE 429-9-2014 7.2
+            References:
+                SMPTE 429-9:2014 7.2
         """
         _, _, asset = asset
         asset_vol = asset['ChunkList']['Chunk'].get('VolumeIndex')
@@ -115,8 +126,9 @@ class Checker(CheckerBase):
     def check_assets_am_path(self, am, asset):
         """ AssetMap assets path validation.
 
-            Reference :
-                SMPTE 429-9-2014 7.1
+            References:
+                mpeg_ii_am_spec.doc (v3.4) 4.3.1, 5.3, 6.4
+                SMPTE 429-9:2014 7.1, A.2
         """
         uuid, path, _ = asset
 
@@ -132,8 +144,9 @@ class Checker(CheckerBase):
     def check_assets_am_size(self, am, asset):
         """ AssetMap assets size check.
 
-            Reference :
-                SMPTE 429-9-2014 7.4
+            References:
+                mpeg_ii_am_spec.doc (v3.4) 4.3.4
+                SMPTE ST 429-9:2014 7.4
         """
         _, path, asset = asset
         path = os.path.join(self.dcp.path, path)
