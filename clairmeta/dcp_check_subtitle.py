@@ -15,6 +15,7 @@ from clairmeta.utils.probe import unwrap_mxf
 from clairmeta.dcp_check import CheckerBase, CheckException
 from clairmeta.dcp_check_utils import check_xml
 from clairmeta.dcp_utils import (list_cpl_assets, get_reel_for_asset,
+                                 get_first_reel_for_asset_type,
                                  get_contentkey_for_asset)
 from clairmeta.settings import DCP_SETTINGS
 from clairmeta.logger import get_log
@@ -66,9 +67,7 @@ class SubtitleUtils(object):
         tick = int(tick)
         time_base = 1.0 / edit_rate
 
-        # Ceiling division. Ugly, but avoids importing math.ceil
-        # https://stackoverflow.com/questions/14822184/is-there-a-ceiling-equivalent-of-operator-in-python#17511341
-        return int(-(-(tick * 0.004) // time_base))
+        return int((tick * 0.004) // time_base)
 
     def st_tc_frames(self, tc, edit_rate):
         """ Convert TimeCode to frame count.
@@ -721,3 +720,32 @@ class Checker(CheckerBase):
                 raise CheckException(
                     "Subtitle image reference {} not found in folder {}"
                     "".format(img, os.path.relpath(folder, self.dcp.path)))
+
+    def check_subtitle_cpl_first_tt_event(self, playlist, asset, folder):
+        """ First TT Event of Composition check
+
+            The composition's first Timed Text event's TimeIn attribute
+            should be greater than or equal to 4 seconds.
+
+            Reference:
+                SMPTE RDD 52:2020 7.2.4
+        """
+        reel_cpl = get_reel_for_asset(playlist, asset[1]['Id'])['Position']
+        first_reel_of_st = get_first_reel_for_asset_type(playlist, 'Subtitle')
+        if reel_cpl != first_reel_of_st:
+            return
+
+        st_dict = self.st_util.get_subtitle_xml(asset, folder)
+        if not st_dict:
+            return
+
+        subtitles = keys_by_name_dict(st_dict, 'Subtitle')
+        if not subtitles:
+            return
+
+        st_editrate = self.st_util.get_subtitle_editrate(asset, st_dict)
+        first_tc = subtitles[0][0]['Subtitle@TimeIn']
+        first_tc_frames = self.st_util.st_tc_frames(first_tc, st_editrate)
+
+        if (first_tc_frames < 4 * st_editrate):
+            raise CheckException("First Timed Text event of CPL happens earlier than 4 seconds: {}".format(first_tc))
