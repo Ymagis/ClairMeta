@@ -154,8 +154,8 @@ class Checker(CheckerBase):
     def check_certif_version(self, cert, index):
         """ Certificate version check (X509 v3).
 
-            Reference :
-                SMPTE 430-2-2017 6.2 2
+            References:
+                SMPTE ST 430-2:2017 6.2 2
         """
         if cert.get_version() != crypto.x509.Version.v3.value:
             raise CheckException("Invalid certificate version")
@@ -163,8 +163,8 @@ class Checker(CheckerBase):
     def check_certif_extensions(self, cert, index):
         """ Certificate mandatory extensions check.
 
-            Reference :
-                SMPTE 430-2-2017 6.2 3
+            References:
+                SMPTE ST 430-2:2017 6.2 3
         """
         extensions_map = self.certif_ext_map(cert)
         required_extensions = [
@@ -191,8 +191,8 @@ class Checker(CheckerBase):
     def check_certif_fields(self, cert, index):
         """ Certificate mandatory fields check.
 
-            Reference :
-                SMPTE 430-2-2017 6.2 4
+            References:
+                SMPTE ST 430-2:2017 6.2 4
         """
         # 4. Missing required fields
         # Fields : Non signed part
@@ -210,8 +210,8 @@ class Checker(CheckerBase):
 
             Dn, O, OU and CN fields shall be of type PrintableString.
 
-            Reference :
-                SMPTE 430-2-2017 5.3.1, 5.3.2, 5.3.3, 5.3.4
+            References:
+                SMPTE ST 430-2:2017 5.3.1, 5.3.2, 5.3.3, 5.3.4
         """
         cert = cert.to_cryptography()
         fields = {
@@ -230,8 +230,8 @@ class Checker(CheckerBase):
     def check_certif_basic_constraint(self, cert, index):
         """ Certificate basic constraint check.
 
-            Reference :
-                SMPTE 430-2-2017 6.2 5
+            References:
+                SMPTE ST 430-2:2017 6.2 5
         """
         # 5. Check BasicConstraint
         extensions_map = self.certif_ext_map(cert)
@@ -252,8 +252,8 @@ class Checker(CheckerBase):
     def check_certif_key_usage(self, cert, index):
         """ Certificate key usage check.
 
-            Reference :
-                SMPTE 430-2-2017 6.2 6
+            References:
+                SMPTE ST 430-2:2017 6.2 6
         """
         # 6. Check KeyUsage
         extensions_map = self.certif_ext_map(cert)
@@ -284,8 +284,8 @@ class Checker(CheckerBase):
     def check_certif_organization_name(self, cert, index):
         """ Certificate organization name check.
 
-            Reference :
-                SMPTE 430-2-2017 6.2 7
+            References:
+                SMPTE ST 430-2:2017 6.2 7
         """
         # 7. Check OrganizationName
         if cert.get_issuer().O == '':
@@ -299,8 +299,8 @@ class Checker(CheckerBase):
     def check_certif_role(self, cert, index):
         """ Certificate role check.
 
-            Reference :
-                SMPTE 430-2-2017 6.2 8
+            References:
+                SMPTE ST 430-2:2017 6.2 8
         """
         # 8. Check Role
         cn = cert.get_subject().CN
@@ -328,8 +328,8 @@ class Checker(CheckerBase):
 
             See https://github.com/wolfgangw/backports/issues/80
 
-            Reference :
-                DCI Spec 1.3 9.4.3.5
+            References:
+                DCI DCSS (v1.3) 9.4.3.5
         """
         cn = cert.get_subject().CN
         roles_str = cn.split('.', 1)[0]
@@ -346,8 +346,8 @@ class Checker(CheckerBase):
     def check_certif_date(self, cert, index):
         """ Certificate date validation.
 
-            Reference :
-                SMPTE 430-2-2017 6.2 9
+            References:
+                SMPTE ST 430-2:2017 6.2 9
         """
         # 9. Check time validity
         # Note : Date are formatted in ASN.1 Time YYYYMMDDhhmmssZ
@@ -370,8 +370,8 @@ class Checker(CheckerBase):
     def check_certif_signature_algorithm(self, cert, index):
         """ Certificate signature algorithm check.
 
-            Reference :
-                SMPTE 430-2-2017 6.2 10
+            References:
+                SMPTE ST 430-2:2017 6.2 10
         """
         # 10. Signature Algorithm
         signature_algorithm = cert.get_signature_algorithm().decode("utf-8")
@@ -385,9 +385,8 @@ class Checker(CheckerBase):
     def check_certif_rsa_validity(self, cert, index):
         """ Certificate characteristics (RSA 2048, 65537 exp) check.
 
-            Reference :
-                SMPTE 430-2-2017 6.2 11
-                SMPTE 430-2-2017 5.2
+            References:
+                SMPTE ST 430-2:2017 5.2, 6.2 11
         """
         # 11. Subject's PublicKey RSA validity
         expected_type = crypto.TYPE_RSA
@@ -413,8 +412,8 @@ class Checker(CheckerBase):
     def check_certif_revokation_list(self, cert, index):
         """ Certificate revokation list check.
 
-            Reference :
-                SMPTE 430-2-2017 6.2 12
+            References:
+                SMPTE ST 430-2:2017 6.2 12
         """
         # 12. Revokation list check
         # - Subject public key
@@ -426,8 +425,8 @@ class Checker(CheckerBase):
     def check_certif_publickey_thumbprint(self, cert, index):
         """ Certificate public key thumbprint check.
 
-            Reference :
-                SMPTE 430-2-2017 6.2 13
+            References:
+                SMPTE ST 430-2:2017 6.2 13
         """
         # 13. Subject's public key thumb print match dnQualifier
         dn_thumbprint = cert.get_subject().dnQualifier.encode("utf-8")
@@ -452,8 +451,8 @@ class Checker(CheckerBase):
     def check_certif_signature(self, cert, index):
         """ Certificate signature check.
 
-            Reference :
-                SMPTE 430-2-2017 6.2 15
+            References:
+                SMPTE ST 430-2:2017 6.2 15
         """
         # 15. Validate signature using local issuer
         # Note : use openssl StoreContext object which should do this plus a
@@ -468,7 +467,7 @@ class Checker(CheckerBase):
     def check_xml_certif_serial_coherence(self, cert, xml_cert):
         """ XML / Certificate serial number coherence.
 
-            Reference : N/A
+            References: N/A
         """
         # i. Serial number check
         xml_serial = xml_cert['X509IssuerSerial']['X509SerialNumber']
@@ -480,7 +479,7 @@ class Checker(CheckerBase):
     def check_xml_certif_issuer_coherence(self, cert, xml_cert):
         """ XML / Certificate Issuer coherence.
 
-            Reference : N/A
+            References: N/A
         """
         # ii. Issuer name check
         xml_issuer = xml_cert['X509IssuerSerial']['X509IssuerName']
@@ -493,8 +492,8 @@ class Checker(CheckerBase):
     def check_sign_chain_length(self, source):
         """ Certificates minimum chain length.
 
-            Reference :
-                SMPTE 430-2-2017 6.2 16
+            References:
+                SMPTE ST 430-2:2017 6.2 16
         """
         # 16. Chain length
         if (self.context_chain_length and
@@ -507,8 +506,8 @@ class Checker(CheckerBase):
     def check_sign_chain_coherence(self, source):
         """ Certificates chain coherence.
 
-            Reference :
-                SMPTE 430-2-2017 6.2 17, 18, 19
+            References:
+                SMPTE ST 430-2:2017 6.2 17, 18, 19
         """
         for index in range(1, len(self.cert_list)):
             parent, child = self.cert_list[index-1], self.cert_list[index]
@@ -547,7 +546,7 @@ class Checker(CheckerBase):
     def check_sign_chain_coherence_signature_algorithm(self, source):
         """ Certificates chain coherence.
 
-            Reference : N/A
+            References: N/A
         """
         sign_alg_set = set(
             [c.get_signature_algorithm() for c in self.cert_list])
@@ -559,7 +558,7 @@ class Checker(CheckerBase):
     def check_sign_signature_algorithm(self, source):
         """ XML signature algorithm check.
 
-            Reference : N/A
+            References: N/A
         """
         # Additionnal. XML coherence checks
         signed_info = source['Signature']['SignedInfo']
@@ -574,7 +573,7 @@ class Checker(CheckerBase):
     def check_sign_canonicalization_algorithm(self, source):
         """ XML canonicalization algorithm check.
 
-            Reference : N/A
+            References: N/A
         """
         signed_info = source['Signature']['SignedInfo']
         # Canonicalization algorithm
@@ -585,7 +584,7 @@ class Checker(CheckerBase):
     def check_sign_transform_algorithm(self, source):
         """ XML signature transform algorithm check.
 
-            Reference : N/A
+            References: N/A
         """
         signed_info = source['Signature']['SignedInfo']
         # Transform alogrithm
@@ -596,7 +595,7 @@ class Checker(CheckerBase):
     def check_sign_digest_algorithm(self, source):
         """ XML signature digest method check.
 
-            Reference : N/A
+            References: N/A
         """
         signed_info = source['Signature']['SignedInfo']
         # Digest algorithm
@@ -607,7 +606,7 @@ class Checker(CheckerBase):
     def check_sign_issuer_name(self, source):
         """ XML signature issuer name check.
 
-            Reference : N/A
+            References: N/A
         """
         signer = source['Signer']['X509Data']['X509IssuerSerial']
         # Signer Issuer Name
@@ -618,7 +617,7 @@ class Checker(CheckerBase):
     def check_sign_issuer_serial(self, source):
         """ XML signature serial number check.
 
-            Reference : N/A
+            References: N/A
         """
         sig = source['Signer']['X509Data']['X509IssuerSerial']
         # Signer Serial number
@@ -628,11 +627,11 @@ class Checker(CheckerBase):
     def check_document_signature(self, source, path):
         """ Digital signature validation.
 
-            Reference :
-                SMPTE 429-7-2006 6.13
-                SMPTE 429-8-2007 5.10
-                RFC 3275 https://www.ietf.org/rfc/rfc3275.txt
-                RFC 4051 https://tools.ietf.org/html/rfc4051
+            References:
+                SMPTE ST 429-7:2006 6.13
+                SMPTE ST 429-8:2007 5.10
+                IETF RFC 3275
+                IETF RFC 4051
         """
         # Check digest (XML document hash)
         signed_info = source['Signature']['SignedInfo']

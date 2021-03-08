@@ -20,9 +20,10 @@ class Checker(CheckerBase):
     def check_vol_xml(self, vol):
         """ VolIndex XML syntax and structure check.
 
-            Reference :
-                SMPTE ST 429-9
-                Interop Delivery Media Representation and Segmentation 3.2
+            References:
+                SMPTE ST 429-9:2014
+                mpeg_ii_am_spec.doc (v3.4)
+                https://interop-docs.cinepedia.com/Document_Release_2.0/mpeg_ii_am_spec.pdf
         """
         if self.dcp.schema == 'Interop':
             return
@@ -36,7 +37,7 @@ class Checker(CheckerBase):
     def check_vol_name(self, vol):
         """ VolIndex file name respect DCP standard.
 
-            Reference : N/A
+            References: N/A
         """
         schema = vol['Info']['VolumeIndex']['Schema']
         mandatory_name = {

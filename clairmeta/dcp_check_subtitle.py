@@ -218,9 +218,10 @@ class Checker(CheckerBase):
     def check_subtitle_dcp_format(self, playlist, asset):
         """ Subtitle format (related to DCP Standard) check.
 
-            Reference :
-                SMPTE ST 429-5
-                Interop Closed Captions Packaging 1.9
+            References:
+                Closed Captions Packaging (v1.9)
+                https://interop-docs.cinepedia.com/Addition_To_Document_Release_2.0/ClosedCaption_Interop_2007_11_16_v1_9(clean).pdf
+                SMPTE ST 429-5:2017
         """
         _, asset = asset
         asset_path = asset['Path']
@@ -237,9 +238,10 @@ class Checker(CheckerBase):
     def check_subtitle_cpl_xml(self, playlist, asset, folder):
         """ Subtitle XML file syntax and structure validation.
 
-            Reference :
-                SMPTE ST 428-7
-                Interop TI Subtitle Spec 1.1
+            References:
+                TI Subtitle Specification for DLP Cinema (v1.1)
+                https://web.archive.org/web/20140924175755/http://dlp.com/downloads/pdf_dlp_cinema_CineCanvas_Rev_C.pdf
+                SMPTE ST 428-7:2014
         """
         _, asset = asset
         asset_path = asset['Path']
@@ -263,9 +265,10 @@ class Checker(CheckerBase):
     def check_subtitle_cpl_reel_number(self, playlist, asset, folder):
         """ Subtitle reel number coherence with CPL.
 
-            Reference :
-                SMPTE 428-7-2014 5.6
-                Interop TI Subtitle Spec 1.1 2.5
+            References:
+                TI Subtitle Specification for DLP Cinema (v1.1) 2.5
+                https://web.archive.org/web/20140924175755/http://dlp.com/downloads/pdf_dlp_cinema_CineCanvas_Rev_C.pdf
+                SMPTE ST 428-7:2014 5.6
         """
         st_dict = self.st_util.get_subtitle_xml(asset, folder)
         if not st_dict:
@@ -282,7 +285,7 @@ class Checker(CheckerBase):
     def check_subtitle_cpl_language(self, playlist, asset, folder):
         """ Subtitle language coherence with CPL.
 
-            Reference : N/A
+            References: N/A
         """
         def lookup_language(lang):
             """ Detect language from `lang` name. """
@@ -332,11 +335,11 @@ class Checker(CheckerBase):
             On the other hand, Interop spec doesn't have strict requirement
             on the presence of LoadFont tag.
 
-            Reference :
-                SMPTE ST 428-7-2014 5.11.1
-                SMPTE ST 429-2-2013 8.4.1
-                Interop TI Subtitle Spec 1.1 2.7
-
+            References:
+                TI Subtitle Specification for DLP Cinema (v1.1) 2.7
+                https://web.archive.org/web/20140924175755/http://dlp.com/downloads/pdf_dlp_cinema_CineCanvas_Rev_C.pdf
+                SMPTE ST 428-7:2014 5.11.1
+                SMPTE ST 429-2:2013 8.4.1
         """
         st_dict = self.st_util.get_subtitle_xml(asset, folder)
         if not st_dict:
@@ -357,9 +360,10 @@ class Checker(CheckerBase):
     def check_subtitle_cpl_font_ref(self, playlist, asset, folder):
         """ Subtitle font references check.
 
-            Reference :
-                SMPTE ST 428-7-2014 5.11.1
-                Interop TI Subtitle Spec 1.1 2.7
+            References:
+                TI Subtitle Specification for DLP Cinema (v1.1) 2.7
+                https://web.archive.org/web/20140924175755/http://dlp.com/downloads/pdf_dlp_cinema_CineCanvas_Rev_C.pdf
+                SMPTE ST 428-7:2014 5.11.1
         """
         st_dict = self.st_util.get_subtitle_xml(asset, folder)
         if not st_dict:
@@ -381,7 +385,7 @@ class Checker(CheckerBase):
     def check_subtitle_cpl_font(self, playlist, asset, folder):
         """ Subtitle font file exists.
 
-            Reference : N/A
+            References: N/A
         """
         st_dict = self.st_util.get_subtitle_xml(asset, folder)
         if not st_dict:
@@ -396,8 +400,9 @@ class Checker(CheckerBase):
     def check_subtitle_cpl_font_size(self, playlist, asset, folder):
         """ Subtitle maximum font size.
 
-            Reference :
-                Interop TI Subtitle Spec 1.1 2.7
+            References:
+                TI Subtitle Specification for DLP Cinema (v1.1) 2.7
+                https://web.archive.org/web/20140924175755/http://dlp.com/downloads/pdf_dlp_cinema_CineCanvas_Rev_C.pdf
         """
         st_dict = self.st_util.get_subtitle_xml(asset, folder)
         if not st_dict:
@@ -419,7 +424,7 @@ class Checker(CheckerBase):
     def check_subtitle_cpl_font_glyph(self, playlist, asset, folder):
         """ Check for missing font glyphs.
 
-            Reference : N/A
+            References: N/A
         """
         st_dict = self.st_util.get_subtitle_xml(asset, folder)
         if not st_dict:
@@ -462,7 +467,7 @@ class Checker(CheckerBase):
     def check_subtitle_cpl_st_timing(self, playlist, asset, folder):
         """ Subtitle individual duration / fade time check.
 
-            Reference : N/A
+            References: N/A
         """
         st_dict = self.st_util.get_subtitle_xml(asset, folder)
         if not st_dict:
@@ -497,7 +502,7 @@ class Checker(CheckerBase):
     def check_subtitle_cpl_duration(self, playlist, asset, folder):
         """ Subtitle duration coherence with CPL.
 
-            Reference : N/A
+            References: N/A
         """
         st_dict = self.st_util.get_subtitle_xml(asset, folder)
         if not st_dict:
@@ -532,7 +537,7 @@ class Checker(CheckerBase):
     def check_subtitle_cpl_editrate(self, playlist, asset, folder):
         """ Subtitle editrate coherence with CPL.
 
-            Reference : N/A
+            References: N/A
         """
         st_dict = self.st_util.get_subtitle_xml(asset, folder)
         if not st_dict:
@@ -558,9 +563,9 @@ class Checker(CheckerBase):
             (As_02_TimedText parser) store the TimedTextDescriptor/ResourceID
             in a global AssetID key.
 
-            Reference :
-                SMPTE 429-5-2017
-                SMPTE-RDD 52-2020 10.4
+            References:
+                SMPTE ST 429-5:2017
+                SMPTE RDD 52:2020 10.4
         """
         st_dict = self.st_util.get_subtitle_xml(asset, folder)
         if not st_dict:
@@ -619,7 +624,7 @@ class Checker(CheckerBase):
             created using the same universally unique identifier (UUID) for
             the MXF file and the main XML inside the MXF files. [DCPLYR-3418]
 
-            Reference : N/A
+            References: N/A
         """
         st_dict = self.st_util.get_subtitle_xml(asset, folder)
         if not st_dict:
@@ -638,7 +643,7 @@ class Checker(CheckerBase):
     def check_subtitle_cpl_empty(self, playlist, asset, folder):
         """ Empty Subtitle file check.
 
-            Reference : N/A
+            References: N/A
         """
         st_dict = self.st_util.get_subtitle_xml(asset, folder)
         if not st_dict:
@@ -651,9 +656,10 @@ class Checker(CheckerBase):
     def check_subtitle_cpl_content(self, playlist, asset, folder):
         """ Subtitle individual structure check.
 
-            Reference :
-                Interop TI Subtitle Spec 1.1 2.9
-                SMPTE 428-7-2014 6
+            References:
+                TI Subtitle Specification for DLP Cinema (v1.1) 2.9
+                https://web.archive.org/web/20140924175755/http://dlp.com/downloads/pdf_dlp_cinema_CineCanvas_Rev_C.pdf
+                SMPTE ST 428-7:2014 6
         """
         st_dict = self.st_util.get_subtitle_xml(asset, folder)
         if not st_dict:
@@ -677,9 +683,10 @@ class Checker(CheckerBase):
             VAlign="top", VPosition="0" : out of the top of the screen
             VAlign="bottom", VPosition="0" : some char like 'g' will be cut
 
-            Reference :
-                Interop TI Subtitle Spec 1.1 2.10
-                SMPTE 428-7-2014 6.2.4
+            References:
+                TI Subtitle Specification for DLP Cinema (v1.1) 2.10
+                https://web.archive.org/web/20140924175755/http://dlp.com/downloads/pdf_dlp_cinema_CineCanvas_Rev_C.pdf
+                SMPTE ST 428-7:2014 6.2.4
         """
         st_dict = self.st_util.get_subtitle_xml(asset, folder)
         if not st_dict:
@@ -705,8 +712,9 @@ class Checker(CheckerBase):
     def check_subtitle_cpl_image(self, playlist, asset, folder):
         """ Subtitle image element must reference a valid PNG file.
 
-            Reference :
-                Interop TI Subtitle Spec 1.1 2.17
+            References:
+                TI Subtitle Specification for DLP Cinema (v1.1) 2.17
+                https://web.archive.org/web/20140924175755/http://dlp.com/downloads/pdf_dlp_cinema_CineCanvas_Rev_C.pdf
         """
         st_dict = self.st_util.get_subtitle_xml(asset, folder)
         if not st_dict:
