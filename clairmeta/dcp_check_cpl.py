@@ -66,7 +66,7 @@ class Checker(CheckerBase):
     def check_cpl_xml(self, playlist):
         """ CPL XML syntax and structure check.
 
-            Reference : N/A
+            References: N/A
         """
         cpl = playlist['Info']['CompositionPlaylist']
         check_xml(
@@ -78,8 +78,8 @@ class Checker(CheckerBase):
     def check_cpl_id_rfc4122(self, playlist):
         """ CPL UUID RFC4122 compliance.
 
-            Reference :
-                SMPTE 429-7-2006 6.1
+            References:
+                SMPTE ST 429-7:2006 6.1
         """
         cpl = playlist['Info']['CompositionPlaylist']
         uuid = cpl['Id']
@@ -90,7 +90,7 @@ class Checker(CheckerBase):
     def check_cpl_contenttitle_annotationtext_match(self, playlist):
         """ CPL ContentTitleText and AnnotationText shall match.
 
-            Reference : N/A
+            References: N/A
         """
         cpl_node = playlist['Info']['CompositionPlaylist']
         ct = cpl_node['ContentTitleText']
@@ -102,7 +102,7 @@ class Checker(CheckerBase):
     def check_cpl_contenttitle_pklannotationtext_match(self, playlist):
         """ CPL ContentTitleText and PKL AnnotationText shall match.
 
-            Reference : N/A
+            References: N/A
         """
         cpl_node = playlist['Info']['CompositionPlaylist']
         ct = cpl_node['ContentTitleText']
@@ -129,7 +129,7 @@ class Checker(CheckerBase):
     def check_cpl_empty_text_fields(self, am):
         """ CPL empty text fields check.
 
-            Reference : N/A
+            References: N/A
         """
         fields = ['Creator', 'Issuer', 'AnnotationText']
         empty_fields = []
@@ -146,8 +146,8 @@ class Checker(CheckerBase):
     def check_cpl_issuedate(self, playlist):
         """ CPL Issue Date validation.
 
-            Reference :
-                SMPTE 429-7-2006 6.4
+            References:
+                SMPTE ST 429-7:2006 6.4
         """
         cpl = playlist['Info']['CompositionPlaylist']
         check_issuedate(cpl['IssueDate'])
@@ -155,7 +155,7 @@ class Checker(CheckerBase):
     def check_cpl_referenced_by_pkl(self, playlist):
         """ CPL shall be present in PKL.
 
-            Reference : N/A
+            References: N/A
         """
         cpl = playlist['Info']['CompositionPlaylist']
         pkl_id = cpl.get('PKLId')
@@ -165,8 +165,8 @@ class Checker(CheckerBase):
     def check_cpl_reel_coherence(self, playlist):
         """ CPL reel attributes shall be coherents across all reels.
 
-            Reference :
-                SMPTE 429-2-2013 8.7
+            References:
+                SMPTE ST 429-2:2013 8.7
         """
         cpl = playlist['Info']['CompositionPlaylist']
 
@@ -198,7 +198,7 @@ class Checker(CheckerBase):
             This is not required explicitly in the standards but is known to
             cause issue for some equipements in the field.
 
-            Reference : N/A
+            References: N/A
         """
         cpl = playlist['Info']['CompositionPlaylist']
         if cpl['Encrypted'] == "Mixed":
@@ -207,8 +207,8 @@ class Checker(CheckerBase):
     def check_cpl_reel_duration(self, playlist):
         """ CPL reels shall last at least one second.
 
-            Reference :
-                SMPTE 429-7-2006 9.2
+            References:
+                SMPTE ST 429-7:2006 9.2
         """
         errors = []
         for reel in playlist['Info']['CompositionPlaylist']['ReelList']:
@@ -223,16 +223,16 @@ class Checker(CheckerBase):
     def check_cpl_reel_duration_picture_sound(self, playlist):
         """ CPL reels picture and audio tracks duration shall match.
 
-            Reference :
-                SMPTE 429-2-2013 9.4
+            References:
+                SMPTE ST 429-2:2013 9.4
         """
         self.metadata_cmp_pair(playlist, 'Duration', 'Picture', 'Sound')
 
     def check_cpl_reel_duration_picture_aux(self, playlist):
         """ CPL reels picture and auxiliary tracks duration shall match.
 
-            Reference :
-                SMPTE 429-2-2013 9.4
+            References:
+                SMPTE ST 429-2:2013 9.4
         """
         self.metadata_cmp_pair(playlist, 'Duration', 'Picture', 'AuxData')
 
@@ -244,7 +244,7 @@ class Checker(CheckerBase):
             For SMPTE: MainSubtitle duration is allowed to be less than or
             equal to MainPicture Duration.
 
-            Reference : N/A
+            References: N/A
          """
         cmp_op = None
         mess = None
@@ -264,8 +264,8 @@ class Checker(CheckerBase):
     def check_cpl_reels_cut(self, playlist):
         """ CPL reels cut coherence check.
 
-            Reference :
-                SMPTE 429-7-2006 8.1.4, 8.1.5, 8.1.6
+            References:
+                SMPTE ST 429-7:2006 8.1.4, 8.1.5, 8.1.6
         """
         cpl_position = 0
         cut_keys = ['CPLEntryPoint', 'CPLOutPoint', 'Duration']
@@ -300,7 +300,7 @@ class Checker(CheckerBase):
     def check_assets_cpl_missing_from_vf(self, playlist, asset):
         """ CPL assets referencing external package.
 
-            Reference : N/A
+            References: N/A
         """
         _, asset = asset
         uuid = asset['Id']
@@ -315,7 +315,7 @@ class Checker(CheckerBase):
     def check_assets_cpl_missing_from_multi_cpl(self, playlist, asset):
         """ Multi CPL package must be self contained.
 
-            Reference : N/A
+            References: N/A
         """
         _, asset = asset
         uuid = asset['Id']
@@ -333,7 +333,7 @@ class Checker(CheckerBase):
     def check_assets_cpl_labels(self, playlist, asset):
         """ CPL assets labels check.
 
-            Reference : N/A
+            References: N/A
         """
         _, asset = asset
 
@@ -345,7 +345,7 @@ class Checker(CheckerBase):
     def check_assets_cpl_labels_schema(self, playlist, asset):
         """ CPL assets labels / schema coherence check.
 
-            Reference : N/A
+            References: N/A
         """
         _, asset = asset
 
@@ -359,8 +359,8 @@ class Checker(CheckerBase):
     def check_assets_cpl_uuid(self, playlist, asset):
         """ CPL assets UUID RFC4122 compliance.
 
-            Reference :
-                SMPTE 429-7-2006 8.1.1
+            References:
+                SMPTE ST 429-7:2006 8.1.1
         """
         _, asset = asset
         uuid = asset['Id']
@@ -372,7 +372,7 @@ class Checker(CheckerBase):
     def check_assets_cpl_filename_uuid(self, playlist, asset):
         """ CPL assets file name UUID check.
 
-            Reference : N/A
+            References: N/A
         """
         _, asset = asset
 
@@ -387,8 +387,8 @@ class Checker(CheckerBase):
     def check_assets_cpl_hash(self, playlist, asset):
         """ CPL assets Hash shall be present alongside KeyId (encrypted).
 
-            Reference :
-                SMPTE 429-2-2013 9.11
+            References:
+                SMPTE ST 429-2:2013 9.11
         """
         if 'KeyId' in asset and 'Hash' not in asset:
             raise CheckException("Encrypted asset must have a Hash element")
@@ -396,8 +396,8 @@ class Checker(CheckerBase):
     def check_assets_cpl_cut(self, playlist, asset):
         """ CPL assets cut coherence check.
 
-            Reference :
-                SMPTE 429-7-2006 8.1.4, 8.1.5, 8.1.6
+            References:
+                SMPTE ST 429-7:2006 8.1.4, 8.1.5, 8.1.6
         """
         _, asset = asset
         cut_keys = ['EntryPoint', 'OutPoint', 'IntrinsicDuration']
@@ -415,7 +415,7 @@ class Checker(CheckerBase):
     def check_assets_cpl_metadata(self, playlist, asset):
         """ CPL assets metadata coherence with MXF tracks.
 
-            Reference : N/A
+            References: N/A
         """
         _, asset = asset
         # This a correspondance table between CPL and MXF tags

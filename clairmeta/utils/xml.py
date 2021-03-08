@@ -259,7 +259,8 @@ def validate_xml(xml_path, xsd_id):
 def canonicalize_xml(xml_path, root=None, ns=None, strip=None):
     """ Canonicalize a XML document using C14N method.
 
-        Reference : https://www.w3.org/TR/xml-c14n/
+        References:
+            W3C Canonical XML (v1.1)
 
         Args:
             xml_path (str): XML file absolute path.
