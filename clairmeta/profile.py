@@ -17,7 +17,7 @@ DCP_CHECK_PROFILE = {
         'check_dcnc_': 'WARNING',
         'check_dcp_foreign_files': 'WARNING',
         'check_assets_am_volindex_one': 'WARNING',
-        'check_am_empty_text_fields': 'WARNING',
+        'check_am_empty_text_fields': 'INFO',
         'check_pkl_empty_text_fields': 'WARNING',
         'check_cpl_empty_text_fields': 'WARNING',
         'check_cpl_contenttitle_annotationtext_match': 'WARNING',

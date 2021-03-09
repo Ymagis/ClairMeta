@@ -61,7 +61,14 @@ class Checker(CheckerBase):
     def check_am_empty_text_fields(self, am):
         """ AssetMap empty text fields check.
 
-            Reference : N/A
+            This check for empty 'Creator', 'Issuer' or 'AnnotationText' text
+            fields. While not invalid per specification, it appears other
+            checking tools might trigger error / warning here so we provide
+            this to align with other check reports.
+
+            References:
+                mpeg_ii_am_spec.doc (v3.4) 4.1.2, 4.1.5, 4.1.6
+                SMPTE ST 429-9:2014 5.2, 5.3, 5.6
         """
         fields = ['Creator', 'Issuer', 'AnnotationText']
         empty_fields = []
