@@ -28,8 +28,8 @@ class Checker(CheckerBase):
     def check_sound_cpl_channels(self, playlist, asset):
         """ Sound max channels count.
 
-            Reference :
-                SMPTE 428-2-2006 3.3
+            References:
+                SMPTE ST 428-2:2006 3.3
         """
         channels = DCP_SETTINGS['sound']['max_channel_count']
         _, asset = asset
@@ -48,8 +48,9 @@ class Checker(CheckerBase):
             should be used when delivering 5.1 + HI/VI content. In all cases,
             an even number of channels shall be used.
 
-            Reference :
-                http://isdcf.com/papers/ISDCF-Doc4-Audio-channel-recommendations.pdf
+            References:
+                ISDCF Doc 04
+                https://isdcf.com/papers/ISDCF-Doc4-Audio-channel-recommendations.pdf
         """
         _, asset = asset
         cc = asset['Probe']['ChannelCount']
@@ -62,8 +63,8 @@ class Checker(CheckerBase):
     def check_sound_cpl_format(self, playlist, asset):
         """ Sound channels count coherence with format.
 
-            Reference :
-                SMPTE 429-2-2013 A.1.2
+            References:
+                SMPTE ST 429-2:2013 A.1.2
         """
         configurations = DCP_SETTINGS['sound']['configuration_channels']
         _, asset = asset
@@ -80,8 +81,8 @@ class Checker(CheckerBase):
     def check_sound_cpl_sampling(self, playlist, asset):
         """ Sound sampling rate check.
 
-            Reference :
-                SMPTE 428-2-2006 3.2
+            References:
+                SMPTE ST 428-2:2006 3.2
         """
         rates = DCP_SETTINGS['sound']['sampling_rate']
         _, asset = asset
@@ -95,8 +96,8 @@ class Checker(CheckerBase):
     def check_sound_cpl_quantization(self, playlist, asset):
         """ Sound quantization check.
 
-            Reference :
-                SMPTE 428-2-2006 3.1
+            References:
+                SMPTE ST 428-2:2006 3.1
         """
         bitdepth = DCP_SETTINGS['sound']['quantization']
         _, asset = asset
@@ -110,7 +111,7 @@ class Checker(CheckerBase):
     def check_sound_cpl_blockalign(self, playlist, asset):
         """ Sound block alignement check.
 
-            Reference : N/A
+            References: N/A
         """
         align = DCP_SETTINGS['sound']['quantization'] / 8
         _, asset = asset
