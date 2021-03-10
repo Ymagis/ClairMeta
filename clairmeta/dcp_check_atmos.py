@@ -28,8 +28,8 @@ class Checker(CheckerBase):
     def check_atmos_cpl_essence_encoding(self, playlist, asset):
         """ Atmos data essence coding universal label.
 
-            Reference :
-                SMPTE 429-18-2019 11
+            References:
+                SMPTE ST 429-18:2019 11
         """
         _, asset = asset
         ul = DCP_SETTINGS['atmos']['smpte_ul']
@@ -56,9 +56,10 @@ class Checker(CheckerBase):
 
             This field will be optional (429-18).
 
-            Reference :
-                Dolby Atmos Next-Generation Audio for Cinema (WhitePaper)
-                SMPTE 429-18-2019 12 Table 4
+            References:
+                Dolby S14/26858/27819
+                https://web.archive.org/web/20190407130138/https://www.dolby.com/us/en/technologies/dolby-atmos/dolby-atmos-next-generation-audio-for-cinema-white-paper.pdf
+                SMPTE ST 429-18:2019 12 Table 4
         """
         _, asset = asset
         max_atmos = DCP_SETTINGS['atmos']['max_channel_count']
@@ -76,9 +77,10 @@ class Checker(CheckerBase):
 
             This field will be optional (429-18).
 
-            Reference :
-                Dolby Atmos Next-Generation Audio for Cinema (WhitePaper)
-                SMPTE 429-18-2019 12 Table 4
+            References:
+                Dolby S14/26858/27819
+                https://web.archive.org/web/20190407130138/https://www.dolby.com/us/en/technologies/dolby-atmos/dolby-atmos-next-generation-audio-for-cinema-white-paper.pdf
+                SMPTE ST 429-18:2019 12 Table 4
         """
         _, asset = asset
         max_atmos = DCP_SETTINGS['atmos']['max_object_count']

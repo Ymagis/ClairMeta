@@ -106,7 +106,7 @@ class DCPChecker(CheckerBase):
     def check_dcp_empty_dir(self):
         """ Empty directory detection.
 
-            Reference : N/A
+            References: N/A
         """
         list_empty_dir = []
         for dirpath, dirnames, filenames in os.walk(self.dcp.path):
@@ -123,7 +123,7 @@ class DCPChecker(CheckerBase):
     def check_dcp_hidden_files(self):
         """ Hidden files detection.
 
-            Reference : N/A
+            References: N/A
         """
         hidden_files = [
             os.path.relpath(f, self.dcp.path)
@@ -136,7 +136,7 @@ class DCPChecker(CheckerBase):
     def check_dcp_foreign_files(self):
         """ Foreign files detection (not listed in AssetMap).
 
-            Reference : N/A
+            References: N/A
         """
         list_asset_path = [
             os.path.join(self.dcp.path, a)
@@ -154,7 +154,7 @@ class DCPChecker(CheckerBase):
     def check_dcp_multiple_am_or_vol(self):
         """ Only one AssetMap and VolIndex shall be present.
 
-            Reference : N/A
+            References: N/A
         """
         restricted_lists = {
             'VolIndex': self.dcp._list_vol,
@@ -182,9 +182,9 @@ class DCPChecker(CheckerBase):
     def check_dcp_signed(self):
         """ DCP with encrypted content must be digitally signed.
 
-            Reference :
-                DCI Spec 1.3 5.4.3.7.
-                DCI Spec 1.3 5.5.2.3.
+            References:
+                DCI DCSS (v1.3) 5.4.3.7
+                DCI DCSS (v1.3) 5.5.2.3
         """
         for cpl in self.dcp._list_cpl:
             cpl_node = cpl['Info']['CompositionPlaylist']
@@ -201,7 +201,7 @@ class DCPChecker(CheckerBase):
     def check_link_ov_coherence(self):
         """ Relink OV/VF sanity checks.
 
-            Reference : N/A
+            References: N/A
         """
         if self.ov_path and self.dcp.package_type != 'VF':
             raise CheckException("Package checked must be a VF")
@@ -215,7 +215,7 @@ class DCPChecker(CheckerBase):
     def check_link_ov_asset(self, asset, essence):
         """ VF package shall reference assets present in OV.
 
-            Reference : N/A
+            References: N/A
         """
         if not self.ov_dcp:
             return
