@@ -1,7 +1,7 @@
 # Clairmeta - (C) YMAGIS S.A.
 # See LICENSE for more information
 
-from clairmeta.dcp_check import CheckerBase, CheckException
+from clairmeta.dcp_check import CheckerBase
 from clairmeta.dcp_utils import list_cpl_assets
 from clairmeta.settings import DCP_SETTINGS
 
@@ -37,19 +37,25 @@ class Checker(CheckerBase):
         mxf_ul = asset['Probe'].get('DataEssenceCoding', '')
 
         if not cpl_ul:
-            raise CheckException("Missing Atmos DataType tag (CPL/AuxData")
+            self.fatal_error(
+                "Missing Atmos DataType tag (CPL/AuxData)",
+                "missing_cpl")
         elif not mxf_ul:
-            raise CheckException("Missing Atmos Essence Coding UL (MXF)")
+            self.fatal_error(
+                "Missing Atmos Essence Coding UL (MXF)",
+                "missing_mxf")
 
         cpl_ul, mxf_ul = cpl_ul.lower(), mxf_ul.lower()
         if cpl_ul != mxf_ul:
-            raise CheckException(
+            self.error(
                 "Incoherent Atmos Data Essence Coding, CPL {} / MXF {}"
-                .format(cpl_ul, mxf_ul))
+                .format(cpl_ul, mxf_ul),
+                "incoherent")
         elif mxf_ul != ul:
-            raise CheckException(
+            self.error(
                 "Unknown Atmos Data Essence Coding, expecting {} but got {}"
-                .format(ul, mxf_ul))
+                .format(ul, mxf_ul),
+                "unknown")
 
     def check_atmos_cpl_channels(self, playlist, asset):
         """ Atmos maximum channels count.
@@ -66,11 +72,14 @@ class Checker(CheckerBase):
         max_cc = asset['Probe'].get('MaxChannelCount')
 
         if not max_cc:
-            raise CheckException("Missing MaxChannelCount field")
+            self.error(
+                "Missing MaxChannelCount field",
+                "missing")
         elif max_cc > max_atmos:
-            raise CheckException(
+            self.error(
                 "Invalid Atmos MaxChannelCount, got {} but maximum is {}"
-                .format(max_cc, max_atmos))
+                .format(max_cc, max_atmos),
+                "invalid")
 
     def check_atmos_cpl_objects(self, playlist, asset):
         """ Atmos maximum objects count.
@@ -87,8 +96,11 @@ class Checker(CheckerBase):
         max_obj = asset['Probe'].get('MaxObjectCount')
 
         if not max_obj:
-            raise CheckException("Missing MaxObjectCount field")
+            self.error(
+                "Missing MaxObjectCount field",
+                "missing")
         elif max_obj > max_atmos:
-            raise CheckException(
+            self.error(
                 "Invalid Atmos MaxObjectCount, got {} but maximum is {}"
-                .format(max_obj, max_atmos))
+                .format(max_obj, max_atmos),
+                "invalid")

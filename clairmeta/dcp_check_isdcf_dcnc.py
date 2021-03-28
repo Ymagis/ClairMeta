@@ -5,7 +5,7 @@ from datetime import datetime
 
 from clairmeta.dcp_utils import list_cpl_assets
 from clairmeta.utils.isdcf import parse_isdcf_string
-from clairmeta.dcp_check import CheckerBase, CheckException
+from clairmeta.dcp_check import CheckerBase
 from clairmeta.settings import DCP_SETTINGS
 
 
@@ -32,31 +32,30 @@ class Checker(CheckerBase):
         ct = cpl_node['ContentTitleText']
         self.fields, errors = parse_isdcf_string(ct)
         if errors:
-            raise CheckException('\n'.join(errors))
+            self.error('\n'.join(errors))
 
     def check_dcnc_field_redband(self, playlist, fields):
         """ RedBand qualifier is restricted to Trailer. """
         is_trailer = fields['ContentType'].get('Type') == 'TLR'
         redband = fields['ContentType'].get('RedBand')
         if not is_trailer and redband:
-            raise CheckException(
-                "RedBand qualifier is only for trailer content")
+            self.error("RedBand qualifier is only for trailer content")
 
     def check_dcnc_field_dimension(self, playlist, fields):
         """ 3D content shall specify 2D or 3D version. """
         is_3D = fields['Standard'].get('Dimension') == '3D'
         dimension_content = fields['ContentType'].get('Dimension')
         if is_3D and dimension_content == '':
-            raise CheckException("Content Type should specify 2D version or "
-                                 "3D version for 3D Movie")
+            self.error("Content Type should specify 2D version or "
+                       "3D version for 3D Movie")
 
     def check_dcnc_field_aspect_ratio(self, playlist, fields):
         """ ImageAspectRatio qualifier forbidden for Trailer. """
         is_trailer = fields['ContentType'].get('Type') == 'TLR'
         iar_qualifier = fields['ProjectorAspectRatio'].get('ImageAspectRatio')
         if is_trailer and iar_qualifier != '':
-            raise CheckException("Trailer content should not contain "
-                                 "ImageAspectRatio qualifier")
+            self.error("Trailer content should not contain "
+                       "ImageAspectRatio qualifier")
 
     def check_dcnc_field_date(self, playlist, fields):
         """ Composition Date validation. """
@@ -65,22 +64,24 @@ class Checker(CheckerBase):
             try:
                 date = datetime.strptime(date_str, '%Y%m%d')
             except ValueError as e:
-                raise CheckException(
+                self.error(
                     "Date can't be parsed, expecting YYYYMMDD : {}"
-                    .format(date_str))
+                    .format(date_str),
+                    "format")
 
             now = datetime.now()
             if date > now:
-                raise CheckException(
-                    "Date suggest a composition from the future")
+                self.error(
+                    "Date suggest a composition from the future",
+                    "future")
 
     def check_dcnc_field_package_type(self, playlist, fields):
         """ Version qualifier is forbidden for OV package. """
         pkg_type = fields['PackageType'].get('Type')
         pkg_version = fields['PackageType'].get('Version')
         if pkg_type == 'OV' and pkg_version != '':
-            raise CheckException("OV Package can't include a version number "
-                                 "in the package type field")
+            self.error("OV Package can't include a version number "
+                       "in the package type field")
 
     def check_dcnc_field_claim_framerate(self, playlist, fields):
         """ FrameRate from CPL and ContentTitleText shall match. """
@@ -89,7 +90,7 @@ class Checker(CheckerBase):
         content_rate = fields['ContentType'].get('FrameRate')
         cpl_rate = str(cpl_node['EditRate'])
         if content_rate and cpl_rate != "Mixed" and content_rate != cpl_rate:
-            raise CheckException(
+            self.error(
                 "ContentTitle / CPL Framerate mismatch : {} / {}".format(
                     content_rate, cpl_rate))
 
@@ -105,7 +106,7 @@ class Checker(CheckerBase):
         }
         if (dimension and cpl_stereo != "Mixed" and
                 is_stereo_map[dimension] != cpl_stereo):
-            raise CheckException(
+            self.error(
                 "ContentTitle suggest {} but CPL is {}".format(
                     dimension, '3D' if cpl_stereo else '2D'))
 
@@ -117,7 +118,7 @@ class Checker(CheckerBase):
         ar = DCP_SETTINGS['picture']['aspect_ratio'].get(ar_str)
         cpl_ar = cpl_node['ScreenAspectRatio']
         if ar and cpl_ar != "Mixed" and ar['ratio'] != cpl_ar:
-            raise CheckException(
+            self.error(
                 "ContentTitle / CPL AspectRatio mismatch : {} / {}".format(
                     ar['ratio'], cpl_ar))
 
@@ -136,7 +137,7 @@ class Checker(CheckerBase):
                 False: 'No Subtitle'
             }
 
-            raise CheckException(
+            self.error(
                 "ContentTitle suggest {} but CPL contains {}".format(
                     msg_map[hasSub],
                     msg_map[cplHasSub]))
@@ -151,15 +152,13 @@ class Checker(CheckerBase):
             titleCaption = ''
 
         if 'OCAP' in titleCaption and not cpl_node['OpenCaption']:
-            raise CheckException("ContentTitle suggest OCAP but CPL has none")
+            self.error("ContentTitle suggest OCAP but CPL has none")
         if 'CCAP' in titleCaption and not cpl_node['ClosedCaption']:
-            raise CheckException("ContentTitle suggest CCAP but CPL has none")
+            self.error("ContentTitle suggest CCAP but CPL has none")
         if titleCaption == '' and cpl_node['OpenCaption']:
-            raise CheckException(
-                "ContentTitle suggest no caption but CPL has OCAP")
+            self.error("ContentTitle suggest no caption but CPL has OCAP")
         if titleCaption == '' and cpl_node['ClosedCaption']:
-            raise CheckException(
-                "ContentTitle suggest no caption but CPL has CCAP")
+            self.error( "ContentTitle suggest no caption but CPL has CCAP")
 
     def check_dcnc_field_claim_audio(self, playlist, fields):
         """ Audio format from CPL and ContentTitleText shall match. """
@@ -181,7 +180,7 @@ class Checker(CheckerBase):
             cpl_cc = audio_map.get(audio_format)
 
             if cpl_cc and asset_cc < cpl_cc:
-                raise CheckException(
+                self.error(
                     "ContentTitle claims {} audio but CPL contains only "
                     " {} channels".format(audio_format, asset_cc))
 
@@ -193,9 +192,8 @@ class Checker(CheckerBase):
             filters=['AuxData']))
 
         if immersive and not auxdatas:
-            raise CheckException("ContentTitle claims immersive audio ({}) "
-                                 "but CPL have no Auxiliary tracks".format(
-                                    immersive))
+            self.error("ContentTitle claims immersive audio ({}) "
+                       "but CPL have no Auxiliary tracks".format(immersive))
 
         if immersive and auxdatas:
             assets = [
@@ -203,8 +201,8 @@ class Checker(CheckerBase):
                 if asset['Schema'].lower() == immersive.lower()]
 
             if not assets:
-                raise CheckException("ContentTitle claims immersive audio ({})"
-                                     " but CPL is not".format(immersive))
+                self.error("ContentTitle claims immersive audio ({})"
+                           " but CPL is not".format(immersive))
 
     def check_dcnc_field_claim_resolution(self, playlist, fields):
         """ Picture resolution from CPL and ContentTitleText shall match.  """
@@ -216,7 +214,7 @@ class Checker(CheckerBase):
 
         if resolution and detect_res:
             if mxf_res not in resolution_map[resolution]:
-                raise CheckException(
+                self.error(
                     "ContentTitle claims {} but CPL Picture track resolution "
                     "is {}".format(resolution, mxf_res))
 
@@ -224,7 +222,7 @@ class Checker(CheckerBase):
         """ DCP Standard coherence check. """
         standard = fields['Standard'].get('Schema')
         if standard and standard != self.dcp.schema:
-            raise CheckException("ContentTitle claims {} but DCP schema is {}".format(
+            self.error("ContentTitle claims {} but DCP schema is {}".format(
                 standard, self.dcp.schema))
 
     def check_dcnc_field_claim_dolbyvision(self, playlist, fields):
@@ -232,21 +230,21 @@ class Checker(CheckerBase):
         dvi_dcnc = fields['ContentType'].get('DolbyVision')
         dvi_cpl = playlist['Info']['CompositionPlaylist']['DolbyVision']
         if dvi_dcnc and not dvi_cpl:
-            raise CheckException("ContentTitle claims DolbyVision but CPL "
-                                 "miss required metadata")
+            self.error("ContentTitle claims DolbyVision but CPL "
+                       "miss required metadata")
         elif not dvi_dcnc and dvi_cpl:
-            raise CheckException("CPL imply DolbyVision but ContentTitle miss "
-                                 "DVis ContentType field")
+            self.error("CPL imply DolbyVision but ContentTitle miss "
+                       "DVis ContentType field")
 
     def check_dcnc_field_claim_eclaircolor(self, playlist, fields):
         """ EclairColor metadata shall be present in CPL. """
         ec_dcnc = fields['ContentType'].get('EclairColor')
         ec_cpl = playlist['Info']['CompositionPlaylist']['EclairColor']
         if ec_dcnc and not ec_cpl:
-            raise CheckException("ContentTitle claims EclairColor but CPL "
+            self.error("ContentTitle claims EclairColor but CPL "
                                  "miss required metadata")
         elif not ec_dcnc and ec_cpl:
-            raise CheckException("CPL imply EclairColor but ContentTitle miss "
+            self.error("CPL imply EclairColor but ContentTitle miss "
                                  "EC ContentType field")
 
     def check_dcnc_field_claim_packagetype(self, playlist, fields):
@@ -255,9 +253,7 @@ class Checker(CheckerBase):
         dcp_package = self.dcp.package_type
 
         if package and package == 'OV' and dcp_package != package:
-            raise CheckException(
-                "ContentTitle claims OV but DCP is not complete")
+            self.error( "ContentTitle claims OV but DCP is not complete")
 
         if package and package == 'VF' and dcp_package != package:
-            raise CheckException(
-                "ContentTitle claims VF but DCP is complete")
+            self.error("ContentTitle claims VF but DCP is complete")

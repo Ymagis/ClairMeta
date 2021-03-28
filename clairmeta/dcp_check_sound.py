@@ -1,7 +1,7 @@
 # Clairmeta - (C) YMAGIS S.A.
 # See LICENSE for more information
 
-from clairmeta.dcp_check import CheckerBase, CheckException
+from clairmeta.dcp_check import CheckerBase
 from clairmeta.dcp_utils import list_cpl_assets
 from clairmeta.settings import DCP_SETTINGS
 
@@ -36,7 +36,7 @@ class Checker(CheckerBase):
         cc = asset['Probe']['ChannelCount']
 
         if cc > channels:
-            raise CheckException(
+            self.error(
                 "Invalid Sound ChannelCount, should be less than {} but got {}"
                 "".format(channels, cc))
 
@@ -56,7 +56,7 @@ class Checker(CheckerBase):
         cc = asset['Probe']['ChannelCount']
 
         if cc % 2 != 0:
-            raise CheckException(
+            self.error(
                 "Invalid Sound ChannelCount, should be an even number, got {}"
                 "".format(cc))
 
@@ -74,7 +74,7 @@ class Checker(CheckerBase):
         if cf in configurations:
             label, min_cc, max_cc = configurations[cf]
             if label and cc < min_cc or cc > max_cc:
-                raise CheckException(
+                self.error(
                     "Invalid Sound ChannelCount, {} require between {} and {} "
                     "channels, got {}".format(label, min_cc, max_cc, cc))
 
@@ -89,7 +89,7 @@ class Checker(CheckerBase):
         sr = asset['Probe']['AudioSamplingRate']
 
         if sr not in rates:
-            raise CheckException(
+            self.error(
                 "Invalid Sound SamplingRate, expected {} but got {}".format(
                     rates, sr))
 
@@ -104,7 +104,7 @@ class Checker(CheckerBase):
         depth = asset['Probe']['QuantizationBits']
 
         if depth != bitdepth:
-            raise CheckException(
+            self.error(
                 "Invalid Sound Quantization, expected {} but got {}".format(
                     bitdepth, depth))
 
@@ -119,6 +119,6 @@ class Checker(CheckerBase):
         cc = asset['Probe']['ChannelCount']
 
         if al != cc * align:
-            raise CheckException(
+            self.error(
                 "Invalid Sound BlockAlign, expected {} but got {} (it should "
                 "be ChannelCount x 3)".format(cc * align, al))
