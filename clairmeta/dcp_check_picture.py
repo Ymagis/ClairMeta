@@ -4,7 +4,7 @@
 import six
 
 from clairmeta.utils.time import compare_ratio
-from clairmeta.dcp_check import CheckerBase, CheckException
+from clairmeta.dcp_check import CheckerBase
 from clairmeta.dcp_utils import list_cpl_assets
 from clairmeta.settings import DCP_SETTINGS
 
@@ -74,7 +74,7 @@ class Checker(CheckerBase):
                 [resolution in res for res in dci_resolutions])
 
             if not is_dci_res:
-                raise CheckException("Picture have non-DCI Resolution")
+                self.error("Picture have non-DCI Resolution")
 
     def check_picture_cpl_encoding(self, playlist, asset):
         """ Picture wavelet transform levels SMPTE compliance.
@@ -101,7 +101,7 @@ class Checker(CheckerBase):
 
             is_dci = resolution_name in levels_map
             if is_dci and levels_map[resolution_name] != levels:
-                raise CheckException(
+                self.error(
                     "Picture must have {} wavelet transform levels, {}"
                     " found".format(levels_map[resolution_name], levels))
 
@@ -121,7 +121,7 @@ class Checker(CheckerBase):
             t_bitrate = dci_bitrate + tolerance
 
             if max_bitrate > t_bitrate:
-                raise CheckException(
+                self.error(
                     "Exceed DCI maximum bitrate ({} Mb/s) : {} Mb/s".format(
                         t_bitrate, max_bitrate))
 
@@ -139,7 +139,7 @@ class Checker(CheckerBase):
             t_bitrate = dci_bitrate - (dci_bitrate * margin) / 100.0
 
             if avg_bitrate > t_bitrate:
-                raise CheckException(
+                self.error(
                     "Exceed DCI safe average bitrate ({} Mb/s) "
                     ": {} Mb/s".format(t_bitrate, avg_bitrate))
 
@@ -160,13 +160,11 @@ class Checker(CheckerBase):
 
             if resolution in self.settings['resolutions']['2K']:
                 if editrate not in editrate_map['2K'][dimension]:
-                    raise CheckException(
-                        'Invalid EditRate {} for 2K {} content'
+                    self.error('Invalid EditRate {} for 2K {} content'
                         .format(editrate, dimension))
             elif resolution in self.settings['resolutions']['4K']:
                 if editrate not in editrate_map['4K'][dimension]:
-                    raise CheckException(
-                        'Invalid EditRate {} for 4K {} content'
+                    self.error('Invalid EditRate {} for 4K {} content'
                         .format(editrate, dimension))
 
     def check_picture_cpl_archival_framerate(self, playlist, asset):
@@ -183,7 +181,7 @@ class Checker(CheckerBase):
 
         for archival_editrate in archival_editrates:
             if compare_ratio(editrate, archival_editrate):
-                raise CheckException(
+                self.error(
                     "Archival EditRate {} may not play safely on all hardware"
                     .format(editrate))
 
@@ -200,7 +198,7 @@ class Checker(CheckerBase):
         series2_map = self.settings['editrates_min_series2']
 
         if editrate >= series2_map[dimension]:
-            raise CheckException(
+            self.error(
                 "EditRate {} require an HFR capable projection server "
                 "(Series II), may not play safely on all hardware".format(
                     editrate))
@@ -218,7 +216,7 @@ class Checker(CheckerBase):
         is_stereo = asset['Stereoscopic']
 
         if is_stereo and editrate * 2 != framerate:
-            raise CheckException("3D FrameRate must be double of EditRate")
+            self.error("3D FrameRate must be double of EditRate")
 
         if not is_stereo and editrate != framerate:
-            raise CheckException("2D FrameRate must be equal to EditRate")
+            self.error("2D FrameRate must be equal to EditRate")

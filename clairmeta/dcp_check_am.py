@@ -4,7 +4,7 @@
 import os
 
 from clairmeta.utils.uuid import check_uuid
-from clairmeta.dcp_check import CheckerBase, CheckException
+from clairmeta.dcp_check import CheckerBase
 from clairmeta.dcp_check_utils import check_xml
 from clairmeta.dcp_utils import list_am_assets
 
@@ -36,6 +36,7 @@ class Checker(CheckerBase):
             References: N/A
         """
         check_xml(
+            self,
             am['FilePath'],
             am['Info']['AssetMap']['__xmlns__'],
             am['Info']['AssetMap']['Schema'],
@@ -53,7 +54,7 @@ class Checker(CheckerBase):
         }
 
         if mandatory_name[schema] != am['FileName']:
-            raise CheckException(
+            self.error(
                 "{} Assetmap must be named {}, got {} instead".format(
                     schema, mandatory_name[schema], am['FileName'])
             )
@@ -79,8 +80,7 @@ class Checker(CheckerBase):
                 empty_fields.append(f)
 
         if empty_fields:
-            raise CheckException("Empty {} field(s)".format(
-                ", ".join(empty_fields)))
+            self.error("Empty {} field(s)".format(", ".join(empty_fields)))
 
     def check_assets_am_uuid(self, am, asset):
         """ AssetMap UUIDs validation.
@@ -90,8 +90,7 @@ class Checker(CheckerBase):
         """
         uuid, _, _ = asset
         if not check_uuid(uuid):
-            raise CheckException(
-                "Invalid uuid found : {}".format(uuid, RFC4122_RE))
+            self.error("Invalid uuid found : {}".format(uuid, RFC4122_RE))
 
     def check_assets_am_volindex(self, am, asset):
         """ AssetMap assets shall reference existing VolIndex.
@@ -103,8 +102,7 @@ class Checker(CheckerBase):
         # Note : schema already check for positive integer
         asset_vol = asset['ChunkList']['Chunk'].get('VolumeIndex')
         if asset_vol and asset_vol > am['Info']['AssetMap']['VolumeCount']:
-            raise CheckException(
-                "Invalid VolIndex found : {}".format(asset_vol))
+            self.error("Invalid VolIndex found : {}".format(asset_vol))
 
     def check_assets_am_volindex_one(self, am, asset):
         """ AssetMap assets VolIndex shall be one or absent.
@@ -115,7 +113,7 @@ class Checker(CheckerBase):
         _, _, asset = asset
         asset_vol = asset['ChunkList']['Chunk'].get('VolumeIndex')
         if asset_vol and asset_vol != 1:
-            raise CheckException(
+            self.error(
                 "VolIndex is now deprecated and shall always be 1, got {}"
                 .format(asset_vol))
 
@@ -128,13 +126,13 @@ class Checker(CheckerBase):
         uuid, path, _ = asset
 
         if path == '':
-            raise CheckException("Empty path for {}".format(uuid))
+            self.fatal_error("Empty path for {}".format(uuid), "empty")
 
         if ' ' in path:
-            raise CheckException("Space in path")
+            self.error("Space in path", "space")
 
         if not os.path.isfile(os.path.join(self.dcp.path, path)):
-            raise CheckException("Missing asset")
+            self.error("Missing asset", "missing")
 
     def check_assets_am_size(self, am, asset):
         """ AssetMap assets size check.
@@ -154,7 +152,7 @@ class Checker(CheckerBase):
             length = chunk['Length']
 
             if offset >= actual_size:
-                raise CheckException("Invalid offset value ()".format(offset))
+                self.error("Invalid offset value ()".format(offset))
             if length != actual_size:
-                raise CheckException("Invalid size value, expected {} but got "
-                                     "{}".format(length, actual_size))
+                self.error("Invalid size value, expected {} but got "
+                           "{}".format(length, actual_size))

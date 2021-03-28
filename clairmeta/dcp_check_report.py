@@ -33,30 +33,40 @@ class CheckReport(object):
 
     def checks_failed(self):
         """ Returns a list of all failed checks. """
-        return [c for c in self.checks if not c.valid and not c.bypass]
-
-    def checks_failed_by_status(self, status):
-        """ Returns a list of failed checks with ``status``. """
-        return [
-            c for c in self.checks
-            if not c.valid and not c.bypass and c.criticality == status]
+        return [c for c in self.checks if c.has_errors()]
 
     def checks_succeeded(self):
         """ Returns a list of all succeeded checks. """
-        return [c for c in self.checks if c.valid and not c.bypass]
+        return [c for c in self.checks if not c.has_errors() and not c.bypass]
 
     def checks_bypassed(self):
         """ Returns a set of all bypassed unique checks. """
         return [c for c in self.checks if c.bypass]
 
-    def valid(self):
+    def checks_by_criticality(self, criticality):
+        """ Returns a list of failed checks with ``criticality``. """
+        return [
+            check
+            for check in self.checks
+            for error in check.errors
+            if error.criticality == criticality]
+
+    def errors_by_criticality(self, criticality):
+        """ Returns a list of failed checks with ``criticality``. """
+        return [
+            error
+            for check in self.checks
+            for error in check.errors
+            if error.criticality == criticality]
+
+    def is_valid(self):
         """ Returns validity of checked DCP. """
-        return not any([c.criticality == "ERROR" for c in self.checks if not c.valid])
+        return all([c.is_valid() for c in self.checks])
 
     def pretty_str(self):
         """ Format the report in a human friendly way. """
         report = ""
-        report += "Status : {}\n".format('Success' if self.valid() else 'Fail')
+        report += "Status : {}\n".format('Success' if self.is_valid() else 'Fail')
         report += "Path : {}\n".format(self.dcp.path)
         report += "Size : {}\n".format(human_size(self.dcp.size))
         report += "Total check : {}\n".format(self.checks_count())
@@ -68,12 +78,13 @@ class CheckReport(object):
 
         # Accumulate all failed check and stack them by asset
         for c in self.checks_failed():
-            asset = status_map[c.criticality]
-            for filename in c.asset_stack:
-                asset = asset[filename]
+            for e in c.errors:
+                asset = status_map[str(e.criticality)]
+                for filename in c.asset_stack:
+                    asset = asset[filename]
 
-            asset['msg'] = (asset.get('msg', [])
-                + ['. ' + c.short_desc() + '\n' + c.message])
+                message = ". {}\n{}".format(e.short_desc(), e.message)
+                asset['msg'] = asset.get('msg', []) + [message]
 
         for status, vals in six.iteritems(status_map):
             out_stack = []
@@ -154,7 +165,7 @@ class CheckReport(object):
         return {
             'dcp_path': self.dcp.path,
             'dcp_size': self.dcp.size,
-            'valid': self.valid(),
+            'valid': self.is_valid(),
             'profile': self.profile,
             'date': self.date,
             'duration_seconds': self.duration,

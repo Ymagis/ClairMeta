@@ -119,9 +119,9 @@ class DCPCheckTest(CheckerTestBase):
 
     def test_noncoherent_encryption(self):
         self.assertFalse(self.check(31))
-        self.assertTrue(self.has_failed('check_cpl_reel_coherence_encryption'))
+        self.assertTrue(self.has_failed('check_cpl_reel_coherence'))
         self.assertFalse(self.check(32))
-        self.assertTrue(self.has_failed('check_cpl_reel_coherence_encryption'))
+        self.assertTrue(self.has_failed('check_cpl_reel_coherence'))
 
     def test_iop_subtitle_png(self):
         self.assertTrue(self.check(33))
@@ -174,32 +174,39 @@ class DCPCheckReportTest(CheckerTestBase):
             len(failed) + len(success) + len(bypass),
             len(self.report.checks))
 
-        errors = self.report.checks_failed_by_status('ERROR')
+        errors = self.report.errors_by_criticality('ERROR')
         self.assertEqual(3, len(self.report.checks_failed()))
-        self.assertEqual(1, len(self.report.checks_failed_by_status('ERROR')))
-        self.assertEqual(2, len(self.report.checks_failed_by_status('WARNING')))
+        self.assertEqual(1, len(self.report.errors_by_criticality('ERROR')))
+        self.assertEqual(2, len(self.report.errors_by_criticality('WARNING')))
 
-        error = errors[0]
-        self.assertEqual(error.name, "check_picture_cpl_max_bitrate")
+        check = self.report.checks_by_criticality('ERROR')[0]
+        self.assertEqual(check.name, "check_picture_cpl_max_bitrate")
+        self.assertFalse(check.is_valid())
+        self.assertFalse(check.bypass)
+        self.assertGreaterEqual(check.seconds_elapsed, 0)
+        self.assertEqual(check.asset_stack, [
+            'CPL_ECL25SingleCPL_TST-48-600_S_EN-XX_UK-U_51_2K_DI_20180301_ECL_SMPTE_OV.xml',
+            'ECL25SingleCPL_TST-48-600_S_EN-XX_UK-U_51_2K_DI_20180301_ECL_SMPTE_OV_01.mxf'])
+
+        error = check.errors[0]
+        self.assertEqual(error.full_name(), "check_picture_cpl_max_bitrate")
         self.assertEqual(
             error.short_desc(),
             "Picture maximum bitrate DCI compliance.")
         self.assertEqual(
             error.message,
             "Exceed DCI maximum bitrate (250.05 Mb/s) : 358.25 Mb/s")
-        self.assertFalse(error.valid)
-        self.assertFalse(error.bypass)
-        self.assertGreaterEqual(error.seconds_elapsed, 0)
-        self.assertEqual(error.asset_stack, [
-            'CPL_ECL25SingleCPL_TST-48-600_S_EN-XX_UK-U_51_2K_DI_20180301_ECL_SMPTE_OV.xml',
-            'ECL25SingleCPL_TST-48-600_S_EN-XX_UK-U_51_2K_DI_20180301_ECL_SMPTE_OV_01.mxf'])
         self.assertTrue(error.criticality == "ERROR")
 
-    def test_report_status(self):
-        self.assertEqual(False, self.report.valid())
+    def test_report_output(self):
+        self.assertEqual(False, self.report.is_valid())
 
         report = self.report.pretty_str()
+        self.assertTrue(report)
         self.assertTrue("Picture maximum bitrate DCI compliance." in report)
+
+        self.assertTrue(self.report.to_dict())
+
 
 if __name__ == '__main__':
     unittest.main()

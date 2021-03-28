@@ -8,7 +8,7 @@ import operator
 from clairmeta.utils.sys import all_keys_in_dict
 from clairmeta.utils.uuid import check_uuid, extract_uuid, RFC4122_RE
 from clairmeta.utils.time import compare_ratio
-from clairmeta.dcp_check import CheckerBase, CheckException
+from clairmeta.dcp_check import CheckerBase
 from clairmeta.dcp_check_utils import check_xml, check_issuedate, compare_uuid
 from clairmeta.dcp_utils import list_cpl_assets, get_type_for_asset
 
@@ -61,7 +61,7 @@ class Checker(CheckerBase):
                 if message:
                     what += ", {}".format(message)
 
-                raise CheckException(what)
+                self.error(what)
 
     def check_cpl_xml(self, playlist):
         """ CPL XML syntax and structure check.
@@ -70,6 +70,7 @@ class Checker(CheckerBase):
         """
         cpl = playlist['Info']['CompositionPlaylist']
         check_xml(
+            self,
             playlist['FilePath'],
             cpl['__xmlns__'],
             cpl['Schema'],
@@ -85,7 +86,7 @@ class Checker(CheckerBase):
         uuid = cpl['Id']
 
         if not check_uuid(uuid, RFC4122_RE):
-            raise CheckException("CPL ID invalid (RFC 4122) : {}".format(uuid))
+            self.error("CPL ID invalid (RFC 4122) : {}".format(uuid))
 
     def check_cpl_contenttitle_annotationtext_match(self, playlist):
         """ CPL ContentTitleText and AnnotationText shall match.
@@ -96,8 +97,8 @@ class Checker(CheckerBase):
         ct = cpl_node['ContentTitleText']
         at = cpl_node.get('AnnotationText')
         if at and at != ct:
-            raise CheckException("CPL ContentTitleText / AnnotationText "
-                                 "mismatch : {} / {}".format(ct, at))
+            self.error("CPL ContentTitleText / AnnotationText "
+                       "mismatch : {} / {}".format(ct, at))
 
     def check_cpl_contenttitle_pklannotationtext_match(self, playlist):
         """ CPL ContentTitleText and PKL AnnotationText shall match.
@@ -118,13 +119,15 @@ class Checker(CheckerBase):
         is_multi_cpl = len(self.dcp.list_cpl) > 1
 
         if is_multi_cpl and at and not ct.startswith(at):
-            raise CheckException(
+            self.error(
                 "Multi CPLs package shall use a common denominator of all CPL "
-                "titles as the PKL AnnotationText : {} / {}".format(ct, at))
+                "titles as the PKL AnnotationText : {} / {}".format(ct, at),
+                "common_denominator")
         elif at and at != ct:
-            raise CheckException(
+            self.error(
                 "CPL ContentTitleText / PKL "
-                "AnnotationText mismatch : {} / {}".format(ct, at))
+                "AnnotationText mismatch : {} / {}".format(ct, at),
+                "mismatch")
 
     def check_cpl_empty_text_fields(self, am):
         """ CPL empty text fields check.
@@ -140,8 +143,7 @@ class Checker(CheckerBase):
                 empty_fields.append(f)
 
         if empty_fields:
-            raise CheckException("Empty {} field(s)".format(
-                ", ".join(empty_fields)))
+            self.error("Empty {} field(s)".format(", ".join(empty_fields)))
 
     def check_cpl_issuedate(self, playlist):
         """ CPL Issue Date validation.
@@ -150,7 +152,7 @@ class Checker(CheckerBase):
                 SMPTE ST 429-7:2006 6.4
         """
         cpl = playlist['Info']['CompositionPlaylist']
-        check_issuedate(cpl['IssueDate'])
+        check_issuedate(self, cpl['IssueDate'])
 
     def check_cpl_referenced_by_pkl(self, playlist):
         """ CPL shall be present in PKL.
@@ -160,7 +162,7 @@ class Checker(CheckerBase):
         cpl = playlist['Info']['CompositionPlaylist']
         pkl_id = cpl.get('PKLId')
         if not pkl_id:
-            raise CheckException("CPL is not referenced in any PKL")
+            self.error("CPL is not referenced in any PKL")
 
     def check_cpl_reel_coherence(self, playlist):
         """ CPL reel attributes shall be coherents across all reels.
@@ -183,26 +185,26 @@ class Checker(CheckerBase):
             'ChannelFormat',
             'ChannelConfiguration',
             'SoundLanguage',
+            'Encrypted',
         ]
 
-        errors = []
+        doc_keys = {
+            'Encrypted':
+"""
+Encryption should be coherent across all reeels.
+
+This is not required explicitly in the standards but is known to
+cause issue for some equipements in the field.
+"""
+        }
+
+        cpl = playlist['Info']['CompositionPlaylist']
         for k in coherence_keys:
             if cpl[k] == "Mixed":
-                errors.append("{} is not coherent for all reels".format(k))
-        if errors:
-            raise CheckException("\n".join(errors))
-
-    def check_cpl_reel_coherence_encryption(self, playlist):
-        """ Encryption should be coherent across all reeels.
-
-            This is not required explicitly in the standards but is known to
-            cause issue for some equipements in the field.
-
-            References: N/A
-        """
-        cpl = playlist['Info']['CompositionPlaylist']
-        if cpl['Encrypted'] == "Mixed":
-            raise CheckException("Encryption is not coherent for all reels")
+                self.error(
+                    "{} is not coherent for all reels".format(k),
+                    k, doc_keys.get(k, "")
+                )
 
     def check_cpl_reel_duration(self, playlist):
         """ CPL reels shall last at least one second.
@@ -210,15 +212,12 @@ class Checker(CheckerBase):
             References:
                 SMPTE ST 429-7:2006 9.2
         """
-        errors = []
         for reel in playlist['Info']['CompositionPlaylist']['ReelList']:
             pic = reel['Assets']['Picture']
             edit = pic['EditRate']
             if pic['Duration'] < edit or pic['IntrinsicDuration'] < edit:
-                errors.append("Reel {} last less than one second".format(
+                self.error("Reel {} last less than one second".format(
                     reel['Position']))
-        if errors:
-            raise CheckException("\n".join(errors))
 
     def check_cpl_reel_duration_picture_sound(self, playlist):
         """ CPL reels picture and audio tracks duration shall match.
@@ -285,17 +284,16 @@ class Checker(CheckerBase):
                 pos_reel = reel['Position']
 
                 if start != cpl_position:
-                    errors.append(
-                        "Invalid CPLEntryPoint in Reel {}".format(pos_reel))
+                    self.error(
+                        "Invalid CPLEntryPoint in Reel {}".format(pos_reel),
+                        "entrypoint")
 
                 if end - start != dur:
-                    errors.append(
-                        "Invalid Duration in Reel {}".format(pos_reel))
+                    self.error(
+                        "Invalid Duration in Reel {}".format(pos_reel),
+                        "duration")
 
             cpl_position += assets[0]['Duration']
-
-        if errors:
-            raise CheckException("\n".join(errors))
 
     def check_assets_cpl_missing_from_vf(self, playlist, asset):
         """ CPL assets referencing external package.
@@ -309,7 +307,7 @@ class Checker(CheckerBase):
 
         if is_vf_asset and not is_relinked_from_ov:
             asset_type = get_type_for_asset(playlist, uuid)
-            raise CheckException(
+            self.error(
                 "Asset missing ({}), external reference".format(asset_type))
 
     def check_assets_cpl_missing_from_multi_cpl(self, playlist, asset):
@@ -326,9 +324,8 @@ class Checker(CheckerBase):
 
         if not is_found:
             asset_type = get_type_for_asset(playlist, uuid)
-            raise CheckException(
-                "Asset missing ({}), multi CPL must be complete"
-                .format(asset_type))
+            self.error("Asset missing ({}), multi CPL must be complete"
+                      .format(asset_type))
 
     def check_assets_cpl_labels(self, playlist, asset):
         """ CPL assets labels check.
@@ -340,7 +337,7 @@ class Checker(CheckerBase):
         if 'Probe' in asset:
             label = asset['Probe'].get('LabelSetType')
             if label and label not in self.mxf_schema_map.values():
-                raise CheckException("MXF Label invalid : {}".format(label))
+                self.error("MXF Label invalid : {}".format(label))
 
     def check_assets_cpl_labels_schema(self, playlist, asset):
         """ CPL assets labels / schema coherence check.
@@ -352,7 +349,7 @@ class Checker(CheckerBase):
         if 'Probe' in asset:
             label = asset['Probe'].get('LabelSetType')
             if label and self.mxf_schema_map[self.dcp.schema] != label:
-                raise CheckException(
+                self.error(
                     "MXF Label incoherent, got {} but expected {}".format(
                         label, self.mxf_schema_map[self.dcp.schema]))
 
@@ -366,8 +363,7 @@ class Checker(CheckerBase):
         uuid = asset['Id']
 
         if not check_uuid(uuid, RFC4122_RE):
-            raise CheckException(
-                "Asset ID invalid (RFC 4122) : {}".format(uuid))
+            self.error("Asset ID invalid (RFC 4122) : {}".format(uuid))
 
     def check_assets_cpl_filename_uuid(self, playlist, asset):
         """ CPL assets file name UUID check.
@@ -381,6 +377,7 @@ class Checker(CheckerBase):
             cpl_uuid = asset['Id']
             if file_uuid:
                 compare_uuid(
+                    self,
                     ('FILENAME', file_uuid),
                     ('CPL', cpl_uuid))
 
@@ -391,7 +388,7 @@ class Checker(CheckerBase):
                 SMPTE ST 429-2:2013 9.11
         """
         if 'KeyId' in asset and 'Hash' not in asset:
-            raise CheckException("Encrypted asset must have a Hash element")
+            self.error("Encrypted asset must have a Hash element")
 
     def check_assets_cpl_cut(self, playlist, asset):
         """ CPL assets cut coherence check.
@@ -408,9 +405,9 @@ class Checker(CheckerBase):
             dur = asset['IntrinsicDuration']
 
             if start >= dur:
-                raise CheckException("Invalid EntryPoint")
+                self.error("Invalid EntryPoint", "entrypoint")
             if end > dur:
-                raise CheckException("Invalid Duration")
+                self.error("Invalid Duration", "duration")
 
     def check_assets_cpl_metadata(self, playlist, asset):
         """ CPL assets metadata coherence with MXF tracks.
@@ -432,7 +429,6 @@ class Checker(CheckerBase):
         if 'Probe' not in asset:
             return
 
-        errors = []
         for k, v in six.iteritems(metadata_map):
             if k in asset and v in asset['Probe']:
                 cpl_val = asset[k]
@@ -442,12 +438,15 @@ class Checker(CheckerBase):
                 matching = is_float and compare_ratio(cpl_val, mxf_val)
                 matching = matching or not is_float and cpl_val == mxf_val
                 if not matching:
-                    errors.append(
+                    self.error(
                         "{} metadata mismatch, CPL claims {} but MXF {}"
-                        .format(k, cpl_val, mxf_val))
+                        .format(k, cpl_val, mxf_val),
+                        "mismatch")
             if k in asset and v not in asset['Probe']:
-                errors.append("Missing MXF Metadata {}".format(v))
+                self.error(
+                    "Missing MXF Metadata {}".format(v),
+                    "missing_mxf")
             if k not in asset and v in asset['Probe']:
-                errors.append("Missing CPL Metadata {} for asset {}".format(k))
-        if errors:
-            raise CheckException("\n".join(errors))
+                self.error(
+                    "Missing CPL Metadata {} for asset {}".format(k),
+                    "missing_cpl")

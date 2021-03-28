@@ -64,7 +64,7 @@ class DCPChecker(CheckerBase):
         self.run_checks()
         self.make_report()
         self.dump_report()
-        return self.report.valid(), self.report
+        return self.report.is_valid(), self.report
 
     def list_checks(self):
         """ List all available checks. """
@@ -117,8 +117,7 @@ class DCPChecker(CheckerBase):
                         os.path.relpath(fullpath, self.dcp.path))
 
         if list_empty_dir:
-            raise CheckException("Empty directories detected : {}".format(
-                list_empty_dir))
+            self.error("Empty directories detected : {}".format(list_empty_dir))
 
     def check_dcp_hidden_files(self):
         """ Hidden files detection.
@@ -130,8 +129,7 @@ class DCPChecker(CheckerBase):
             for f in self.dcp._list_files
             if os.path.basename(f).startswith('.')]
         if hidden_files:
-            raise CheckException("Hidden files detected : {}".format(
-                hidden_files))
+            self.error("Hidden files detected : {}".format(hidden_files))
 
     def check_dcp_foreign_files(self):
         """ Foreign files detection (not listed in AssetMap).
@@ -149,7 +147,7 @@ class DCPChecker(CheckerBase):
             for a in self.dcp._list_files
             if a not in list_asset_path]
         if self.dcp.foreign_files:
-            raise CheckException('\n'.join(self.dcp.foreign_files))
+            self.error('\n'.join(self.dcp.foreign_files))
 
     def check_dcp_multiple_am_or_vol(self):
         """ Only one AssetMap and VolIndex shall be present.
@@ -163,9 +161,9 @@ class DCPChecker(CheckerBase):
 
         for k, v in six.iteritems(restricted_lists):
             if len(v) == 0:
-                raise CheckException("Missing {} file".format(k))
+                self.error("Missing {} file".format(k))
             if len(v) > 1:
-                raise CheckException("Multiple {} files found".format(k))
+                self.error("Multiple {} files found".format(k))
 
     def setup_dcp_link_ov(self):
         """ Setup the link VF to OV check and run for each assets. """
@@ -196,7 +194,7 @@ class DCPChecker(CheckerBase):
             for xml in xmls:
                 signed = all_keys_in_dict(xml, ['Signer', 'Signature'])
                 if not signed and cpl_node['Encrypted'] is True:
-                    raise CheckException("Encrypted DCP must be signed")
+                    self.error("Encrypted DCP must be signed")
 
     def check_link_ov_coherence(self):
         """ Relink OV/VF sanity checks.
@@ -204,13 +202,13 @@ class DCPChecker(CheckerBase):
             References: N/A
         """
         if self.ov_path and self.dcp.package_type != 'VF':
-            raise CheckException("Package checked must be a VF")
+            self.error("Package checked must be a VF")
 
         from clairmeta.dcp import DCP
         self.ov_dcp = DCP(self.ov_path)
         self.ov_dcp.parse()
         if self.ov_dcp.package_type != 'OV':
-            raise CheckException("Package referenced must be a OV")
+            self.error("Package referenced must be a OV")
 
     def check_link_ov_asset(self, asset, essence):
         """ VF package shall reference assets present in OV.
@@ -227,12 +225,12 @@ class DCPChecker(CheckerBase):
             path_ov = ov_dcp_dict['asset_list'].get(uuid)
 
             if not path_ov:
-                raise CheckException(
+                self.error(
                     "Asset missing ({}) from OV : {}".format(essence, uuid))
 
             asset_path = os.path.join(self.ov_dcp.path, path_ov)
             if not os.path.exists(asset_path):
-                raise CheckException(
+                self.error(
                     "Asset missing ({}) from OV (MXF not found) : {}"
                     "".format(essence, path_ov))
 

@@ -11,15 +11,14 @@ DCP_CHECK_PROFILE = {
     # Checker criticality
     # Base level is default and can be overrided per check using its name
     # Incomplete name allowed, the best match will be selected automatically
+    # Wildcard character allowed for regex based matching
     # 4 levels : ERROR, WARNING, INFO and SILENT.
     'criticality': {
         'default': 'ERROR',
         'check_dcnc_': 'WARNING',
         'check_dcp_foreign_files': 'WARNING',
         'check_assets_am_volindex_one': 'WARNING',
-        'check_am_empty_text_fields': 'INFO',
-        'check_pkl_empty_text_fields': 'WARNING',
-        'check_cpl_empty_text_fields': 'WARNING',
+        'check_*_empty_text_fields': 'WARNING',
         'check_cpl_contenttitle_annotationtext_match': 'WARNING',
         'check_cpl_contenttitle_pklannotationtext_match': 'WARNING',
         'check_assets_cpl_missing_from_vf': 'WARNING',
