@@ -77,14 +77,20 @@ class CheckReport(object):
         status_map = nested_dict()
 
         # Accumulate all failed check and stack them by asset
-        for c in self.checks_failed():
-            for e in c.errors:
-                asset = status_map[str(e.criticality)]
-                for filename in c.asset_stack:
+        for check in self.checks_failed():
+            lines = [". {}".format(check.short_desc())]
+
+            for error in check.errors:
+                asset = status_map[str(error.criticality)]
+
+                for filename in check.asset_stack:
                     asset = asset[filename]
 
-                message = ". {}\n{}".format(e.short_desc(), e.message)
-                asset['msg'] = asset.get('msg', []) + [message]
+                desc = error.short_desc()
+                desc = ". {}\n".format(desc) if desc else ""
+                lines.append("{}{}".format(desc, error.message))
+
+            asset['msg'] = asset.get('msg', []) + ["\n".join(lines)]
 
         for status, vals in six.iteritems(status_map):
             out_stack = []
