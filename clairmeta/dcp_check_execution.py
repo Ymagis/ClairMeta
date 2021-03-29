@@ -57,14 +57,9 @@ class CheckError(object):
             return self.parent_name
 
     def short_desc(self):
-        """ Returns first line of the docstring or function name. """
-        lines = self.parent_doc.split('\n')
-        outer = lines[0].strip() if lines else self.parent_name
-
+        """ Returns first line of the documentation. """
         lines = list(filter(None, self.doc.split('\n')))
-        inner = " (" + lines[0].strip() + ")" if lines else ""
-
-        return "{}{}".format(outer, inner)
+        return lines[0].strip() if lines else ""
 
     def to_dict(self):
         """ Returns a dictionary representation. """
