@@ -191,9 +191,6 @@ class DCPCheckReportTest(CheckerTestBase):
         error = check.errors[0]
         self.assertEqual(error.full_name(), "check_picture_cpl_max_bitrate")
         self.assertEqual(
-            error.short_desc(),
-            "Picture maximum bitrate DCI compliance.")
-        self.assertEqual(
             error.message,
             "Exceed DCI maximum bitrate (250.05 Mb/s) : 358.25 Mb/s")
         self.assertTrue(error.criticality == "ERROR")
