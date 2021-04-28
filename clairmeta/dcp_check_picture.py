@@ -80,7 +80,9 @@ class Checker(CheckerBase):
         """ Picture wavelet transform levels SMPTE compliance.
 
             References:
+                SMPTE ST 422:2014 8.2.3
                 SMPTE ST 429-2:2013 10.2.2
+                DCI DCSS (v1.4) 4.3.3
         """
         resolutions = self.settings['resolutions']
         levels_map = {
@@ -93,6 +95,16 @@ class Checker(CheckerBase):
             levels = asset['Probe']['DecompositionLevels']
             resolution = asset['Probe']['Resolution']
             resolution_name = ''
+
+            # asdcp-lib was not able to extract DecompositionLevels, this
+            # probably means that the J2KCodingStyleDefault descriptor is not
+            # present.
+            # It is indeed listed as an optional field in ST 422, but
+            # DCI Specification and RDD 52 seems to imply that it should be
+            # present so dedicated checks could be added to validate the J2K
+            # codestream.
+            if levels == 0:
+                return
 
             for k, v in six.iteritems(resolutions):
                 if resolution in v:
