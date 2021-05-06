@@ -106,6 +106,21 @@ def get_reel_for_asset(cpl, uuid):
         if uuid in uuids:
             return reel
 
+def get_first_reel_for_asset_type(cpl, type):
+    """ First reel of asset type lookup.
+
+        Args:
+            cpl (dict): Dictionary representation of CompositionPlayList.
+            type (str): Type of asset.
+
+        Returns:
+            Returns the first reel containing an asset of type
+
+    """
+    for reel in cpl['Info']['CompositionPlaylist']['ReelList']:
+        if (reel.get('Assets', []).get(type)):
+            return reel['Position']
+
 
 def get_type_for_asset(cpl, uuid):
     """ Asset Track type lookup (eg. Picture, Sound, AuxData, ...).
