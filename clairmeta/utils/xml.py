@@ -193,7 +193,7 @@ def parse_xml(
         raise ValueError("{} is not a file".format(xml_path))
 
     try:
-        with open(xml_path) as file:
+        with io.open(xml_path, encoding="utf-8-sig") as file:
             readed_file = file.read()
 
             # Collapse these namespace
