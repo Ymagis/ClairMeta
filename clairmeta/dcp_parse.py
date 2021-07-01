@@ -59,7 +59,7 @@ def generic_parse(
                 }
             }
     except Exception as e:
-        get_log().info("Error parsing XML {} : {}".format(path, str(e)))
+        get_log().error("Error parsing XML {} : {}".format(path, str(e)))
 
 
 def assetmap_parse(path):
