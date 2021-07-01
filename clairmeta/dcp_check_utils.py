@@ -48,7 +48,7 @@ def check_issuedate(checker, date):
     now_date = datetime.now().replace(tzinfo=parse_date.tzinfo)
 
     if parse_date > now_date:
-        self.error("IssueDate is post dated : {}".format(parse_date))
+        checker.error("IssueDate is post dated : {}".format(parse_date))
 
 
 def compare_uuid(checker, uuid_to_check, uuid_reference):
