@@ -29,58 +29,58 @@ RULES = {
         'FilmTitle': r'(^[a-zA-Z0-9-]{1,14}$)',
         'ContentType':
             r'(^'
-            '(?P<Type>FTR|EPS|TLR|TSR|PRO|TST|RTG-F|RTG-T|SHR|ADV|XSN|PSA|POL)'
-            '(-(?P<Version>\d))?'
-            '(-(?P<Temporary>Temp))?'
-            '(-(?P<PreRelease>Pre))?'
-            '(-(?P<RedBand>RedBand))?'
-            '(-(?P<TheatreChain>[a-zA-Z0-9]))?'
-            '(-(?P<Dimension>(2D|3D)))?'
-            '(-(?P<MasteringLuminance>\d+fl))?'
-            '(-(?P<FrameRate>\d+))?'
-            '(-(?P<DolbyVision>DVis))?'
-            '(-(?P<EclairColor>EC))?'
-            '$)',
+            r'(?P<Type>FTR|EPS|TLR|TSR|PRO|TST|RTG-F|RTG-T|SHR|ADV|XSN|PSA|POL)'
+            r'(-(?P<Version>\d))?'
+            r'(-(?P<Temporary>Temp))?'
+            r'(-(?P<PreRelease>Pre))?'
+            r'(-(?P<RedBand>RedBand))?'
+            r'(-(?P<TheatreChain>[a-zA-Z0-9]))?'
+            r'(-(?P<Dimension>(2D|3D)))?'
+            r'(-(?P<MasteringLuminance>\d+fl))?'
+            r'(-(?P<FrameRate>\d+))?'
+            r'(-(?P<DolbyVision>DVis))?'
+            r'(-(?P<EclairColor>EC))?'
+            r'$)',
         'ProjectorAspectRatio':
             r'(^'
-            '(?P<AspectRatio>F|S|C)'
-            '(-(?P<ImageAspectRatio>\d{1,3}))?'
-            '$)',
+            r'(?P<AspectRatio>F|S|C)'
+            r'(-(?P<ImageAspectRatio>\d{1,3}))?'
+            r'$)',
         'Language':
             r'(^'
-            '(?P<AudioLanguage>[A-Z]{2,3})'
-            '-(?P<SubtitleLanguage>[A-Za-z]{2,3})'
-            '(-(?P<SubtitleLanguage2>[A-Za-z]{2,3}))?'
-            '(-(?P<Caption>(CCAP|OCAP)))?'
-            '$)',
+            r'(?P<AudioLanguage>[A-Z]{2,3})'
+            r'-(?P<SubtitleLanguage>[A-Za-z]{2,3})'
+            r'(-(?P<SubtitleLanguage2>[A-Za-z]{2,3}))?'
+            r'(-(?P<Caption>(CCAP|OCAP)))?'
+            r'$)',
         'TerritoryRating':
             r'(^'
-            '(?P<ReleaseTerritory>([A-Z]{2,3}))'
-            '(-(?P<LocalRating>[A-Z0-9\+]{1,3}))?'
-            '$)',
+            r'(?P<ReleaseTerritory>([A-Z]{2,3}))'
+            r'(-(?P<LocalRating>[A-Z0-9\+]{1,3}))?'
+            r'$)',
         'AudioType':
             r'(^'
-            '(?P<Channels>(10|20|51|71|MOS))'
-            '(-(?P<HearingImpaired>HI))?'
-            '(-(?P<VisionImpaired>VI))?'
-            '(-(?P<SignLanguage>SL))?'
-            '(-(?P<ImmersiveSound>(ATMOS|Atmos|AURO|DTS-X)))?'
-            '(-(?P<MotionSimulator>(DBOX|Dbox)))?'
-            '$)',
+            r'(?P<Channels>(10|20|51|71|MOS))'
+            r'(-(?P<HearingImpaired>HI))?'
+            r'(-(?P<VisionImpaired>VI))?'
+            r'(-(?P<SignLanguage>SL))?'
+            r'(-(?P<ImmersiveSound>(ATMOS|Atmos|AURO|DTS-X)))?'
+            r'(-(?P<MotionSimulator>(DBOX|Dbox)))?'
+            r'$)',
         'Resolution': r'(^2K|4K$)',
         'Studio': r'(^[A-Z0-9]{2,4}$)',
         'Date': r'(^\d{8}$)',
         'Facility': r'(^[A-Z0-9]{2,3}$)',
         'Standard':
             r'(^'
-            '(?P<Schema>(IOP|SMPTE))'
-            '(-(?P<Dimension>3D))?'
-            '$)',
+            r'(?P<Schema>(IOP|SMPTE))'
+            r'(-(?P<Dimension>3D))?'
+            r'$)',
         'PackageType':
             r'(^'
-            '(?P<Type>(OV|VF))'
-            '(-(?P<Version>\d))?'
-            '$)',
+            r'(?P<Type>(OV|VF))'
+            r'(-(?P<Version>\d))?'
+            r'$)',
      }
  }
 

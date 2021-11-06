@@ -69,7 +69,10 @@ def temporary_file(prefix="tmp", suffix=""):
         _, filepath = tempfile.mkstemp(prefix=prefix, suffix=suffix)
         yield filepath
     finally:
-        os.remove(filepath)
+        try:
+            os.remove(filepath)
+        except PermissionError:
+            pass
 
 
 @contextlib.contextmanager

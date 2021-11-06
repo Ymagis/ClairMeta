@@ -3,6 +3,7 @@
 
 import unittest
 import os
+import platform
 from datetime import datetime
 
 from tests import DCP_MAP, KDM_MAP, KEY
@@ -76,6 +77,7 @@ class DCPCheckTest(CheckerTestBase):
         self.assertTrue(self.check(28))
         self.assertTrue(self.check(38))
 
+    @unittest.skipIf(platform.system() == "Windows", "asdcp-unwrap on Windows doesn't properly unwrap resources files (including fonts) from MXF making check fails. Help wanted.")
     def test_smpte_vf(self):
         self.assertTrue(self.check(8))
         self.assertTrue(self.has_failed(DCPCheckTest.vf_missing))

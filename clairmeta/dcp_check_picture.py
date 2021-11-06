@@ -11,8 +11,8 @@ from clairmeta.settings import DCP_SETTINGS
 
 class Checker(CheckerBase):
 
-    def __init__(self, dcp, profile):
-        super(Checker, self).__init__(dcp, profile)
+    def __init__(self, dcp):
+        super(Checker, self).__init__(dcp)
         self.settings = DCP_SETTINGS['picture']
 
     def run_checks(self):

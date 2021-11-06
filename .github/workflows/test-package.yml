@@ -8,7 +8,7 @@ on: [push, pull_request]
 
 jobs:
   test-linux:
-    runs-on: ubuntu-18.04
+    runs-on: ubuntu-20.04
     strategy:
       matrix:
         python-version: [3.6, 3.9]
@@ -29,12 +29,12 @@ jobs:
     - name: Install python dependencies
       run: |
         pip install pipenv codecov
-        pipenv install --dev
+        pipenv install --dev --python ${{ matrix.python-version }}
         pipenv graph
-    - name: Test with nose
+    - name: Test
       run: |
         pipenv run python -m compileall clairmeta
-        pipenv run nosetests --nocapture --with-doctest --doctest-options=+ELLIPSIS --with-coverage --cover-package=clairmeta -v
+        pipenv run pytest --doctest-modules
 
   test-macos:
     runs-on: macos-10.15
@@ -58,12 +58,12 @@ jobs:
     - name: Install python dependencies
       run: |
         pip install pipenv codecov
-        pipenv install --dev
+        pipenv install --dev --python ${{ matrix.python-version }}
         pipenv graph
-    - name: Test with nose
+    - name: Test
       run: |
         pipenv run python -m compileall clairmeta
-        pipenv run nosetests --nocapture --with-doctest --doctest-options=+ELLIPSIS --with-coverage --cover-package=clairmeta -v
+        pipenv run pytest --doctest-modules
 
   test-windows:
     runs-on: windows-2019
@@ -88,9 +88,12 @@ jobs:
     - name: Install python dependencies
       run: |
         pip install pipenv codecov
-        pipenv install --dev
+        pipenv install --dev --python ${{ matrix.python-version }}
         pipenv graph
-    - name: Test with nose
+      shell: bash
+    - name: Test
       run: |
+        export PATH="/c/vcpkg/installed/x64-windows/bin:$PATH"
         pipenv run python -m compileall clairmeta
-        pipenv run nosetests --nocapture --with-doctest --doctest-options=+ELLIPSIS --with-coverage --cover-package=clairmeta -v
+        pipenv run pytest --doctest-modules
+      shell: bash

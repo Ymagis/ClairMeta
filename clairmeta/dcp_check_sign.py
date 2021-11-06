@@ -23,8 +23,8 @@ class Checker(CheckerBase):
         2006 : D-Cinema Operations - Digital Certificate, section 6.2.
     """
 
-    def __init__(self, dcp, profile):
-        super(Checker, self).__init__(dcp, profile)
+    def __init__(self, dcp):
+        super(Checker, self).__init__(dcp)
 
         self.init_context()
 
@@ -72,7 +72,7 @@ class Checker(CheckerBase):
     def issuer_to_str(self, issuer):
         """ String representation of X509Name object. """
         # Note : what are the escapes rule here ?
-        issuer_dn = issuer.dnQualifier.replace('+', '\+')
+        issuer_dn = issuer.dnQualifier.replace('+', r'\+')
         return "dnQualifier={},CN={},OU={},O={}".format(
             issuer_dn, issuer.CN, issuer.OU, issuer.O)
 
