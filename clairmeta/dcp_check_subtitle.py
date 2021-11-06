@@ -33,7 +33,7 @@ class SubtitleUtils(object):
         else:
             xml_path = os.path.join(folder, os.path.splitext(asset['Path'])[0])
 
-        if not os.path.exists(xml_path):
+        if not os.path.isfile(xml_path):
             return
 
         return parse_xml(
@@ -225,6 +225,9 @@ class Checker(CheckerBase):
         """
         _, asset = asset
         asset_path = asset['Path']
+        if not asset_path:
+            return
+
         extension_by_schema = {
             'Interop': '.xml',
             'SMPTE': '.mxf'
@@ -244,6 +247,8 @@ class Checker(CheckerBase):
         """
         _, asset = asset
         asset_path = asset['Path']
+        if not asset_path:
+            return
 
         if asset_path.endswith('.xml'):
             path = os.path.join(self.dcp.path, asset_path)

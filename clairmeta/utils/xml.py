@@ -215,7 +215,7 @@ def parse_xml(
             return xml_dict
 
     except (Exception, ExpatError) as e:
-        get_log().info("Error parsing XML {} : {}".format(xml_path, str(e)))
+        get_log().error("Error parsing XML {} : {}".format(xml_path, str(e)))
 
 
 def validate_xml(xml_path, xsd_id):
