@@ -1,0 +1,96 @@
+
+# Notes
+#  Can reduce duplication when Github action support YAML anchors.
+
+name: Build and test package
+
+on: [push, pull_request]
+
+jobs:
+  test-linux:
+    runs-on: ubuntu-18.04
+    strategy:
+      matrix:
+        python-version: [3.6, 3.9]
+    steps:
+    - name: Clone repository
+      uses: actions/checkout@v2
+    - name: Clone tests data repository
+      uses: actions/checkout@v2
+      with:
+        repository: Ymagis/ClairMeta_Data
+        path: tests/resources
+    - name: Set up Python ${{ matrix.python-version }}
+      uses: actions/setup-python@v2
+      with:
+        python-version: ${{ matrix.python-version }}
+    - name: Set up environment
+      run: .github/scripts/linux/apt/install_test_env.sh
+    - name: Install python dependencies
+      run: |
+        pip install pipenv codecov
+        pipenv install --dev
+        pipenv graph
+    - name: Test with nose
+      run: |
+        pipenv run python -m compileall clairmeta
+        pipenv run nosetests --nocapture --with-doctest --doctest-options=+ELLIPSIS --with-coverage --cover-package=clairmeta -v
+
+  test-macos:
+    runs-on: macos-10.15
+    strategy:
+      matrix:
+        python-version: [3.6, 3.9]
+    steps:
+    - name: Clone repository
+      uses: actions/checkout@v2
+    - name: Clone tests data repository
+      uses: actions/checkout@v2
+      with:
+        repository: Ymagis/ClairMeta_Data
+        path: tests/resources
+    - name: Set up Python ${{ matrix.python-version }}
+      uses: actions/setup-python@v2
+      with:
+        python-version: ${{ matrix.python-version }}
+    - name: Set up environment
+      run: .github/scripts/macos/install_test_env.sh
+    - name: Install python dependencies
+      run: |
+        pip install pipenv codecov
+        pipenv install --dev
+        pipenv graph
+    - name: Test with nose
+      run: |
+        pipenv run python -m compileall clairmeta
+        pipenv run nosetests --nocapture --with-doctest --doctest-options=+ELLIPSIS --with-coverage --cover-package=clairmeta -v
+
+  test-windows:
+    runs-on: windows-2019
+    strategy:
+      matrix:
+        python-version: [3.6, 3.9]
+    steps:
+    - name: Clone repository
+      uses: actions/checkout@v2
+    - name: Clone tests data repository
+      uses: actions/checkout@v2
+      with:
+        repository: Ymagis/ClairMeta_Data
+        path: tests/resources
+    - name: Set up Python ${{ matrix.python-version }}
+      uses: actions/setup-python@v2
+      with:
+        python-version: ${{ matrix.python-version }}
+    - name: Set up environment
+      run: .github/scripts/windows/install_test_env.sh
+      shell: bash
+    - name: Install python dependencies
+      run: |
+        pip install pipenv codecov
+        pipenv install --dev
+        pipenv graph
+    - name: Test with nose
+      run: |
+        pipenv run python -m compileall clairmeta
+        pipenv run nosetests --nocapture --with-doctest --doctest-options=+ELLIPSIS --with-coverage --cover-package=clairmeta -v
