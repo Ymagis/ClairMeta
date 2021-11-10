@@ -4,7 +4,7 @@
 import os
 
 from clairmeta.utils.uuid import check_uuid
-from clairmeta.dcp_check import CheckerBase, CheckException
+from clairmeta.dcp_check import CheckerBase
 from clairmeta.dcp_check_utils import check_xml
 from clairmeta.dcp_utils import list_am_assets
 
@@ -33,9 +33,10 @@ class Checker(CheckerBase):
     def check_am_xml(self, am):
         """ AssetMap XML syntax and structure check.
 
-            Reference : N/A
+            References: N/A
         """
         check_xml(
+            self,
             am['FilePath'],
             am['Info']['AssetMap']['__xmlns__'],
             am['Info']['AssetMap']['Schema'],
@@ -44,7 +45,7 @@ class Checker(CheckerBase):
     def check_am_name(self, am):
         """ AssetMap file name respect DCP standard.
 
-            Reference : N/A
+            References: N/A
         """
         schema = am['Info']['AssetMap']['Schema']
         mandatory_name = {
@@ -53,7 +54,7 @@ class Checker(CheckerBase):
         }
 
         if mandatory_name[schema] != am['FileName']:
-            raise CheckException(
+            self.error(
                 "{} Assetmap must be named {}, got {} instead".format(
                     schema, mandatory_name[schema], am['FileName'])
             )
@@ -61,7 +62,14 @@ class Checker(CheckerBase):
     def check_am_empty_text_fields(self, am):
         """ AssetMap empty text fields check.
 
-            Reference : N/A
+            This check for empty 'Creator', 'Issuer' or 'AnnotationText' text
+            fields. While not invalid per specification, it appears other
+            checking tools might trigger error / warning here so we provide
+            this to align with other check reports.
+
+            References:
+                mpeg_ii_am_spec.doc (v3.4) 4.1.2, 4.1.5, 4.1.6
+                SMPTE ST 429-9:2014 5.2, 5.3, 5.6
         """
         fields = ['Creator', 'Issuer', 'AnnotationText']
         empty_fields = []
@@ -72,68 +80,65 @@ class Checker(CheckerBase):
                 empty_fields.append(f)
 
         if empty_fields:
-            raise CheckException("Empty {} field(s)".format(
-                ", ".join(empty_fields)))
+            self.error("Empty {} field(s)".format(", ".join(empty_fields)))
 
     def check_assets_am_uuid(self, am, asset):
         """ AssetMap UUIDs validation.
 
-            Reference :
-                SMPTE 429-9-2014 6.1
+            References:
+                SMPTE ST 429-9:2014 6.1
         """
         uuid, _, _ = asset
         if not check_uuid(uuid):
-            raise CheckException(
-                "Invalid uuid found : {}".format(uuid, RFC4122_RE))
+            self.error("Invalid uuid found : {}".format(uuid, RFC4122_RE))
 
     def check_assets_am_volindex(self, am, asset):
         """ AssetMap assets shall reference existing VolIndex.
 
-            Reference :
-                Deprecated in SMPTE 429-9-2014
+            References:
+                SMPTE ST 429-9:2014
         """
         _, _, asset = asset
         # Note : schema already check for positive integer
         asset_vol = asset['ChunkList']['Chunk'].get('VolumeIndex')
         if asset_vol and asset_vol > am['Info']['AssetMap']['VolumeCount']:
-            raise CheckException(
-                "Invalid VolIndex found : {}".format(asset_vol))
+            self.error("Invalid VolIndex found : {}".format(asset_vol))
 
     def check_assets_am_volindex_one(self, am, asset):
         """ AssetMap assets VolIndex shall be one or absent.
 
-            Reference :
-                SMPTE 429-9-2014 7.2
+            References:
+                SMPTE ST 429-9:2014 7.2
         """
         _, _, asset = asset
         asset_vol = asset['ChunkList']['Chunk'].get('VolumeIndex')
         if asset_vol and asset_vol != 1:
-            raise CheckException(
+            self.error(
                 "VolIndex is now deprecated and shall always be 1, got {}"
                 .format(asset_vol))
 
     def check_assets_am_path(self, am, asset):
         """ AssetMap assets path validation.
 
-            Reference :
-                SMPTE 429-9-2014 7.1
+            References:
+                SMPTE ST 429-9:2014 7.1
         """
         uuid, path, _ = asset
 
         if path == '':
-            raise CheckException("Empty path for {}".format(uuid))
+            self.fatal_error("Empty path for {}".format(uuid), "empty")
 
         if ' ' in path:
-            raise CheckException("Space in path")
+            self.error("Space in path", "space")
 
         if not os.path.isfile(os.path.join(self.dcp.path, path)):
-            raise CheckException("Missing asset")
+            self.error("Missing asset", "missing")
 
     def check_assets_am_size(self, am, asset):
         """ AssetMap assets size check.
 
-            Reference :
-                SMPTE 429-9-2014 7.4
+            References:
+                SMPTE ST 429-9:2014 7.4
         """
         _, path, asset = asset
         path = os.path.join(self.dcp.path, path)
@@ -147,7 +152,7 @@ class Checker(CheckerBase):
             length = chunk['Length']
 
             if offset >= actual_size:
-                raise CheckException("Invalid offset value ()".format(offset))
+                self.error("Invalid offset value ()".format(offset))
             if length != actual_size:
-                raise CheckException("Invalid size value, expected {} but got "
-                                     "{}".format(length, actual_size))
+                self.error("Invalid size value, expected {} but got "
+                           "{}".format(length, actual_size))

@@ -4,7 +4,7 @@
 import os
 
 from clairmeta.utils.file import shaone_b64
-from clairmeta.dcp_check import CheckerBase, CheckException
+from clairmeta.dcp_check import CheckerBase
 from clairmeta.dcp_check_utils import check_xml, check_issuedate
 from clairmeta.dcp_utils import list_pkl_assets
 
@@ -37,6 +37,7 @@ class Checker(CheckerBase):
         """ PKL XML syntax and structure check. """
         pkl_node = pkl['Info']['PackingList']
         check_xml(
+            self,
             pkl['FilePath'],
             pkl_node['__xmlns__'],
             pkl_node['Schema'],
@@ -45,7 +46,7 @@ class Checker(CheckerBase):
     def check_pkl_empty_text_fields(self, am):
         """ PKL empty text fields check.
 
-            Reference : N/A
+            References: N/A
         """
         fields = ['Creator', 'Issuer', 'AnnotationText']
         empty_fields = []
@@ -56,31 +57,30 @@ class Checker(CheckerBase):
                 empty_fields.append(f)
 
         if empty_fields:
-            raise CheckException("Empty {} field(s)".format(
-                ", ".join(empty_fields)))
+            self.error("Empty {} field(s)".format( ", ".join(empty_fields)))
 
     def check_pkl_issuedate(self, pkl):
         """ PKL Issue Date validation.
 
-            Reference : N/A
+            References: N/A
         """
-        check_issuedate(pkl['Info']['PackingList']['IssueDate'])
+        check_issuedate(self, pkl['Info']['PackingList']['IssueDate'])
 
     def check_assets_pkl_referenced_by_assetamp(self, pkl, asset):
         """ PKL assets shall be present in AssetMap.
 
-            Reference : N/A
+            References: N/A
         """
         uuid, _, _ = asset
         # Note : dcp._list_asset is directly extracted from Assetmap
         if uuid not in self.dcp._list_asset.keys():
-            raise CheckException("Not present in Assetmap")
+            self.error("Not present in Assetmap")
 
     def check_assets_pkl_size(self, pkl, asset):
         """ PKL assets size check.
 
-            Reference :
-                SMPTE 429-8-2007 6.4
+            References:
+                SMPTE ST 429-8:2007 6.4
         """
         _, path, asset = asset
         if not path or not os.path.exists(path):
@@ -90,15 +90,14 @@ class Checker(CheckerBase):
         actual_size = os.path.getsize(path)
 
         if actual_size != asset_size:
-            raise CheckException(
-                "Invalid size, expected {} but got {}".format(
-                    asset_size, actual_size))
+            self.error("Invalid size, expected {} but got {}".format(
+                asset_size, actual_size))
 
     def check_assets_pkl_hash(self, pkl, asset):
         """ PKL assets hash check.
 
-            Reference :
-                SMPTE 429-8-2007 6.3
+            References:
+                SMPTE ST 429-8:2007 6.3
         """
         _, path, asset = asset
         if not path or not os.path.exists(path):
@@ -111,6 +110,5 @@ class Checker(CheckerBase):
             self.hash_map[asset_id] = shaone_b64(path, self.hash_callback)
 
         if self.hash_map[asset_id] != asset_hash:
-            raise CheckException(
-                "Corrupt file, expected hash {} but got {}".format(
-                    asset_hash, self.hash_map[asset_id]))
+            self.error("Corrupt file, expected hash {} but got {}".format(
+                asset_hash, self.hash_map[asset_id]))

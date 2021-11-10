@@ -1,6 +1,7 @@
 # Clairmeta - (C) YMAGIS S.A.
 # See LICENSE for more information
 
+import re
 import six
 import time
 import inspect
@@ -8,52 +9,9 @@ import traceback
 from datetime import datetime
 
 from clairmeta.logger import get_log
+from clairmeta.dcp_check_execution import (
+    CheckException, CheckError, CheckExecution)
 from clairmeta.dcp_check_report import CheckReport
-
-
-class CheckException(Exception):
-    """ All check shall raise a CheckException in case of falure. """
-    def __init__(self, msg):
-        super(CheckException, self).__init__(six.ensure_str(msg))
-
-
-class CheckExecution(object):
-    """ Check execution with status and related metadatas. """
-
-    def __init__(self, func):
-        """ Constructor for CheckExecution.
-
-            Args:
-                func (function): Check function.
-
-        """
-        self.name = func.__name__
-        self.doc = func.__doc__
-        self.message = ""
-        self.valid = False
-        self.bypass = False
-        self.seconds_elapsed = 0
-        self.asset_stack = []
-        self.criticality = ""
-
-    def short_desc(self):
-        """ Returns first line of the docstring or function name. """
-        docstring_lines = self.doc.split('\n')
-        return docstring_lines[0].strip() if docstring_lines else c.name
-
-    def to_dict(self):
-        """ Returns a dictionary representation. """
-        return {
-            'name': self.name,
-            'pretty_name': self.short_desc(),
-            'doc': self.doc,
-            'message': self.message,
-            'valid': self.valid,
-            'bypass': self.bypass,
-            'seconds_elapsed': self.seconds_elapsed,
-            'asset_stack': self.asset_stack,
-            'criticality': self.criticality
-        }
 
 
 
@@ -63,6 +21,8 @@ class CheckerBase(object):
         All check module shall derive from this class.
 
     """
+
+    ERROR_NAME_RE = re.compile("^\w+$")
 
     def __init__(self, dcp, profile):
         """ CheckerBase constructor.
@@ -76,6 +36,7 @@ class CheckerBase(object):
         self.profile = profile
         self.log = get_log()
         self.checks = []
+        self.errors = []
         self.report = None
         self.hash_callback = None
 
@@ -96,7 +57,12 @@ class CheckerBase(object):
         }
 
         for c_name, c_level in six.iteritems(check_level):
-            if name.startswith(c_name):
+            # NOTE: very rough implementation
+            # NOTE: not-optimized by compiling patterm
+            # Translate Perl like syntax to Python
+            c_name = c_name.replace('*', '.*')
+
+            if re.search(c_name, name):
                 score_profile[len(c_name)] = c_level
 
         return score_profile[max(score_profile.keys())]
@@ -139,33 +105,70 @@ class CheckerBase(object):
                     error_prefix (str): error message prefix
 
             Returns:
-                Tuple (status, return_value)
+                Check function return value
 
         """
+        self._check_setup()
+
         check_exec = CheckExecution(check)
-        check_exec.criticality = self.find_check_criticality(check_exec.name)
-        check_exec.valid = False
 
         try:
             start = time.time()
             check_res = None
             check_res = check(*args)
         except CheckException as e:
-            prefix = kwargs.get('error_prefix', '')
-            check_exec.message = "{}{}".format(
-                prefix + "\n\t" if prefix else '', str(e))
+            pass
         except Exception as e:
-            check_exec.message = "Check unknown error\n{}".format(
-                traceback.format_exc())
-            check_exec.criticality = "ERROR"
-            self.log.error(check.msg)
-        else:
-            check_exec.valid = True
+            error = CheckError("{}".format(traceback.format_exc()))
+            error.name = "internal_error"
+            error.parent_name = check_exec.name
+            error.doc = "ClairMeta internal error"
+            error.criticality = "ERROR"
+            check_exec.errors.append(error)
+            self.log.error(error.message)
         finally:
+            for error in self.errors:
+                error.parent_name = check_exec.name
+                error.parent_doc = check_exec.doc
+                error.criticality = self.find_check_criticality(
+                    error.full_name())
+                check_exec.errors.append(error)
+
             check_exec.asset_stack = kwargs.get('stack', [self.dcp.path])
             check_exec.seconds_elapsed = time.time() - start
+
             self.checks.append(check_exec)
-            return check_exec.valid, check_res
+
+            return check_res
+
+    def _check_setup(self):
+        """ Internal setup executed before each check is run. """
+        self.errors = []
+
+    def error(self, message, name="", doc=""):
+        """ Append an error to the current check execution.
+
+            Args:
+                message (str): Error message.
+                name (str): Error name that will be appended to the check name
+                    to uniquely identify this error. Only alphanumeric
+                    characters allowed.
+                doc (str): Error description.
+
+        """
+        if name and not re.match(self.ERROR_NAME_RE, name):
+            raise Exception("Error name invalid : {}".format(name))
+
+        self.errors.append(CheckError(
+            message,
+            name.lower(),
+            doc
+        ))
+
+    def fatal_error(self, message, name="", doc=""):
+        """ Append an error and halt the current check execution. """
+        self.error(message, name, doc)
+        raise CheckException()
 
     def make_report(self):
         """ Check report generation. """

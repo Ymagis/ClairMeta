@@ -215,7 +215,7 @@ def parse_xml(
             return xml_dict
 
     except (Exception, ExpatError) as e:
-        get_log().info("Error parsing XML {} : {}".format(xml_path, str(e)))
+        get_log().error("Error parsing XML {} : {}".format(xml_path, str(e)))
 
 
 def validate_xml(xml_path, xsd_id):
@@ -259,7 +259,8 @@ def validate_xml(xml_path, xsd_id):
 def canonicalize_xml(xml_path, root=None, ns=None, strip=None):
     """ Canonicalize a XML document using C14N method.
 
-        Reference : https://www.w3.org/TR/xml-c14n/
+        References:
+            W3C Canonical XML (v1.1)
 
         Args:
             xml_path (str): XML file absolute path.

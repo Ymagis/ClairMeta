@@ -123,7 +123,11 @@ class ConsoleProgress(object):
             total_progress_size = int(total_progress * col_width)
             total_bar_size = col_width - total_progress_size
 
-            eta_sec = (self._total_size - processed) / (processed / elapsed)
+            if processed > 0:
+                eta_sec = (self._total_size - processed) / (processed / elapsed)
+            else:
+                eta_sec = 0
+
             eta_str = time.strftime("%H:%M:%S", time.gmtime(eta_sec))
 
             sys.stdout.write("ETA {} [{}] {:.2f}% - File [{}] {:.2f}% - {}\r".format(
