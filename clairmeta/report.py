@@ -1,8 +1,10 @@
 # Clairmeta - (C) YMAGIS S.A.
 # See LICENSE for more information
 
+import re
 import six
 from collections import defaultdict
+from datetime import datetime
 
 from clairmeta.utils.file import human_size
 
@@ -18,13 +20,21 @@ class CheckReport(object):
         'BYPASS': 'Bypass(s)',
     }
 
-    def __init(self):
-        """ Constructor for CheckReport. """
-        self.dcp = None
-        self.checks = []
-        self.profile = ""
-        self.date = ""
-        self.duration = -1
+    def __init__(self, dcp, profile):
+        """ Constructor for CheckReport.
+
+            Args:
+                dcp (clairmeta.DCP): DCP.
+                profile (dict): Checker profile.
+
+        """
+        self.dcp = dcp
+        self.checks = dcp.checks
+        self.profile = profile
+        self.date = datetime.now().strftime("%d/%m/%Y %H:%M:%S")
+        self.duration = sum([c.seconds_elapsed for c in self.checks])
+
+        self._detect_check_criticality()
 
     def checks_count(self):
         """ Return the number of different checks executed. """
@@ -107,6 +117,23 @@ class CheckReport(object):
             report += "{}\n{}\n".format(self.pretty_status['BYPASS'] + ':', bypassed)
 
         return report
+
+    def _detect_check_criticality(self):
+        """ Assign criticality for each errors. """
+        levels = self.profile['criticality']
+        default = levels.get('default', 'ERROR')
+        # Translate Perl like syntax to Python
+        levels = {k.replace('*', '.*'): v for k, v in six.iteritems(levels)}
+
+        for check in self.checks:
+            for error in check.errors:
+                score_profile = { 0: default }
+                for c_name, c_level in six.iteritems(levels):
+                    # Assumes python is internally caching regex compilation
+                    if re.search(c_name, error.full_name()):
+                        score_profile[len(c_name)] = c_level
+
+                error.criticality = score_profile[max(score_profile.keys())]
 
     def _dump_stack(self, out_str, key, values, indent_level):
         """ Recursively iterate through the error message stack.

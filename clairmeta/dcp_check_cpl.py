@@ -14,8 +14,8 @@ from clairmeta.dcp_utils import list_cpl_assets, get_type_for_asset
 
 
 class Checker(CheckerBase):
-    def __init__(self, dcp, profile):
-        super(Checker, self).__init__(dcp, profile)
+    def __init__(self, dcp):
+        super(Checker, self).__init__(dcp)
 
         self.mxf_schema_map = {
             'Interop': 'MXFInterop',

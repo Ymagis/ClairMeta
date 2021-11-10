@@ -167,9 +167,9 @@ class SubtitleUtils(object):
 
 class Checker(CheckerBase):
 
-    def __init__(self, dcp, profile):
+    def __init__(self, dcp):
         self.st_util = SubtitleUtils(dcp)
-        super(Checker, self).__init__(dcp, profile)
+        super(Checker, self).__init__(dcp)
 
     def run_checks(self):
         for cpl in self.dcp._list_cpl:

@@ -10,8 +10,8 @@ from clairmeta.dcp_utils import list_am_assets
 
 
 class Checker(CheckerBase):
-    def __init__(self, dcp, profile):
-        super(Checker, self).__init__(dcp, profile)
+    def __init__(self, dcp):
+        super(Checker, self).__init__(dcp)
 
     def run_checks(self):
         for source in self.dcp._list_am:

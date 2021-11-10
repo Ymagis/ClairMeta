@@ -1,35 +1,49 @@
 # Clairmeta - (C) YMAGIS S.A.
 # See LICENSE for more information
 
-import os
+import re
 import six
+import time
 import importlib
 import inspect
+import traceback
 
 from clairmeta.settings import DCP_CHECK_SETTINGS
-from clairmeta.profile import get_default_profile
-from clairmeta.dcp_utils import list_cpl_assets, cpl_probe_asset
-from clairmeta.dcp_check_base import CheckerBase, CheckException
+from clairmeta.logger import get_log
+from clairmeta.dcp_check_execution import CheckError, CheckExecution
 from clairmeta.utils.file import ConsoleProgress
-from clairmeta.utils.sys import all_keys_in_dict
+from clairmeta.exception import CheckException
 
 
-class DCPChecker(CheckerBase):
-    """ Digital Cinema Package checker. """
 
-    def __init__(
-        self, dcp, profile=get_default_profile(), ov_path=None,
-        hash_callback=None
-    ):
-        """ DCPChecker constructor.
+class CheckerBase(object):
+    """ Digital Cinema Package checker.
+
+        Base class for check module, provide check discover and run utilities.
+        All check module shall derive from this class.
+
+    """
+
+    ERROR_NAME_RE = re.compile(r"^\w+$")
+
+    def __init__(self, dcp, ov_path=None, hash_callback=None, bypass_list=None):
+        """ CheckerBase constructor.
 
             Args:
                 dcp (clairmeta.DCP): DCP object.
-                profile (dict): Checker profile.
                 ov_path (str, optional): Absolute path of OriginalVersion DCP.
+                hash_callback (function, optional): Callback function to report
+                    file hash progression.
+                bypass_list (list, optional): List of checks to bypass.
 
         """
-        super(DCPChecker, self).__init__(dcp, profile)
+        self.dcp = dcp
+        self.log = get_log()
+        self.checks = []
+        self.errors = []
+        self.report = None
+        self.bypass_list = bypass_list if bypass_list else []
+        self.check_modules = {}
         self.ov_path = ov_path
         self.ov_dcp = None
 
@@ -43,16 +57,15 @@ class DCPChecker(CheckerBase):
                 "Invalid callback, please provide a function"
                 " or instance of ConsoleProgress (or derivate).")
 
-        self.check_modules = {}
-        self.load_modules()
 
     def load_modules(self):
         prefix = DCP_CHECK_SETTINGS['module_prefix']
         for k, v in six.iteritems(DCP_CHECK_SETTINGS['modules']):
             try:
                 module_path = 'clairmeta.' + prefix + k
-                module_vol = importlib.import_module(module_path)
-                checker = module_vol.Checker(self.dcp, self.profile)
+                module = importlib.import_module(module_path)
+                checker = module.Checker(self.dcp)
+                checker.ov_path = self.ov_path
                 checker.hash_callback = self.hash_callback
                 self.check_modules[v] = checker
             except (ImportError, Exception) as e:
@@ -60,180 +73,118 @@ class DCPChecker(CheckerBase):
                     module_path, str(e)))
 
     def check(self):
-        """ Execute the complete check process. """
-        self.run_checks()
-        self.make_report()
-        self.dump_report()
-        return self.report.is_valid(), self.report
+        """ Execute the complete check process.
 
-    def list_checks(self):
-        """ List all available checks. """
-        all_checks = {}
-        all_checks['General'] = self.find_check('dcp')
-        all_checks['General'] += self.find_check('link_ov')
+            Returns:
+                List of checks executed.
 
-        for desc, checker in six.iteritems(self.check_modules):
-            all_checks[desc] = checker.find_check('')
+        """
+        self.load_modules()
+        return self.run_checks()
 
-        res = {}
-        for k, v in six.iteritems(all_checks):
-            checks = []
-            for check in v:
-                docstring = check.__doc__
-                if docstring:
-                    desc = docstring.splitlines()[0].strip()
-                else:
-                    desc = ""
+    def find_check(self, prefix):
+        """ Discover checks functions (using introspection).
 
-                checks.append((check.__name__, desc))
-            res[k] = checks
+            Args:
+                prefix (str): Prefix of the checks to find (excluding leading
+                    'check_').
 
-        return res
+            Returns:
+                List of check functions.
+
+        """
+        checks = []
+
+        member_list = inspect.getmembers(self, predicate=inspect.ismethod)
+        for k, v in member_list:
+            check_prefix = k.startswith('check_' + prefix)
+            check_bypass = any([k.startswith(c) for c in self.bypass_list])
+
+            if check_prefix and not check_bypass:
+                checks.append(v)
+            elif check_bypass:
+                check_exec = CheckExecution(v)
+                check_exec.bypass = True
+                self.checks.append(check_exec)
+
+        return checks
 
     def run_checks(self):
         """ Execute all checks. """
         self.log.info("Checking DCP : {}".format(self.dcp.path))
 
-        # Run own tests
-        dcp_checks = self.find_check('dcp')
-        [self.run_check(c, stack=[self.dcp.path]) for c in dcp_checks]
-        self.setup_dcp_link_ov()
-
-        # Run external modules tests
         for _, checker in six.iteritems(self.check_modules):
             self.checks += checker.run_checks()
+        return self.checks
 
-    def check_dcp_empty_dir(self):
-        """ Empty directory detection.
+    def run_check(self, check, *args, **kwargs):
+        """ Execute a check.
 
-            References: N/A
+            Args:
+                check (function): Check function.
+                *args: Variable list of check function arguments.
+                **kwargs: Variable list of keywords arguments.
+                    error_prefix (str): error message prefix
+
+            Returns:
+                Check function return value
+
         """
-        list_empty_dir = []
-        for dirpath, dirnames, filenames in os.walk(self.dcp.path):
-            for d in dirnames:
-                fullpath = os.path.join(dirpath, d)
-                if not os.listdir(fullpath):
-                    list_empty_dir.append(
-                        os.path.relpath(fullpath, self.dcp.path))
+        self._check_setup()
 
-        if list_empty_dir:
-            self.error("Empty directories detected : {}".format(list_empty_dir))
+        check_exec = CheckExecution(check)
 
-    def check_dcp_hidden_files(self):
-        """ Hidden files detection.
+        try:
+            start = time.time()
+            check_res = None
+            check_res = check(*args)
+        except CheckException as e:
+            pass
+        except Exception as e:
+            error = CheckError("{}".format(traceback.format_exc()))
+            error.name = "internal_error"
+            error.parent_name = check_exec.name
+            error.doc = "ClairMeta internal error"
+            check_exec.errors.append(error)
+            self.log.error(error.message)
+        finally:
+            for error in self.errors:
+                error.parent_name = check_exec.name
+                error.parent_doc = check_exec.doc
+                check_exec.errors.append(error)
 
-            References: N/A
+            check_exec.asset_stack = kwargs.get('stack', [self.dcp.path])
+            check_exec.seconds_elapsed = time.time() - start
+
+            self.checks.append(check_exec)
+
+            return check_res
+
+    def _check_setup(self):
+        """ Internal setup executed before each check is run. """
+        self.errors = []
+
+    def error(self, message, name="", doc=""):
+        """ Append an error to the current check execution.
+
+            Args:
+                message (str): Error message.
+                name (str): Error name that will be appended to the check name
+                    to uniquely identify this error. Only alphanumeric
+                    characters allowed.
+                doc (str): Error description.
+
         """
-        hidden_files = [
-            os.path.relpath(f, self.dcp.path)
-            for f in self.dcp._list_files
-            if os.path.basename(f).startswith('.')]
-        if hidden_files:
-            self.error("Hidden files detected : {}".format(hidden_files))
+        if name and not re.match(self.ERROR_NAME_RE, name):
+            raise Exception("Error name invalid : {}".format(name))
 
-    def check_dcp_foreign_files(self):
-        """ Foreign files detection (not listed in AssetMap).
+        self.errors.append(CheckError(
+            message,
+            name.lower(),
+            doc
+        ))
 
-            References: N/A
-        """
-        list_asset_path = [
-            os.path.join(self.dcp.path, a)
-            for a in self.dcp._list_asset.values()]
-        list_asset_path += self.dcp._list_vol_path
-        list_asset_path += self.dcp._list_am_path
-
-        self.dcp.foreign_files = [
-            os.path.relpath(a, self.dcp.path)
-            for a in self.dcp._list_files
-            if a not in list_asset_path]
-        if self.dcp.foreign_files:
-            self.error('\n'.join(self.dcp.foreign_files))
-
-    def check_dcp_multiple_am_or_vol(self):
-        """ Only one AssetMap and VolIndex shall be present.
-
-            References: N/A
-        """
-        restricted_lists = {
-            'VolIndex': self.dcp._list_vol,
-            'Assetmap': self.dcp._list_am,
-        }
-
-        for k, v in six.iteritems(restricted_lists):
-            if len(v) == 0:
-                self.error("Missing {} file".format(k))
-            if len(v) > 1:
-                self.error("Multiple {} files found".format(k))
-
-    def setup_dcp_link_ov(self):
-        """ Setup the link VF to OV check and run for each assets. """
-        if not self.ov_path:
-            return
-
-        self.run_check(self.check_link_ov_coherence, stack=[self.dcp.path])
-        for cpl in self.dcp._list_cpl:
-            for essence, asset in list_cpl_assets(cpl):
-                self.run_check(
-                    self.check_link_ov_asset,
-                    asset, essence, stack=[self.dcp.path])
-
-    def check_dcp_signed(self):
-        """ DCP with encrypted content must be digitally signed.
-
-            References:
-                DCI DCSS (v1.3) 5.4.3.7
-                DCI DCSS (v1.3) 5.5.2.3
-        """
-        for cpl in self.dcp._list_cpl:
-            cpl_node = cpl['Info']['CompositionPlaylist']
-            xmls = [
-                pkl['Info']['PackingList'] for pkl in self.dcp._list_pkl
-                if pkl['Info']['PackingList']['Id'] == cpl_node.get('PKLId')]
-            xmls.append(cpl_node)
-
-            for xml in xmls:
-                signed = all_keys_in_dict(xml, ['Signer', 'Signature'])
-                if not signed and cpl_node['Encrypted'] is True:
-                    self.error("Encrypted DCP must be signed")
-
-    def check_link_ov_coherence(self):
-        """ Relink OV/VF sanity checks.
-
-            References: N/A
-        """
-        if self.ov_path and self.dcp.package_type != 'VF':
-            self.error("Package checked must be a VF")
-
-        from clairmeta.dcp import DCP
-        self.ov_dcp = DCP(self.ov_path)
-        self.ov_dcp.parse()
-        if self.ov_dcp.package_type != 'OV':
-            self.error("Package referenced must be a OV")
-
-    def check_link_ov_asset(self, asset, essence):
-        """ VF package shall reference assets present in OV.
-
-            References: N/A
-        """
-        if not self.ov_dcp:
-            return
-
-        ov_dcp_dict = self.ov_dcp.parse()
-
-        if not asset.get('Path'):
-            uuid = asset['Id']
-            path_ov = ov_dcp_dict['asset_list'].get(uuid)
-
-            if not path_ov:
-                self.error(
-                    "Asset missing ({}) from OV : {}".format(essence, uuid))
-
-            asset_path = os.path.join(self.ov_dcp.path, path_ov)
-            if not os.path.exists(asset_path):
-                self.error(
-                    "Asset missing ({}) from OV (MXF not found) : {}"
-                    "".format(essence, path_ov))
-
-            # Probe asset for later checks
-            asset['AbsolutePath'] = asset_path
-            cpl_probe_asset(asset, essence, asset_path)
+    def fatal_error(self, message, name="", doc=""):
+        """ Append an error and halt the current check execution. """
+        self.error(message, name, doc)
+        raise CheckException()

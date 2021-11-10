@@ -10,12 +10,7 @@ from clairmeta.utils.time import frame_to_tc, format_ratio
 from clairmeta.utils.sys import all_keys_in_dict
 from clairmeta.settings import DCP_SETTINGS
 from clairmeta.logger import get_log
-
-
-class ProbeException(Exception):
-    """ Raised when probing a DCP fails. """
-    def __init__(self, msg):
-        super(ProbeException, self).__init__(six.ensure_str(msg))
+from clairmeta.exception import ProbeException
 
 
 def discover_schema(node):

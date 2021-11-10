@@ -4,17 +4,6 @@
 import six
 
 
-
-class CheckException(Exception):
-    """ Non recoverable errors while checking a DCP.
-
-        This is not to be used for regular check errors, where we instead use
-        ``error()`` and ``fatal_error()`` methods.
-
-    """
-    pass
-
-
 ERROR_SILENT = 0
 ERROR_INFO = 1
 ERROR_WARNING = 2
@@ -110,7 +99,7 @@ class CheckExecution(object):
             for e in self.errors]
         )
 
-    def has_errors(self, criticality=""):
+    def has_errors(self, criticality=None):
         """ Returns whether check raised any errors of ``criticality``.
 
             Args:

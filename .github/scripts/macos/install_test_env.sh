@@ -20,7 +20,6 @@ cmake \
     -DOpenSSLLib_PATH=/usr/local/opt/openssl/lib/libcrypto.dylib \
     -DOpenSSLLib_include_DIR=/usr/local/opt/openssl/include \
     ..
-
 sudo cmake --build . --target install --config Release -- -j$(sysctl -n hw.ncpu)
 
 cd "$BASE_DIR"

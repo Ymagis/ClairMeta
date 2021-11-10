@@ -12,13 +12,15 @@ from clairmeta.dcp_parse import (assetmap_parse, volindex_parse, pkl_parse,
 from clairmeta.dcp_utils import (list_am_assets, list_pkl_assets,
                                  cpl_extract_characteristics, cpl_probe_asset,
                                  kdm_extract_key_info)
-from clairmeta.dcp_check import DCPChecker
+from clairmeta.dcp_check import CheckerBase
 from clairmeta.utils.xml import parse_xml
 from clairmeta.utils.sys import remove_key_dict
 from clairmeta.utils.file import folder_size, human_size
 from clairmeta.utils.crypto import decrypt_b64
 from clairmeta.settings import DCP_SETTINGS
 from clairmeta.profile import DCP_CHECK_PROFILE
+from clairmeta.report import CheckReport
+from clairmeta.exception import ClairMetaException
 
 
 class DCP(object):
@@ -34,12 +36,12 @@ class DCP(object):
                 KDM recipient private key.
 
             Raises:
-                ValueError: ``path`` directory not found.
+                ClairMetaException: ``path`` directory not found.
 
         """
 
         if not os.path.isdir(path):
-            raise ValueError("{} is not a valid folder".format(path))
+            raise ClairMetaException("{} is not a valid folder".format(path))
 
         self.path = os.path.normpath(path)
         self.kdm = os.path.normpath(kdm) if kdm else None
@@ -52,6 +54,8 @@ class DCP(object):
 
         self._probeb = False
         self._parsed = False
+        self._checked = False
+        self.checks = []
 
     def init_package_files(self):
         """ List all files present in DCP. """
@@ -285,13 +289,20 @@ class DCP(object):
         return self.metadata
 
     def check(
-        self, profile=DCP_CHECK_PROFILE, ov_path=None, hash_callback=None
+        self,
+        profile=DCP_CHECK_PROFILE,
+        ov_path=None,
+        hash_callback=None,
+        bypass_list=None
     ):
         """ Check validity.
 
             Args:
                 profile (dict): Checker profile.
                 ov_path (str, optional): Absolute path of OriginalVersion DCP.
+                hash_callback (function, optional): Callback function to report
+                    file hash progression.
+                bypass_list (list, optional): List of checks to bypass.
 
             Returns:
                 Tuple (boolean, CheckReport) of DCP check status and report.
@@ -299,8 +310,44 @@ class DCP(object):
         """
         if not self._parsed or not self._probeb:
             self.parse()
+        if not self._checked:
+            if isinstance(profile, dict) and profile.get("bypass"):
+                bypass_list = profile.get("bypass")
+                self.log.warning(
+                    "Deprecation warning: please use ``bypass_list`` argument"
+                    " instead of profile ``bypass`` key to specify bypassed"
+                    " checks. Ignoring ``bypass_list`` parameter."
+                )
 
-        self._checker = DCPChecker(
-            self, profile=profile, ov_path=ov_path,
-            hash_callback=hash_callback)
-        return self._checker.check()
+            self.checker = CheckerBase(
+                self,
+                ov_path=ov_path,
+                hash_callback=hash_callback,
+                bypass_list=bypass_list
+            )
+            self.checks = self.checker.check()
+            self._checked = True
+
+        return self.check_report(profile)
+
+    def check_report(self, profile=DCP_CHECK_PROFILE):
+        """ Generate additional check reports.
+
+            Args:
+                profile (dict): Checker profile.
+
+            Returns:
+                Tuple (boolean, CheckReport) of DCP check status and report.
+
+            Raises:
+                ClairMetaException: when this DCP has not yet been checked.
+
+        """
+        if not self._checked:
+            raise ClairMetaException(
+                "DCP has not been checked, can't generate report")
+
+        report = CheckReport(self, profile)
+        self.log.info("Check report:\n\n" + report.pretty_str())
+
+        return report.is_valid(), report

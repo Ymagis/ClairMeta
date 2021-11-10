@@ -1,18 +1,30 @@
 set -ex
 
-# install keys
-sudo apt-get update
-sudo apt-get -y install dirmngr curl
-# key for bintray
-gpg --keyserver hkp://keyserver.ubuntu.com:80 --recv 379CE192D401AB61
-gpg --export --armor 379CE192D401AB61 | sudo apt-key add -
+sudo apt-get -y update
 
-# add apt list
-source /etc/lsb-release
-echo "deb https://dl.bintray.com/ymagis/Clairmeta ${DISTRIB_CODENAME} main" | sudo tee /etc/apt/sources.list.d/clairmeta.list
+##
+# Install asdcplib
 
-# TODO: should we just pull asdcplib and compile here ?
+sudo apt-get -y install libssl-dev libxerces-c-dev libexpat-dev
 
-# clairmeta dependencies
-sudo apt-get update
-sudo apt-get -y install asdcplib mediainfo sox
+brew install openssl xerces-c
+
+BASE_DIR=`pwd`
+WORK_DIR=`mktemp -d`
+cd "$WORK_DIR"
+
+git clone https://github.com/cinecert/asdcplib.git && cd asdcplib
+git checkout rel_2_10_35
+mkdir build && cd build
+
+cmake ..
+sudo cmake --build . --target install --config Release -- -j$(nproc)
+
+cd "$BASE_DIR"
+rm -rf "$WORK_DIR"
+
+
+##
+# ClairMeta dependencies
+
+sudo apt-get -y install mediainfo sox
