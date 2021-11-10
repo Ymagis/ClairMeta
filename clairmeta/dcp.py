@@ -13,13 +13,13 @@ from clairmeta.dcp_utils import (list_am_assets, list_pkl_assets,
                                  cpl_extract_characteristics, cpl_probe_asset,
                                  kdm_extract_key_info)
 from clairmeta.dcp_check import CheckerBase
-from clairmeta.dcp_check_report import CheckReport
 from clairmeta.utils.xml import parse_xml
 from clairmeta.utils.sys import remove_key_dict
 from clairmeta.utils.file import folder_size, human_size
 from clairmeta.utils.crypto import decrypt_b64
 from clairmeta.settings import DCP_SETTINGS
 from clairmeta.profile import DCP_CHECK_PROFILE
+from clairmeta.report import CheckReport
 from clairmeta.exception import ClairMetaException
 
 
