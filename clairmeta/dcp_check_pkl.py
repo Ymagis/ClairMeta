@@ -49,15 +49,22 @@ class Checker(CheckerBase):
             References: N/A
         """
         fields = ['Creator', 'Issuer', 'AnnotationText']
+        madatory_fields = ['Creator']
         empty_fields = []
+        missing_fields = []
 
         for f in fields:
             am_f = am['Info']['PackingList'].get(f)
             if am_f == '':
                 empty_fields.append(f)
+            elif am_f is None and f in madatory_fields:
+                missing_fields.append(f)
 
         if empty_fields:
             self.error("Empty {} field(s)".format( ", ".join(empty_fields)))
+        if missing_fields:
+            self.error("Missing {} field(s)".format(
+                ", ".join(missing_fields)), "missing")
 
     def check_pkl_issuedate(self, pkl):
         """ PKL Issue Date validation.

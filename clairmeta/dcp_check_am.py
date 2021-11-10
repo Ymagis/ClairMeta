@@ -4,7 +4,7 @@
 import os
 import re
 
-from clairmeta.utils.uuid import check_uuid
+from clairmeta.utils.uuid import check_uuid, RFC4122_RE
 from clairmeta.dcp_check import CheckerBase
 from clairmeta.dcp_check_utils import check_xml
 from clairmeta.dcp_utils import list_am_assets
@@ -90,15 +90,22 @@ class Checker(CheckerBase):
 
         """
         fields = ['Creator', 'Issuer', 'AnnotationText']
+        madatory_fields = ['Creator']
         empty_fields = []
+        missing_fields = []
 
         for f in fields:
             am_f = am['Info']['AssetMap'].get(f)
             if am_f == '':
                 empty_fields.append(f)
+            elif am_f is None and f in madatory_fields:
+                missing_fields.append(f)
 
         if empty_fields:
             self.error("Empty {} field(s)".format(", ".join(empty_fields)))
+        if missing_fields:
+            self.error("Missing {} field(s)".format(
+                ", ".join(missing_fields)), "missing")
 
     def check_assets_am_uuid(self, am, asset):
         """ AssetMap UUIDs validation.
