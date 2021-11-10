@@ -22,6 +22,7 @@ DCP_CHECK_PROFILE = {
         'check_assets_am_volindex_one': 'WARNING',
         'check_*_empty_text_fields': 'WARNING',
         'check_*_empty_text_fields_missing': 'ERROR',
+        'check_*_xml_constraints_line_ending': 'WARNING',
         'check_cpl_contenttitle_annotationtext_match': 'WARNING',
         'check_cpl_contenttitle_pklannotationtext_match': 'WARNING',
         'check_assets_cpl_missing_from_vf': 'WARNING',
