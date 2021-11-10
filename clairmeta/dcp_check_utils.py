@@ -2,6 +2,7 @@
 # See LICENSE for more information
 
 import six
+import re
 from datetime import datetime
 from dateutil import parser
 
@@ -17,7 +18,55 @@ def get_schema(name):
             return v
 
 
+def check_xml_constraints(xml_path):
+    """ Check D-Cinema XML Contraints
+
+        References:
+            TI Subtitle Operational Recommendation for DLP Cinema Projectors (Draft A)
+            https://web.archive.org/web/20140924153620/http://dlp.com/downloads/pdf_dlp_cinema_subtitle_operational_recommendation_rev_a.pdf
+            SMPTE ST 429-17:2017
+            W3C Extensible Markup Language v (1.0)
+    """
+
+    # Follow the XML spec precicely for the definition of XMLDecl, except for:
+    # VersionNum := '1.0'
+    # EncName    := 'UTF-8'
+    # EncodingDecl not optional
+    # SDDecl must have 'no'
+    RE_XML_S             = '([\x20\x09\x0D\x0A])'
+    RE_XML_Eq            = '(' + RE_XML_S + '?=' + RE_XML_S + '?)'
+    RE_XML_SDDecl        = '(' + RE_XML_S + 'standalone' + RE_XML_Eq + '(\'no\'|"no"))'
+    RE_XML_EncName       = '(UTF\-8)'
+    RE_XML_EncodingDecl  = '(' + RE_XML_S + 'encoding' + RE_XML_Eq + '("' + RE_XML_EncName + '"|\'' + RE_XML_EncName + '\'))'
+    RE_XML_VersionNum    = '(1\.0)'
+    RE_XML_VersionInfo   = '(' + RE_XML_S + 'version' + RE_XML_Eq + '(\'' + RE_XML_VersionNum + '\'|"' + RE_XML_VersionNum + '"))'
+    RE_XML_XMLDecl       = '<\?xml' + RE_XML_VersionInfo + RE_XML_EncodingDecl + RE_XML_SDDecl + '?' + RE_XML_S + '?' + '\?>'
+
+    try:
+        with open(xml_path) as file:
+            xml_file = file.read()
+    except IOError as e:
+        get_log().info("Error opening XML file {} : {}".format(xml_path, str(e)))
+        return
+
+    errors = []
+
+    if re.match('\ufeff', xml_file):
+        errors.append("BOM not allowed in XML file")
+
+    if not (re.match(RE_XML_XMLDecl, xml_file) or re.match('\ufeff' + RE_XML_XMLDecl, xml_file)):
+        errors.append("Invalid XML Declaration")
+
+    if xml_file[-2:] != '>\n' and xml_file[-3:] != '>\r\n':
+        errors.append("XML file has invalid ending")
+
+    if errors:
+        raise CheckException('\n'.join(errors))
+
+
 def check_xml(checker, xml_path, xml_ns, schema_type, schema_dcp):
+    check_xml_constraints(xml_path)
+
     # Correct namespace
     schema_id = get_schema(xml_ns)
     if not schema_id:
