@@ -52,8 +52,7 @@ class Checker(CheckerBase):
         """
         volume_count = am['Info']['AssetMap']['VolumeCount']
         if volume_count != 1:
-            raise CheckException(
-                "Invalid VolumeCount value: {}".format(volume_count))
+            self.error("Invalid VolumeCount value: {}".format(volume_count))
 
     def check_am_name(self, am):
         """ AssetMap file name respect DCP standard.
@@ -124,8 +123,7 @@ class Checker(CheckerBase):
         """
         uuid, _, _ = asset
         if not check_uuid(uuid):
-            raise CheckException(
-                "Invalid uuid found : {}".format(uuid))
+            self.error("Invalid uuid found : {}".format(uuid))
 
     def check_assets_am_volindex_one(self, am, asset):
         """ AssetMap Asset VolumeIndex element shall be 1 or absent.
@@ -149,36 +147,35 @@ class Checker(CheckerBase):
                 SMPTE ST 429-9:2014 7.1, A.2
 
         """
-        path_errors = []
         _, path, _ = asset
 
         path_segments = list(filter(None, path.split('/')))
         path_segments_count = len(path_segments)
         if path_segments_count > 10:
-            path_errors.append(">10 path segments: {}".format(path_segments_count))
+            self.error(">10 path segments: {}".format(path_segments_count))
 
         max_path_seg = max(map(len, path_segments))
         if max_path_seg > 100:
-            path_errors.append("Path segment >100 characters: {}".format(max_path_seg))
+            self.error("Path segment >100 characters: {}".format(max_path_seg))
 
         if len(path) > 100:
-            path_errors.append("Path >100 characters: {}".format(len(path)))
+            self.error("Path >100 characters: {}".format(len(path)))
 
         path_invalid_chars = re.findall(r'[^a-zA-Z0-9._/-]', path)
         if path_invalid_chars:
-            path_errors.append("Invalid characters in path: {}".format(str(sorted(set(path_invalid_chars)))[1:-1]))
+            unique_char_str = ", ".join(sorted(set(path_invalid_chars)))
+            self.error("Invalid characters in path: {}".format(unique_char_str))
 
         if path[0] == '/':
-            path_errors.append("Path is not relative")
+            self.error("Path is not relative")
 
-        if os.path.relpath(os.path.join(self.dcp.path,path), self.dcp.path).startswith("../"):
-            path_errors.append("Path points outside of DCP root")
+        rel_path = os.path.relpath(
+            os.path.join(self.dcp.path, path), self.dcp.path)
+        if rel_path.startswith("../"):
+            self.error("Path points outside of DCP root")
 
         if not os.path.isfile(os.path.join(self.dcp.path, path)):
-            path_errors.append("Missing asset file: {}".format(os.path.basename(path)))
-
-        if path_errors:
-            raise CheckException('\n'.join(path_errors))
+            self.error("Missing asset file: {}".format(os.path.basename(path)))
 
     def check_assets_am_offset(self, am, asset):
         """ AssetMap Chunk Offset check
