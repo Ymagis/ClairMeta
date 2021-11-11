@@ -5,7 +5,7 @@ name = "pypi"
 
 [dev-packages]
 coverage = "*"
-nose = "*"
+pytest = "*"
 pep8 = "*"
 
 [packages]

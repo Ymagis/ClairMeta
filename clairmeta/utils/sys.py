@@ -216,7 +216,7 @@ def remove_key_dict(in_dict, patterns):
 
         >>> remove_key_dict(
         ...     {'key1': {'mykey': 1}, 'key2': {'mykey': 2}, 'mykey': 3},
-        ...     [r'^.*\d$']
+        ...     [r'^.*\\d$']
         ... )
         {'mykey': 3}
 

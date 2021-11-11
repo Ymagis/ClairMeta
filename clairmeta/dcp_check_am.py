@@ -5,14 +5,14 @@ import os
 import re
 
 from clairmeta.utils.uuid import check_uuid
-from clairmeta.dcp_check import CheckerBase, CheckException
+from clairmeta.dcp_check import CheckerBase
 from clairmeta.dcp_check_utils import check_xml
 from clairmeta.dcp_utils import list_am_assets
 
 
 class Checker(CheckerBase):
-    def __init__(self, dcp, profile):
-        super(Checker, self).__init__(dcp, profile)
+    def __init__(self, dcp):
+        super(Checker, self).__init__(dcp)
 
     def run_checks(self):
         for source in self.dcp._list_am:
@@ -37,6 +37,7 @@ class Checker(CheckerBase):
             References: N/A
         """
         check_xml(
+            self,
             am['FilePath'],
             am['Info']['AssetMap']['__xmlns__'],
             am['Info']['AssetMap']['Schema'],
@@ -70,7 +71,7 @@ class Checker(CheckerBase):
         }
 
         if mandatory_name[schema] != am['FileName']:
-            raise CheckException(
+            self.error(
                 "{} Assetmap must be named {}, got {} instead".format(
                     schema, mandatory_name[schema], am['FileName'])
             )
@@ -78,7 +79,15 @@ class Checker(CheckerBase):
     def check_am_empty_text_fields(self, am):
         """ AssetMap empty text fields check.
 
-            References: N/A
+            This check for empty 'Creator', 'Issuer' or 'AnnotationText' text
+            fields. While not invalid per specification, it appears other
+            checking tools might trigger error / warning here so we provide
+            this to align with other check reports.
+
+            References:
+                mpeg_ii_am_spec.doc (v3.4) 4.1.2, 4.1.5, 4.1.6
+                SMPTE ST 429-9:2014 5.2, 5.3, 5.6
+
         """
         fields = ['Creator', 'Issuer', 'AnnotationText']
         empty_fields = []
@@ -89,8 +98,7 @@ class Checker(CheckerBase):
                 empty_fields.append(f)
 
         if empty_fields:
-            raise CheckException("Empty {} field(s)".format(
-                ", ".join(empty_fields)))
+            self.error("Empty {} field(s)".format(", ".join(empty_fields)))
 
     def check_assets_am_uuid(self, am, asset):
         """ AssetMap UUIDs validation.
@@ -121,7 +129,7 @@ class Checker(CheckerBase):
         _, _, asset = asset
         asset_vol = asset['ChunkList']['Chunk'].get('VolumeIndex')
         if asset_vol and asset_vol != 1:
-            raise CheckException(
+            self.error(
                 "VolIndex is now deprecated and shall always be 1, got {}"
                 .format(asset_vol))
 
@@ -132,8 +140,8 @@ class Checker(CheckerBase):
                 mpeg_ii_am_spec.doc (v3.4) 4.3.1, 5.3, 6.4
                 https://interop-docs.cinepedia.com/Document_Release_2.0/mpeg_ii_am_spec.pdf
                 SMPTE ST 429-9:2014 7.1, A.2
-        """
 
+        """
         path_errors = []
         _, path, _ = asset
 
@@ -188,6 +196,7 @@ class Checker(CheckerBase):
                 mpeg_ii_am_spec.doc (v3.4) 4.3.4
                 https://interop-docs.cinepedia.com/Document_Release_2.0/mpeg_ii_am_spec.pdf
                 SMPTE ST 429-9:2014 7.4
+
         """
         _, path, asset = asset
         path = os.path.join(self.dcp.path, path)
@@ -200,5 +209,5 @@ class Checker(CheckerBase):
             length = chunk['Length']
 
             if length != actual_size:
-                raise CheckException("Invalid size value, expected {} but got "
-                                     "{}".format(length, actual_size))
+                self.error("Invalid size value, expected {} but got "
+                           "{}".format(length, actual_size))

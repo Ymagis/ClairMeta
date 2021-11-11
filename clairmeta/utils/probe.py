@@ -3,9 +3,9 @@
 
 import os
 import six
+import platform
 import subprocess
 import xmltodict
-import bisect
 import contextlib
 from shutilwhich import which
 
@@ -15,6 +15,16 @@ from clairmeta.utils.file import temporary_dir, parse_name
 from clairmeta.utils.time import format_ratio
 from clairmeta.settings import DCP_SETTINGS
 from clairmeta.logger import get_log
+from clairmeta.exception import CommandException
+
+
+win32 = platform.system() == "Windows"
+
+ASDCP_INFO_CMD      = 'asdcp-info.exe' if win32 else 'asdcp-info'
+ASDCP_UNWRAP_CMD    = 'asdcp-unwrap.exe' if win32 else 'asdcp-unwrap'
+SOX_CMD             = 'sox.exe' if win32 else 'sox'
+MEDIAINFO_CMD       = 'mediainfo.exe' if win32 else 'mediainfo'
+PROBE_DEPS = [ASDCP_INFO_CMD, ASDCP_UNWRAP_CMD, SOX_CMD, MEDIAINFO_CMD]
 
 
 def check_command(name):
@@ -40,19 +50,19 @@ def execute_command(cmd_args):
             Tuple (stdout, stderr).
 
         Raises:
-            ValueError: If ``cmd_args`` is empty.
-            ValueError: In case of non-zero return code.
+            CommandException: If ``cmd_args`` is empty.
+            CommandException: In case of non-zero return code.
 
     """
     if not cmd_args:
-        return ValueError("Invalid arguments")
+        raise CommandException("Invalid arguments")
 
     p = subprocess.Popen(
         cmd_args,
         stdout=subprocess.PIPE,
         stderr=subprocess.PIPE)
     if p.returncode:
-        raise ValueError("Error calling process : {}".format(cmd_args[0]))
+        raise CommandException("Error calling process : {}".format(cmd_args[0]))
 
     stdout, stderr = p.communicate()
 
@@ -76,21 +86,21 @@ def probe_mxf(path, stereoscopic=False):
             Dictionary containing MXF metadata as parsed by asdcp-info.
 
         Raises:
-            ValueError: If ``path`` is not a valid file.
-            ValueError: If asdcp-info command is not available.
+            CommandException: If ``path`` is not a valid file.
+            CommandException: If asdcp-info command is not available.
 
     """
     if not os.path.isfile(path):
-        raise ValueError("File not found : {}".format(path))
-    if not check_command('asdcp-info'):
-        raise ValueError("asdcp-info not available")
+        raise CommandException("File not found : {}".format(path))
+    if not check_command(ASDCP_INFO_CMD):
+        raise CommandException("{} not available".format(ASDCP_INFO_CMD))
 
     # We don't want asdcp-info to report error in case of bitrate exceeded
     # We do our own check in Clairmeta.
     bitrate_threshold = 1e6
     # Prepare command line...
     asdcp_args = [
-        'asdcp-info',
+        ASDCP_INFO_CMD,
         '-v',  # Verbose flag
         '-i',  # Show identity info
         '-d',  # Show essence descriptor info
@@ -105,7 +115,7 @@ def probe_mxf(path, stereoscopic=False):
     # Execute asdcp-info and parse results
     out, err = execute_command(asdcp_args)
     if err:
-        raise ValueError(err)
+        raise CommandException(err)
 
     metadata = {}
     out = out.decode('UTF-8').splitlines()
@@ -190,14 +200,14 @@ def unwrap_mxf(path, prefix=None, args=[]):
             str: Path to the temporary folder containg unwraped resources.
 
         Raises:
-            ValueError: If ``path`` is not a valid file.
-            ValueError: If asdcp-unwrap command is not available.
+            CommandException: If ``path`` is not a valid file.
+            CommandException: If asdcp-unwrap command is not available.
 
     """
     if not os.path.isfile(path):
-        raise ValueError("File not found : {}".format(path))
-    if not check_command('asdcp-unwrap'):
-        raise ValueError("asdcp-unwrap not available")
+        raise CommandException("File not found : {}".format(path))
+    if not check_command(ASDCP_UNWRAP_CMD):
+        raise CommandException("{} not available".format(ASDCP_UNWRAP_CMD))
 
     with temporary_dir() as tmp:
 
@@ -208,7 +218,7 @@ def unwrap_mxf(path, prefix=None, args=[]):
             unwrap_prefix = os.path.join(tmp, folder)
 
         unwrap_args = [
-            'asdcp-unwrap',
+            ASDCP_UNWRAP_CMD,
             path,
             unwrap_prefix
         ]
@@ -237,8 +247,8 @@ def stat_mxf_audio(path, channels, entry_point, duration):
     """
     if not os.path.isfile(path):
         raise ValueError("File not found : {}".format(path))
-    if not check_command('sox'):
-        raise ValueError("sox not available")
+    if not check_command(SOX_CMD):
+        raise ValueError("{} not available".format(SOX_CMD))
 
     args = [
         '-1',  # Split Wave essence to mono WAV files during extract
@@ -255,7 +265,7 @@ def stat_mxf_audio(path, channels, entry_point, duration):
             for c in range(1, channels+1)]
 
         sox_args = [
-            'sox',
+            SOX_CMD,
             '-t', 'wavpcm',  # File type of audio
             '-M'] + wav_list + [  # Merge multiple input files
             '-n', 'stats'  # Use the `null' file handler
@@ -307,17 +317,18 @@ def probe_mediainfo(path):
             Dictionary containing file metadata as parsed by mediainfo.
 
         Raises:
-            ValueError: If ``path`` is not a valid file.
-            ValueError: If mediainfo command is not available.
+            CommandException: If ``path`` is not a valid file.
+            CommandException: If mediainfo command is not available.
+            CommandException: If parsing metadata fails.
 
     """
     if not os.path.isfile(path):
-        raise ValueError("File not found : {}".format(path))
-    if not check_command('mediainfo'):
-        raise ValueError("mediainfo not available")
+        raise CommandException("File not found : {}".format(path))
+    if not check_command(MEDIAINFO_CMD):
+        raise CommandException("{} not available".format(MEDIAINFO_CMD))
 
     mediainfo_args = [
-        'mediainfo',
+        MEDIAINFO_CMD,
         '--Output=XML',
         path
     ]
@@ -353,7 +364,7 @@ def probe_mediainfo(path):
             else:
                 metadata['Probe' + track_type] = track
     except:
-        raise ValueError('Cannot read file metadata')
+        raise CommandException('Cannot read file metadata')
 
     return {
         'Path': path,
@@ -376,11 +387,11 @@ def probe_folder(path):
             Dictionary containing file sequences metadata.
 
         Raises:
-            ValueError: If ``path`` is not a valid directory.
+            CommandException: If ``path`` is not a valid directory.
 
     """
     if not os.path.isdir(path):
-        raise ValueError("Directory not found : {}".format(path))
+        raise CommandException("Directory not found : {}".format(path))
 
     metadata = {}
 

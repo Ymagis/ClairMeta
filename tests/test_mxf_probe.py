@@ -5,6 +5,7 @@ import unittest
 import os
 
 from clairmeta.utils.probe import probe_mxf
+from clairmeta.exception import CommandException
 
 
 class TestAssetProbe(unittest.TestCase):
@@ -55,7 +56,7 @@ class TestAssetProbe(unittest.TestCase):
             r'http://www.smpte-ra.org/schemas/428-7/2007/DCST')
 
     def test_fake(self):
-        with self.assertRaises(ValueError):
+        with self.assertRaises(CommandException):
             probe_mxf('null')
 
 

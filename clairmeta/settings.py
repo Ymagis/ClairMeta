@@ -147,6 +147,7 @@ DCP_CHECK_SETTINGS = {
     # dynamically during the check process.
     'module_prefix': 'dcp_check_',
     'modules': {
+        'global': 'Global checks',
         'vol': 'VolIndex checks',
         'am': 'AssetMap checks',
         'pkl': 'PackingList checks',

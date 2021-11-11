@@ -2,6 +2,7 @@
 # See LICENSE for more information
 
 import collections
+import platform
 import unittest
 import os
 import json
@@ -53,7 +54,7 @@ class CliTest(unittest.TestCase):
         status, msg = self.launch_command([
             'probe', self.get_dcp_path(1),
             '-type', 'dcp', '-format', 'dict'])
-        self.assertTrue(isinstance(eval(msg), collections.Mapping))
+        self.assertTrue(isinstance(eval(msg), collections.abc.Mapping))
 
     def test_dcp_probe_formating_xml(self):
         status, msg = self.launch_command([
@@ -62,6 +63,10 @@ class CliTest(unittest.TestCase):
         ET.XML(msg)
 
     def test_dcp_probe_formating_json(self):
+        # Reference file contains Unix specific values (path formating)
+        if platform.system() == "Windows":
+            return
+
         status, msg = self.launch_command([
             'probe', self.get_dcp_path(1),
             '-type', 'dcp', '-format', 'json'])
@@ -79,7 +84,7 @@ class CliTest(unittest.TestCase):
         status, msg = self.launch_command([
             'check', self.get_dcp_path(1),
             '-type', 'dcp', '-format', 'dict'])
-        self.assertTrue(isinstance(eval(msg), collections.Mapping))
+        self.assertTrue(isinstance(eval(msg), collections.abc.Mapping))
 
     def test_dcp_check_formating_xml(self):
         status, msg = self.launch_command([
