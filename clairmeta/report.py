@@ -1,8 +1,10 @@
 # Clairmeta - (C) YMAGIS S.A.
 # See LICENSE for more information
 
+import re
 import six
 from collections import defaultdict
+from datetime import datetime
 
 from clairmeta.utils.file import human_size
 
@@ -18,13 +20,21 @@ class CheckReport(object):
         'BYPASS': 'Bypass(s)',
     }
 
-    def __init(self):
-        """ Constructor for CheckReport. """
-        self.dcp = None
-        self.checks = []
-        self.profile = ""
-        self.date = ""
-        self.duration = -1
+    def __init__(self, dcp, profile):
+        """ Constructor for CheckReport.
+
+            Args:
+                dcp (clairmeta.DCP): DCP.
+                profile (dict): Checker profile.
+
+        """
+        self.dcp = dcp
+        self.checks = dcp.checks
+        self.profile = profile
+        self.date = datetime.now().strftime("%d/%m/%Y %H:%M:%S")
+        self.duration = sum([c.seconds_elapsed for c in self.checks])
+
+        self._detect_check_criticality()
 
     def checks_count(self):
         """ Return the number of different checks executed. """
@@ -33,30 +43,40 @@ class CheckReport(object):
 
     def checks_failed(self):
         """ Returns a list of all failed checks. """
-        return [c for c in self.checks if not c.valid and not c.bypass]
-
-    def checks_failed_by_status(self, status):
-        """ Returns a list of failed checks with ``status``. """
-        return [
-            c for c in self.checks
-            if not c.valid and not c.bypass and c.criticality == status]
+        return [c for c in self.checks if c.has_errors()]
 
     def checks_succeeded(self):
         """ Returns a list of all succeeded checks. """
-        return [c for c in self.checks if c.valid and not c.bypass]
+        return [c for c in self.checks if not c.has_errors() and not c.bypass]
 
     def checks_bypassed(self):
         """ Returns a set of all bypassed unique checks. """
         return [c for c in self.checks if c.bypass]
 
-    def valid(self):
+    def checks_by_criticality(self, criticality):
+        """ Returns a list of failed checks with ``criticality``. """
+        return [
+            check
+            for check in self.checks
+            for error in check.errors
+            if error.criticality == criticality]
+
+    def errors_by_criticality(self, criticality):
+        """ Returns a list of failed checks with ``criticality``. """
+        return [
+            error
+            for check in self.checks
+            for error in check.errors
+            if error.criticality == criticality]
+
+    def is_valid(self):
         """ Returns validity of checked DCP. """
-        return not any([c.criticality == "ERROR" for c in self.checks if not c.valid])
+        return all([c.is_valid() for c in self.checks])
 
     def pretty_str(self):
         """ Format the report in a human friendly way. """
         report = ""
-        report += "Status : {}\n".format('Success' if self.valid() else 'Fail')
+        report += "Status : {}\n".format('Success' if self.is_valid() else 'Fail')
         report += "Path : {}\n".format(self.dcp.path)
         report += "Size : {}\n".format(human_size(self.dcp.size))
         report += "Total check : {}\n".format(self.checks_count())
@@ -67,13 +87,20 @@ class CheckReport(object):
         status_map = nested_dict()
 
         # Accumulate all failed check and stack them by asset
-        for c in self.checks_failed():
-            asset = status_map[c.criticality]
-            for filename in c.asset_stack:
-                asset = asset[filename]
+        for check in self.checks_failed():
+            lines = [". {}".format(check.short_desc())]
 
-            asset['msg'] = (asset.get('msg', [])
-                + ['. ' + c.short_desc() + '\n' + c.message])
+            for error in check.errors:
+                asset = status_map[str(error.criticality)]
+
+                for filename in check.asset_stack:
+                    asset = asset[filename]
+
+                desc = error.short_desc()
+                desc = ". {}\n".format(desc) if desc else ""
+                lines.append("{}{}".format(desc, error.message))
+
+            asset['msg'] = asset.get('msg', []) + ["\n".join(lines)]
 
         for status, vals in six.iteritems(status_map):
             out_stack = []
@@ -90,6 +117,23 @@ class CheckReport(object):
             report += "{}\n{}\n".format(self.pretty_status['BYPASS'] + ':', bypassed)
 
         return report
+
+    def _detect_check_criticality(self):
+        """ Assign criticality for each errors. """
+        levels = self.profile['criticality']
+        default = levels.get('default', 'ERROR')
+        # Translate Perl like syntax to Python
+        levels = {k.replace('*', '.*'): v for k, v in six.iteritems(levels)}
+
+        for check in self.checks:
+            for error in check.errors:
+                score_profile = { 0: default }
+                for c_name, c_level in six.iteritems(levels):
+                    # Assumes python is internally caching regex compilation
+                    if re.search(c_name, error.full_name()):
+                        score_profile[len(c_name)] = c_level
+
+                error.criticality = score_profile[max(score_profile.keys())]
 
     def _dump_stack(self, out_str, key, values, indent_level):
         """ Recursively iterate through the error message stack.
@@ -154,7 +198,7 @@ class CheckReport(object):
         return {
             'dcp_path': self.dcp.path,
             'dcp_size': self.dcp.size,
-            'valid': self.valid(),
+            'valid': self.is_valid(),
             'profile': self.profile,
             'date': self.date,
             'duration_seconds': self.duration,

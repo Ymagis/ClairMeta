@@ -7,7 +7,7 @@ import re
 RE = '(^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$)'
 FILE_RE = '([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12})'
 RFC4122_RE = '(^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-([1-5])[0-9a-fA-F]{3}\
--[8-9a-b][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$)'
+-[8-9a-bA-B][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$)'
 
 
 def check_uuid(uuid, regex=RE):

@@ -1,0 +1,99 @@
+
+# Notes
+#  Can reduce duplication when Github action support YAML anchors.
+
+name: Build and test package
+
+on: [push, pull_request]
+
+jobs:
+  test-linux:
+    runs-on: ubuntu-20.04
+    strategy:
+      matrix:
+        python-version: [3.6, 3.9]
+    steps:
+    - name: Clone repository
+      uses: actions/checkout@v2
+    - name: Clone tests data repository
+      uses: actions/checkout@v2
+      with:
+        repository: Ymagis/ClairMeta_Data
+        path: tests/resources
+    - name: Set up Python ${{ matrix.python-version }}
+      uses: actions/setup-python@v2
+      with:
+        python-version: ${{ matrix.python-version }}
+    - name: Set up environment
+      run: .github/scripts/linux/apt/install_test_env.sh
+    - name: Install python dependencies
+      run: |
+        pip install pipenv codecov
+        pipenv install --dev --python ${{ matrix.python-version }}
+        pipenv graph
+    - name: Test
+      run: |
+        pipenv run python -m compileall clairmeta
+        pipenv run pytest --doctest-modules
+
+  test-macos:
+    runs-on: macos-10.15
+    strategy:
+      matrix:
+        python-version: [3.6, 3.9]
+    steps:
+    - name: Clone repository
+      uses: actions/checkout@v2
+    - name: Clone tests data repository
+      uses: actions/checkout@v2
+      with:
+        repository: Ymagis/ClairMeta_Data
+        path: tests/resources
+    - name: Set up Python ${{ matrix.python-version }}
+      uses: actions/setup-python@v2
+      with:
+        python-version: ${{ matrix.python-version }}
+    - name: Set up environment
+      run: .github/scripts/macos/install_test_env.sh
+    - name: Install python dependencies
+      run: |
+        pip install pipenv codecov
+        pipenv install --dev --python ${{ matrix.python-version }}
+        pipenv graph
+    - name: Test
+      run: |
+        pipenv run python -m compileall clairmeta
+        pipenv run pytest --doctest-modules
+
+  test-windows:
+    runs-on: windows-2019
+    strategy:
+      matrix:
+        python-version: [3.6, 3.9]
+    steps:
+    - name: Clone repository
+      uses: actions/checkout@v2
+    - name: Clone tests data repository
+      uses: actions/checkout@v2
+      with:
+        repository: Ymagis/ClairMeta_Data
+        path: tests/resources
+    - name: Set up Python ${{ matrix.python-version }}
+      uses: actions/setup-python@v2
+      with:
+        python-version: ${{ matrix.python-version }}
+    - name: Set up environment
+      run: .github/scripts/windows/install_test_env.sh
+      shell: bash
+    - name: Install python dependencies
+      run: |
+        pip install pipenv codecov
+        pipenv install --dev --python ${{ matrix.python-version }}
+        pipenv graph
+      shell: bash
+    - name: Test
+      run: |
+        export PATH="/c/vcpkg/installed/x64-windows/bin:$PATH"
+        pipenv run python -m compileall clairmeta
+        pipenv run pytest --doctest-modules
+      shell: bash

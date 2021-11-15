@@ -3,6 +3,7 @@
 
 import unittest
 import os
+import platform
 from datetime import datetime
 
 from tests import DCP_MAP, KDM_MAP, KEY
@@ -40,7 +41,9 @@ class CheckerTestBase(unittest.TestCase):
         self.dcp = DCP(self.get_dcp_path(dcp_id))
         self.status, self.report = self.dcp.check(
             profile=self.profile,
-            ov_path=self.get_dcp_path(ov_id))
+            ov_path=self.get_dcp_path(ov_id),
+            bypass_list=['check_assets_pkl_hash']
+        )
         return self.status
 
     def has_succeeded(self):
@@ -57,7 +60,6 @@ class DCPCheckTest(CheckerTestBase):
 
     def __init__(self, *args, **kwargs):
         super(DCPCheckTest, self).__init__(*args, **kwargs)
-        self.profile['bypass'] = ['check_assets_pkl_hash']
 
     def test_iop_ov(self):
         self.assertTrue(self.check(1))
@@ -76,6 +78,7 @@ class DCPCheckTest(CheckerTestBase):
         self.assertTrue(self.check(28))
         self.assertTrue(self.check(38))
 
+    @unittest.skipIf(platform.system() == "Windows", "asdcp-unwrap on Windows doesn't properly unwrap resources files (including fonts) from MXF making check fails. Help wanted.")
     def test_smpte_vf(self):
         self.assertTrue(self.check(8))
         self.assertTrue(self.has_failed(DCPCheckTest.vf_missing))
@@ -119,9 +122,9 @@ class DCPCheckTest(CheckerTestBase):
 
     def test_noncoherent_encryption(self):
         self.assertFalse(self.check(31))
-        self.assertTrue(self.has_failed('check_cpl_reel_coherence_encryption'))
+        self.assertTrue(self.has_failed('check_cpl_reel_coherence'))
         self.assertFalse(self.check(32))
-        self.assertTrue(self.has_failed('check_cpl_reel_coherence_encryption'))
+        self.assertTrue(self.has_failed('check_cpl_reel_coherence'))
 
     def test_iop_subtitle_png(self):
         self.assertTrue(self.check(33))
@@ -150,7 +153,6 @@ class DCPCheckReportTest(CheckerTestBase):
 
     def __init__(self, *args, **kwargs):
         super(DCPCheckReportTest, self).__init__(*args, **kwargs)
-        self.profile['bypass'] = ['check_assets_pkl_hash']
         self.check(25)
 
     def test_report_metadata(self):
@@ -174,32 +176,56 @@ class DCPCheckReportTest(CheckerTestBase):
             len(failed) + len(success) + len(bypass),
             len(self.report.checks))
 
-        errors = self.report.checks_failed_by_status('ERROR')
+        errors = self.report.errors_by_criticality('ERROR')
         self.assertEqual(3, len(self.report.checks_failed()))
-        self.assertEqual(1, len(self.report.checks_failed_by_status('ERROR')))
-        self.assertEqual(2, len(self.report.checks_failed_by_status('WARNING')))
+        self.assertEqual(1, len(self.report.errors_by_criticality('ERROR')))
+        self.assertEqual(2, len(self.report.errors_by_criticality('WARNING')))
 
-        error = errors[0]
-        self.assertEqual(error.name, "check_picture_cpl_max_bitrate")
-        self.assertEqual(
-            error.short_desc(),
-            "Picture maximum bitrate DCI compliance.")
+        check = self.report.checks_by_criticality('ERROR')[0]
+        self.assertEqual(check.name, "check_picture_cpl_max_bitrate")
+        self.assertFalse(check.is_valid())
+        self.assertFalse(check.bypass)
+        self.assertGreaterEqual(check.seconds_elapsed, 0)
+        self.assertEqual(check.asset_stack, [
+            'CPL_ECL25SingleCPL_TST-48-600_S_EN-XX_UK-U_51_2K_DI_20180301_ECL_SMPTE_OV.xml',
+            'ECL25SingleCPL_TST-48-600_S_EN-XX_UK-U_51_2K_DI_20180301_ECL_SMPTE_OV_01.mxf'])
+
+        error = check.errors[0]
+        self.assertEqual(error.full_name(), "check_picture_cpl_max_bitrate")
         self.assertEqual(
             error.message,
             "Exceed DCI maximum bitrate (250.05 Mb/s) : 358.25 Mb/s")
-        self.assertFalse(error.valid)
-        self.assertFalse(error.bypass)
-        self.assertGreaterEqual(error.seconds_elapsed, 0)
-        self.assertEqual(error.asset_stack, [
-            'CPL_ECL25SingleCPL_TST-48-600_S_EN-XX_UK-U_51_2K_DI_20180301_ECL_SMPTE_OV.xml',
-            'ECL25SingleCPL_TST-48-600_S_EN-XX_UK-U_51_2K_DI_20180301_ECL_SMPTE_OV_01.mxf'])
         self.assertTrue(error.criticality == "ERROR")
 
-    def test_report_status(self):
-        self.assertEqual(False, self.report.valid())
+    def test_report_output(self):
+        self.assertEqual(False, self.report.is_valid())
 
         report = self.report.pretty_str()
+        self.assertTrue(report)
         self.assertTrue("Picture maximum bitrate DCI compliance." in report)
+
+        self.assertTrue(self.report.to_dict())
+
+
+class DCPCheckMultiReportTest(CheckerTestBase):
+
+    def __init__(self, *args, **kwargs):
+        super(DCPCheckMultiReportTest, self).__init__(*args, **kwargs)
+
+    def test_report_metadata(self):
+        self.assertFalse(self.check(25))
+        first_duration = self.report.duration
+
+        self.profile['criticality']['check_picture_cpl_max_bitrate'] = 'SILENT'
+        status, report = self.dcp.check_report(self.profile)
+        self.assertTrue(status)
+        self.assertEqual(first_duration, report.duration)
+
+        del self.profile['criticality']['check_picture_cpl_max_bitrate']
+        status, report = self.dcp.check_report(self.profile)
+        self.assertFalse(status)
+        self.assertEqual(first_duration, report.duration)
+
 
 if __name__ == '__main__':
     unittest.main()

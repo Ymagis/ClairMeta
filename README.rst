@@ -58,6 +58,8 @@ Install from PyPI package (reminder : this does not install external dependencie
 
 Install from Debian package (all requirements will be automatically installed):
 
+**Note that Bintray now seems to have reached it's end of life, so the below will probably not work anymore.**
+
 ::
 
     # Optional : add Bintray public key
@@ -108,6 +110,8 @@ As a python library :
     status, report = dcp.check()
     # Check DCP VF against OV
     status, report = dcp.check(ov_path="/path/to/dcp_ov")
+    # Generating additional reports
+    status, report = dcp.check_report(profile=my_profile)
 
     # Check DCP with default console progression report
     from clairmeta.utils.file import ConsoleProgress
@@ -127,8 +131,6 @@ template (actual content listed below is for demonstration purposes only) :
 -  *criticality* key allow custom criteria level specification, check
    name can be incomplete to quickly ignore a bunch of tests, *default* is
    used if no other match where found.
--  *bypass* key allow specific test
-   bypassing, incomplete names are not allowed.
 
 ::
 
@@ -139,8 +141,7 @@ template (actual content listed below is for demonstration purposes only) :
             "check_cpl_reel_duration_picture_subtitles": "WARNING",
             "check_picture_cpl_avg_bitrate": "WARNING",
             "check_picture_cpl_resolution": "WARNING"
-        },
-        "bypass": ["check_assets_pkl_hash"]
+        }
     }
 
 Custom profile check :

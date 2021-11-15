@@ -4,15 +4,15 @@
 import six
 
 from clairmeta.utils.time import compare_ratio
-from clairmeta.dcp_check import CheckerBase, CheckException
+from clairmeta.dcp_check import CheckerBase
 from clairmeta.dcp_utils import list_cpl_assets
 from clairmeta.settings import DCP_SETTINGS
 
 
 class Checker(CheckerBase):
 
-    def __init__(self, dcp, profile):
-        super(Checker, self).__init__(dcp, profile)
+    def __init__(self, dcp):
+        super(Checker, self).__init__(dcp)
         self.settings = DCP_SETTINGS['picture']
 
     def run_checks(self):
@@ -58,11 +58,12 @@ class Checker(CheckerBase):
     def check_picture_cpl_resolution(self, playlist, asset):
         """ Stored pixel array size compliance
 
-            Reference :
+            References:
                 DCI CTP 4.5.1
                 SMPTE 428-1-2006 3
                 SMPTE 429-2-2013 8.2
                 SMPTE RDD 52:2020 7.1
+
         """
         rdd52_array_sizes = [
             self.settings['pixel_array_sizes']['2K'] +
@@ -76,13 +77,15 @@ class Checker(CheckerBase):
                 [resolution in res for res in rdd52_array_sizes])
 
             if not is_dci_res:
-                raise CheckException("Picture has non-compliant pixel array size {}".format(resolution))
+                self.error("Picture has non-compliant pixel array size {}".format(resolution))
 
     def check_picture_cpl_encoding(self, playlist, asset):
         """ Picture wavelet transform levels SMPTE compliance.
 
-            Reference :
-                SMPTE 429-2-2013 10.2.2
+            References:
+                SMPTE ST 422:2014 8.2.3
+                SMPTE ST 429-2:2013 10.2.2
+                DCI DCSS (v1.4) 4.3.3
         """
         resolutions = self.settings['resolutions']
         levels_map = {
@@ -96,6 +99,16 @@ class Checker(CheckerBase):
             resolution = asset['Probe']['Resolution']
             resolution_name = ''
 
+            # asdcp-lib was not able to extract DecompositionLevels, this
+            # probably means that the J2KCodingStyleDefault descriptor is not
+            # present.
+            # It is indeed listed as an optional field in ST 422, but
+            # DCI Specification and RDD 52 seems to imply that it should be
+            # present so dedicated checks could be added to validate the J2K
+            # codestream.
+            if levels == 0:
+                return
+
             for k, v in six.iteritems(resolutions):
                 if resolution in v:
                     resolution_name = k
@@ -103,16 +116,16 @@ class Checker(CheckerBase):
 
             is_dci = resolution_name in levels_map
             if is_dci and levels_map[resolution_name] != levels:
-                raise CheckException(
+                self.error(
                     "Picture must have {} wavelet transform levels, {}"
                     " found".format(levels_map[resolution_name], levels))
 
     def check_picture_cpl_max_bitrate(self, playlist, asset):
         """ Picture maximum bitrate DCI compliance.
 
-            Reference :
-                DCI Spec 1.3 4.3.3
-                https://www.dcimovies.com/Recommended_Practice/ 2.
+            References:
+                DCI HFR RP 2
+                DCI DCSS (v1.3) 4.3.3
         """
         tolerance = self.settings['bitrate_tolerance']
 
@@ -123,14 +136,14 @@ class Checker(CheckerBase):
             t_bitrate = dci_bitrate + tolerance
 
             if max_bitrate > t_bitrate:
-                raise CheckException(
+                self.error(
                     "Exceed DCI maximum bitrate ({} Mb/s) : {} Mb/s".format(
                         t_bitrate, max_bitrate))
 
     def check_picture_cpl_avg_bitrate(self, playlist, asset):
         """ Picture average bitrate DCI compliance.
 
-            Reference : N/A
+            References: N/A
         """
         margin = self.settings['average_bitrate_margin']
 
@@ -141,16 +154,16 @@ class Checker(CheckerBase):
             t_bitrate = dci_bitrate - (dci_bitrate * margin) / 100.0
 
             if avg_bitrate > t_bitrate:
-                raise CheckException(
+                self.error(
                     "Exceed DCI safe average bitrate ({} Mb/s) "
                     ": {} Mb/s".format(t_bitrate, avg_bitrate))
 
     def check_picture_cpl_framerate(self, playlist, asset):
         """ Picture framerate DCI compliance.
 
-            Reference :
-                SMPTE 428-11-2013 5.1
-                SMPTE 429-13-2009 7.2
+            References:
+                SMPTE ST 428-11:2013 5.1
+                SMPTE ST 429-13:2009 7.2
         """
         _, asset = asset
 
@@ -162,21 +175,20 @@ class Checker(CheckerBase):
 
             if resolution in self.settings['resolutions']['2K']:
                 if editrate not in editrate_map['2K'][dimension]:
-                    raise CheckException(
-                        'Invalid EditRate {} for 2K {} content'
+                    self.error('Invalid EditRate {} for 2K {} content'
                         .format(editrate, dimension))
             elif resolution in self.settings['resolutions']['4K']:
                 if editrate not in editrate_map['4K'][dimension]:
-                    raise CheckException(
-                        'Invalid EditRate {} for 4K {} content'
+                    self.error('Invalid EditRate {} for 4K {} content'
                         .format(editrate, dimension))
 
     def check_picture_cpl_archival_framerate(self, playlist, asset):
         """ Picture archival framerate.
 
-            Reference :
-                SMPTE 428-21-2011 5
-                D-Cinema FAQs release FIAF 2012 1.1 5
+            References:
+                SMPTE ST 428-21:2011 5
+                FIAF D-Cinema Equipment Frequently Asked Questions (v1.1) 5
+                https://www.fiafnet.org/images/tinyUpload/E-Resources/Commission-And-PIP-Resources/TC_resources/D-Cinema%20FAQs%20release%20FIAF%202012%20V1.1.pdf
         """
         _, asset = asset
         editrate = asset['EditRate']
@@ -184,14 +196,15 @@ class Checker(CheckerBase):
 
         for archival_editrate in archival_editrates:
             if compare_ratio(editrate, archival_editrate):
-                raise CheckException(
+                self.error(
                     "Archival EditRate {} may not play safely on all hardware"
                     .format(editrate))
 
     def check_picture_cpl_hfr_framerate(self, playlist, asset):
         """ Picture HFR capable (Series II) framerate.
 
-            Reference :
+            References:
+                IMAGO Frame rate support of Digital Cinema
                 https://www.imago.org/index.php/technical/item/462-frame-rate-support-of-digital-cinema.html
         """
         _, asset = asset
@@ -200,7 +213,7 @@ class Checker(CheckerBase):
         series2_map = self.settings['editrates_min_series2']
 
         if editrate >= series2_map[dimension]:
-            raise CheckException(
+            self.error(
                 "EditRate {} require an HFR capable projection server "
                 "(Series II), may not play safely on all hardware".format(
                     editrate))
@@ -208,9 +221,9 @@ class Checker(CheckerBase):
     def check_picture_cpl_editrate_framerate(self, playlist, asset):
         """ Picture editrate / framerate coherence check.
 
-            Reference :
-                SMPTE 429-7-2006 8.1.3
-                SMPTE 429-10-2008 5.2
+            References:
+                SMPTE ST 429-7:2006 8.1.3
+                SMPTE ST 429-10:2008 5.2
         """
         _, asset = asset
         editrate = asset['EditRate']
@@ -218,7 +231,7 @@ class Checker(CheckerBase):
         is_stereo = asset['Stereoscopic']
 
         if is_stereo and editrate * 2 != framerate:
-            raise CheckException("3D FrameRate must be double of EditRate")
+            self.error("3D FrameRate must be double of EditRate")
 
         if not is_stereo and editrate != framerate:
-            raise CheckException("2D FrameRate must be equal to EditRate")
+            self.error("2D FrameRate must be equal to EditRate")
