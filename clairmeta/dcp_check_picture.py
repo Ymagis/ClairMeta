@@ -56,7 +56,10 @@ class Checker(CheckerBase):
         return bitrate_map[bitrate]
 
     def check_picture_cpl_resolution(self, playlist, asset):
-        """ Stored pixel array size compliance
+        """ Stored pixel array size compliance.
+
+            Useful discussion can be found at:
+                https://github.com/Ymagis/ClairMeta/pull/184
 
             References:
                 DCI CTP 4.5.1
@@ -65,6 +68,10 @@ class Checker(CheckerBase):
                 SMPTE RDD 52:2020 7.1
 
         """
+        dci_resolutions = [
+            self.settings['resolutions']['2K'] +
+            self.settings['resolutions']['4K']
+        ]
         rdd52_array_sizes = [
             self.settings['pixel_array_sizes']['2K'] +
             self.settings['pixel_array_sizes']['4K']
@@ -73,11 +80,17 @@ class Checker(CheckerBase):
         _, asset = asset
         if 'Probe' in asset:
             resolution = asset['Probe']['Resolution']
-            is_dci_res = any(
-                [resolution in res for res in rdd52_array_sizes])
 
-            if not is_dci_res:
-                self.error("Picture has non-compliant pixel array size {}".format(resolution))
+            if not any([resolution in res for res in dci_resolutions]):
+                self.error(
+                    "Picture has non DCI compliant pixel array size {}"
+                    .format(resolution), "dci")
+
+            if not any([resolution in res for res in rdd52_array_sizes]):
+                self.error(
+                    "Picture has non RDD52 compliant pixel array size {}"
+                    .format(resolution), "rdd52")
+
 
     def check_picture_cpl_encoding(self, playlist, asset):
         """ Picture wavelet transform levels SMPTE compliance.
