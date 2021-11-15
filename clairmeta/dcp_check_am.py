@@ -191,7 +191,7 @@ class Checker(CheckerBase):
 
         offset = chunk['Offset']
         if offset != 0:
-            raise CheckException("Invalid offset value {}".format(offset))
+            self.error("Invalid offset value {}".format(offset))
 
     def check_assets_am_size(self, am, asset):
         """ AssetMap assets size check.
