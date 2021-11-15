@@ -56,25 +56,28 @@ class Checker(CheckerBase):
         return bitrate_map[bitrate]
 
     def check_picture_cpl_resolution(self, playlist, asset):
-        """ Picture resolution DCI compliance.
+        """ Stored pixel array size compliance
 
             References:
-                SMPTE ST 428-1:2006 3
-                SMPTE ST 429-2:2013 8.2
+                DCI CTP 4.5.1
+                SMPTE 428-1-2006 3
+                SMPTE 429-2-2013 8.2
+                SMPTE RDD 52:2020 7.1
+
         """
-        dci_resolutions = [
-            self.settings['resolutions']['2K'] +
-            self.settings['resolutions']['4K']
+        rdd52_array_sizes = [
+            self.settings['pixel_array_sizes']['2K'] +
+            self.settings['pixel_array_sizes']['4K']
         ]
 
         _, asset = asset
         if 'Probe' in asset:
             resolution = asset['Probe']['Resolution']
             is_dci_res = any(
-                [resolution in res for res in dci_resolutions])
+                [resolution in res for res in rdd52_array_sizes])
 
             if not is_dci_res:
-                self.error("Picture have non-DCI Resolution")
+                self.error("Picture has non-compliant pixel array size {}".format(resolution))
 
     def check_picture_cpl_encoding(self, playlist, asset):
         """ Picture wavelet transform levels SMPTE compliance.
