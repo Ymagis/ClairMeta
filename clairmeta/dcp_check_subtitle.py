@@ -830,7 +830,7 @@ class Checker(CheckerBase):
                     "".format(img, os.path.relpath(folder, self.dcp.path)))
 
     def check_subtitle_cpl_first_tt_event(self, playlist, asset, folder):
-        """ First TT Event of Composition check
+        """ First Timed Text Event of Composition TimeIn greater than 4s.
 
             The composition's first Timed Text event's TimeIn attribute
             should be greater than or equal to 4 seconds.
@@ -839,7 +839,8 @@ class Checker(CheckerBase):
                 SMPTE RDD 52:2020 7.2.4
         """
         reel_cpl = get_reel_for_asset(playlist, asset[1]['Id'])['Position']
-        first_reel_of_st = get_first_reel_for_asset_type(playlist, 'Subtitle')
+        first_reel_of_st = get_first_reel_for_asset_type(
+            playlist, 'Subtitle')['Position']
         if reel_cpl != first_reel_of_st:
             return
 
@@ -856,4 +857,5 @@ class Checker(CheckerBase):
         first_tc_frames = self.st_util.st_tc_frames(first_tc, st_editrate)
 
         if (first_tc_frames < 4 * st_editrate):
-            raise CheckException("First Timed Text event of CPL happens earlier than 4 seconds: {}".format(first_tc))
+            self.error("First Timed Text event of CPL happens "
+                       "earlier than 4 seconds: {}".format(first_tc))

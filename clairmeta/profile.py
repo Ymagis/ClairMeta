@@ -35,6 +35,7 @@ DCP_CHECK_PROFILE = {
         'check_subtitle_cpl_empty': 'WARNING',
         'check_subtitle_cpl_uuid_case': 'WARNING',
         'check_subtitle_cpl_duplicated_uuid': 'WARNING',
+        'check_subtitle_cpl_first_tt_event': 'WARNING',
         'check_picture_cpl_archival_framerate': 'WARNING',
         'check_picture_cpl_hfr_framerate': 'WARNING',
         'check_sound_cpl_format': 'WARNING',
