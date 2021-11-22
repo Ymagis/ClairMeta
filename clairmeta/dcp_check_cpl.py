@@ -295,6 +295,35 @@ cause issue for some equipements in the field.
 
             cpl_position += assets[0]['Duration']
 
+        if errors:
+            raise CheckException("\n".join(errors))
+
+    def check_cpl_reels_timed_text_coherence(self, playlist):
+        """ Timed text track coherence.
+
+            If a MainSubtitle timed text track is present on any reel, a
+            MainSubtitle timed text track shall be present on all reels.
+            If (1) or more ClosedCaption timed text track(s) are present on any
+            reel, the same number of ClosedCaption timed text tracks shall be
+            present on all reels.
+
+            Reference :
+                SMPTE RDD 52-2020 8.3.1
+        """
+        errors = []
+        reels_subtitle = []
+
+        for reel in playlist['Info']['CompositionPlaylist']['ReelList']:
+            reels_subtitle.append(reel['Assets'].get('Subtitle') is not None)
+
+        if any(reels_subtitle) and not all(reels_subtitle):
+            bad_reels = [str(i) for i, r in enumerate(reels_subtitle) if not r]
+            errors.append("Missing Subtitle track on reel(s) : {}".format(
+                ", ".join(bad_reels)))
+
+        if errors:
+            raise CheckException("\n".join(errors))
+
     def check_assets_cpl_missing_from_vf(self, playlist, asset):
         """ CPL assets referencing external package.
 
