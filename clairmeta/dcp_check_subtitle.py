@@ -523,19 +523,17 @@ class Checker(CheckerBase):
             st_in, st_out = st['Subtitle@TimeIn'], st['Subtitle@TimeOut']
             st_list.append((idx, self.st_util.st_tc_frames(st_in, editrate), 0))
             st_list.append((idx, self.st_util.st_tc_frames(st_out, editrate), 1))
+        st_list = sorted(st_list, key=lambda x: (x[1], x[0], x[2]))
 
-        st_list = sorted(st_list, key=lambda x: (x[1], -x[0]))
+        vis_list = []
+        current_vis = 0
+        for idx, st in enumerate(st_list):
+            current_vis += 1 if st[2] == 0 else -1
+            vis_list.append(current_vis)
 
-        visibility_list = []
-        for idx, st in enumerate(subtitles[0]):
-            idx_in = next(i for i, v in enumerate(st_list) if v[0] == idx)
-            offset_out = next(i for i, v in enumerate(st_list[idx_in+1:]) if v[0] == idx) + 1
-            visibility_list.append(offset_out)
-
-        errors = []
-        for idx, v in enumerate(visibility_list):
+        for idx, v in enumerate(vis_list):
             if v > 2:
-                st = subtitles[0][idx]
+                st = subtitles[0][st_list[idx][0]]
                 st_in, st_out = st['Subtitle@TimeIn'], st['Subtitle@TimeOut']
                 self.error(
                     "Too many subtitles ({}) visible at once between {} and {}"
