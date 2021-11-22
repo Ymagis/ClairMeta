@@ -325,11 +325,8 @@ cause issue for some equipements in the field.
 
         if any(reels_subtitle) and not all(reels_subtitle):
             bad_reels = [str(i) for i, r in enumerate(reels_subtitle) if not r]
-            errors.append("Missing Subtitle track on reel(s) : {}".format(
+            self.error("Missing Subtitle track on reel(s) : {}".format(
                 ", ".join(bad_reels)))
-
-        if errors:
-            raise CheckException("\n".join(errors))
 
     def check_assets_cpl_missing_from_vf(self, playlist, asset):
         """ CPL assets referencing external package.

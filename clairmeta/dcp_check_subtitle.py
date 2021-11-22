@@ -509,9 +509,6 @@ class Checker(CheckerBase):
             Reference :
                 SMPTE 429-2-2013 8.4.4
         """
-        if self.dcp.schema != 'SMPTE':
-            return
-
         st_dict = self.st_util.get_subtitle_xml(asset, folder)
         if not st_dict:
             return
@@ -540,11 +537,9 @@ class Checker(CheckerBase):
             if v > 2:
                 st = subtitles[0][idx]
                 st_in, st_out = st['Subtitle@TimeIn'], st['Subtitle@TimeOut']
-                errors.append(
+                self.error(
                     "Too many subtitles ({}) visible at once between {} and {}"
                     .format(v, st_in, st_out))
-        if errors:
-            raise CheckException("\n".join(errors))
 
     def check_subtitle_cpl_max_elements(self, playlist, asset, folder):
         """ Maximum number of subtitle Text or Image elements.
@@ -555,9 +550,6 @@ class Checker(CheckerBase):
             Reference :
                 SMPTE 429-2-2013 8.4.4
         """
-        if self.dcp.schema != 'SMPTE':
-            return
-
         st_dict = self.st_util.get_subtitle_xml(asset, folder)
         if not st_dict:
             return
@@ -566,20 +558,17 @@ class Checker(CheckerBase):
         if not subtitles:
             return
 
-        errors = []
         for idx, st in enumerate(subtitles[0]):
             text_count = len(keys_by_name_dict(st, 'Text'))
             if text_count > 6:
-                errors.append(
+                self.error(
                     "Too many Text elements ({}) for subtitle {}"
                     .format(text_count, st['Subtitle@SpotNumber']))
             img_count = len(keys_by_name_dict(st, 'Image'))
             if img_count > 6:
-                errors.append(
+                self.error(
                     "Too many Image elements ({}) for subtitle {}"
                     .format(img_count, st['Subtitle@SpotNumber']))
-        if errors:
-            raise CheckException("\n".join(errors))
 
     def check_subtitle_cpl_duration(self, playlist, asset, folder):
         """ Subtitle duration coherence with CPL.
@@ -636,7 +625,7 @@ class Checker(CheckerBase):
                     "{}".format(st_rate, cpl_rate))
 
     def check_subtitle_cpl_entry_point(self, playlist, asset, folder):
-        """ Subtitle entrypoint must be 0.
+        """ Subtitle EntryPoint must be 0.
 
             For all MainSubtitle or ClosedCaption timed text tracks, the
             Composition Playlist’s EntryPoint element as defined in
@@ -649,7 +638,7 @@ class Checker(CheckerBase):
         cpl_entry = asset['EntryPoint']
 
         if cpl_entry != 0:
-            raise CheckException(
+            self.error(
                 "Timed Text EntryPoint must be 0 but found {}".format(
                     cpl_entry))
 
@@ -839,9 +828,12 @@ class Checker(CheckerBase):
                 SMPTE RDD 52:2020 7.2.4
         """
         reel_cpl = get_reel_for_asset(playlist, asset[1]['Id'])['Position']
-        first_reel_of_st = get_first_reel_for_asset_type(
-            playlist, 'Subtitle')['Position']
-        if reel_cpl != first_reel_of_st:
+        first_reel_of_st = get_first_reel_for_asset_type(playlist, 'Subtitle')
+        # We are probably checking a Caption track
+        if not first_reel_of_st:
+            return None
+        first_reel_of_st = first_reel_of_st['Position']
+        if not first_reel_of_st or reel_cpl != first_reel_of_st:
             return
 
         st_dict = self.st_util.get_subtitle_xml(asset, folder)
