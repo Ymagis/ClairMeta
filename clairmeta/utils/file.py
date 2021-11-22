@@ -69,7 +69,10 @@ def temporary_file(prefix="tmp", suffix=""):
         _, filepath = tempfile.mkstemp(prefix=prefix, suffix=suffix)
         yield filepath
     finally:
-        os.remove(filepath)
+        try:
+            os.remove(filepath)
+        except PermissionError:
+            pass
 
 
 @contextlib.contextmanager
@@ -108,6 +111,8 @@ class ConsoleProgress(object):
         """
         col_width = 15
         complete_col_width = 60
+        # Avoid division by zero if time resolution is too small
+        file_elapsed = max(sys.float_info.epsilon, file_elapsed)
 
         if file_processed != file_size:
             elapsed = self.total_elapsed + file_elapsed
@@ -121,7 +126,11 @@ class ConsoleProgress(object):
             total_progress_size = int(total_progress * col_width)
             total_bar_size = col_width - total_progress_size
 
-            eta_sec = (self._total_size - processed) / (processed / elapsed)
+            if processed > 0:
+                eta_sec = (self._total_size - processed) / (processed / elapsed)
+            else:
+                eta_sec = 0
+
             eta_str = time.strftime("%H:%M:%S", time.gmtime(eta_sec))
 
             sys.stdout.write("ETA {} [{}] {:.2f}% - File [{}] {:.2f}% - {}\r".format(
@@ -134,6 +143,7 @@ class ConsoleProgress(object):
             sys.stdout.flush()
         else:
             file_size = os.path.getsize(file_path)
+
             speed_report = "{} in {:.2f} sec (at {:.2f} MBytes/s)".format(
                 human_size(file_size), file_elapsed, (file_size / 1e6) / file_elapsed)
 
@@ -169,7 +179,7 @@ def shaone_b64(file_path, callback=None):
     run_size = 0
     sha1 = hashlib.sha1()
     start = time.time()
-    last_cb_time = 0
+    last_cb_time = start
 
     with open(file_path, 'rb') as f:
         while True:
@@ -180,11 +190,12 @@ def shaone_b64(file_path, callback=None):
             run_size += len(data)
             sha1.update(data)
 
-            call_cb = time.time() - last_cb_time > 0.2
+            time_cb = time.time()
+            call_cb = time_cb - last_cb_time > 0.2
             complete = run_size == file_size
             if callback and (call_cb or complete):
-                last_cb_time = time.time()
-                callback(file_path, run_size, file_size, time.time() - start)
+                last_cb_time = time_cb
+                callback(file_path, run_size, file_size, time_cb - start)
 
     # Encode base64 and remove carriage return
     sha1b64 = base64.b64encode(sha1.digest())

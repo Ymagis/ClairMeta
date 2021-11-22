@@ -10,12 +10,7 @@ from clairmeta.utils.time import frame_to_tc, format_ratio
 from clairmeta.utils.sys import all_keys_in_dict
 from clairmeta.settings import DCP_SETTINGS
 from clairmeta.logger import get_log
-
-
-class ProbeException(Exception):
-    """ Raised when probing a DCP fails. """
-    def __init__(self, msg):
-        super(ProbeException, self).__init__(six.ensure_str(msg))
+from clairmeta.exception import ProbeException
 
 
 def discover_schema(node):
@@ -59,7 +54,7 @@ def generic_parse(
                 }
             }
     except Exception as e:
-        get_log().info("Error parsing XML {} : {}".format(path, str(e)))
+        get_log().error("Error parsing XML {} : {}".format(path, str(e)))
 
 
 def assetmap_parse(path):
@@ -68,17 +63,24 @@ def assetmap_parse(path):
 
     if am:
         total_size = 0
+        total_size_ondisk = 0
 
         # Two ways of identifying a PKL inside the assetmap :
         # <PackingList></PackingList> (Interop)
         # <PackingList>true</PackingList> (SMPTE)
         # Hide these specificities and return PackingList: True in both cases
-        for asset in am['Info']['AssetMap']["AssetList"]["Asset"]:
+        for asset in am['Info']['AssetMap']['AssetList']['Asset']:
             total_size += asset['ChunkList']['Chunk'].get('Length', 0)
+            filename = asset['ChunkList']['Chunk']['Path']
+            filepath = os.path.join(os.path.dirname(path), filename)
+            if os.path.exists(filepath):
+                total_size_ondisk += os.path.getsize(filepath)
+
             if 'PackingList' in asset:
                 asset['PackingList'] = True
 
         am['Info']['AssetMap']['AssetsSizeBytes'] = total_size
+        am['Info']['AssetMap']['AssetsOnDiskSizeBytes'] = total_size_ondisk
 
     return am
 
@@ -204,12 +206,10 @@ def cpl_reels_parse(cpl_node):
             marker['EditRate'] = editrate_r
 
             marker_list = marker['MarkerList']['Marker']
-            if type(marker_list) is list:
-                marker['MarkerList'] = marker_list
+            if not type(marker_list) is list:
+                marker['MarkerList'] = [marker_list]
             else:
-                marker['MarkerList'] = [{
-                    marker_list["Label"]: marker_list["Offset"]
-                }]
+                marker['MarkerList'] = marker_list
 
         if 'Metadata' in out_reel['Assets']:
             meta = out_reel['Assets']['Metadata']

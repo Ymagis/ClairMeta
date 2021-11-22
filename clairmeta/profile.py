@@ -6,20 +6,21 @@ import json
 import os
 import copy
 
+from clairmeta.exception import ClairMetaException
+
 
 DCP_CHECK_PROFILE = {
     # Checker criticality
     # Base level is default and can be overrided per check using its name
     # Incomplete name allowed, the best match will be selected automatically
+    # Wildcard character allowed for regex based matching
     # 4 levels : ERROR, WARNING, INFO and SILENT.
     'criticality': {
         'default': 'ERROR',
         'check_dcnc_': 'WARNING',
         'check_dcp_foreign_files': 'WARNING',
         'check_assets_am_volindex_one': 'WARNING',
-        'check_am_empty_text_fields': 'WARNING',
-        'check_pkl_empty_text_fields': 'WARNING',
-        'check_cpl_empty_text_fields': 'WARNING',
+        'check_*_empty_text_fields': 'WARNING',
         'check_cpl_contenttitle_annotationtext_match': 'WARNING',
         'check_cpl_contenttitle_pklannotationtext_match': 'WARNING',
         'check_assets_cpl_missing_from_vf': 'WARNING',
@@ -37,10 +38,7 @@ DCP_CHECK_PROFILE = {
         'check_sound_cpl_format': 'WARNING',
         'check_atmos_cpl_channels': 'WARNING',
         'check_atmos_cpl_objects': 'WARNING',
-    },
-    # Checker options
-    # Bypass is a list of check names (function names)
-    'bypass': [],
+    }
 }
 
 
@@ -62,40 +60,40 @@ def load_profile(file_path):
             Dictionary containing check profile settings.
 
         Raise:
-            ValueError: ``file_path`` is not a valid file.
-            ValueError: ``file_path`` is not a json file (.json).
-            ValueError: ``file_path`` json parsing error.
-            ValueError: ``file_path`` miss some required keys or values type
-                are wrong.
+            ClairMetaException: ``file_path`` is not a valid file.
+            ClairMetaException: ``file_path`` is not a json file (.json).
+            ClairMetaException: ``file_path`` json parsing error.
+            ClairMetaException: ``file_path`` miss some required keys or values
+                type are wrong.
 
     """
     if not os.path.isfile(file_path):
-        raise ValueError("Load Profile : {} file not found".format(file_path))
+        raise ClairMetaException(
+            "Load Profile : {} file not found".format(file_path))
 
     allowed_ext = ['.json']
     file_ext = os.path.splitext(file_path)[-1]
     if file_ext not in allowed_ext:
-        raise ValueError(
+        raise ClairMetaException(
             "Load Profile : {} must be a valid json file".format(file_path))
 
     profile_format = {
         'criticality': dict,
-        'bypass': list
     }
 
     try:
         with open(file_path) as f:
             profile = json.load(f)
     except Exception as e:
-        raise ValueError(
+        raise ClairMetaException(
             "Load Profile {} : loading error - {}".format(file_path, str(e)))
 
     for k, v in six.iteritems(profile_format):
         if k not in profile:
-            raise ValueError(
+            raise ClairMetaException(
                 "Load Profile {} : missing key {}".format(file_path, k))
         if not isinstance(profile[k], v):
-            raise ValueError(
+            raise ClairMetaException(
                 "Load Profile {} : key {} should be a {}".format(
                     file_path, k, v))
 
