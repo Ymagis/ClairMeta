@@ -630,7 +630,7 @@ class Checker(CheckerBase):
             SMPTE ST 429-7 shall be present and have a value of "0".
 
             Reference :
-                SMPTE RDD 52-2020 8.3.2
+                SMPTE RDD 52:2020 8.3.2
         """
         _, asset = asset
         cpl_entry = asset['EntryPoint']

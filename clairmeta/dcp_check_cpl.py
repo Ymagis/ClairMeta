@@ -276,7 +276,6 @@ cause issue for some equipements in the field.
         cpl_position = 0
         cut_keys = ['CPLEntryPoint', 'CPLOutPoint', 'Duration']
 
-        errors = []
         for reel in playlist['Info']['CompositionPlaylist']['ReelList']:
             assets = [
                 v for k, v in six.iteritems(reel['Assets'])
@@ -302,9 +301,6 @@ cause issue for some equipements in the field.
 
             cpl_position += assets[0]['Duration']
 
-        if errors:
-            raise CheckException("\n".join(errors))
-
     def check_cpl_reels_timed_text_coherence(self, playlist):
         """ Timed text track coherence.
 
@@ -315,7 +311,7 @@ cause issue for some equipements in the field.
             present on all reels.
 
             Reference :
-                SMPTE RDD 52-2020 8.3.1
+                SMPTE RDD 52:2020 8.3.1
         """
         errors = []
         reels_subtitle = []
