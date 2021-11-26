@@ -1,7 +1,3 @@
-
-# Notes
-#  Can reduce duplication when Github action support YAML anchors.
-
 name: Build and test package
 
 on: [push, pull_request]
