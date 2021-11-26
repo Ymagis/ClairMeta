@@ -93,8 +93,8 @@ def check_xml(checker, xml_path, xml_ns, schema_type, schema_dcp):
 def check_issuedate(checker, date):
     # As a reminder, date should be already correctly formatted as checked
     # by XSD validation.
-    parse_date = parser.parse(date)
-    now_date = datetime.now().replace(tzinfo=parse_date.tzinfo)
+    parse_date = parser.parse(date).astimezone(tz=None)
+    now_date = datetime.now().astimezone(tz=None)
 
     if parse_date > now_date:
         checker.error("IssueDate is post dated : {}".format(parse_date))
