@@ -1,82 +1,53 @@
 |Build Status| |PyPI version| |Code coverage|
 
-Clairmeta
+ClairMeta
 =========
 
-Clairmeta is a python package for Digital Cinema Package (DCP) probing
+ClairMeta is a python package for Digital Cinema Package (DCP) probing
 and checking.
 
 Features
 --------
 
--  DCP Probe : metadata extraction of the whole DCP, including all XML
-   fields and MXF assets inspection.
--  DCP Checker : advanced DCP validation tool, including (non
-   exhaustive) :
-
-   -  SMPTE / Interop standard convention (naming, …)
-   -  Integrity (MIME type, size, hash) of all assets
-   -  Foreign file identification
-   -  XSD Schema validation for XML files (VOLINDEX, ASSETMAP, CPL, PKL)
-   -  Digital signature validation (CPL, PKL)
-   -  Intra / Inter Reels integrity and coherence
-   -  Metadata match between CPL assets and MXF headers
-   -  Re-link VF / OV
-   -  Picture tests : FrameRate, BitRate, …
-   -  Sound tests : Channels, Sampling, …
-   -  Subtitle : Deep inspection of Interop and SMPTE subtitles
-
--  DSM / DCDM Checker : basic image file sequence validation with some
-   specific rules.
+-  DCP Probe:
+    - Metadata extraction of the whole DCP, including all XML fields and MXF
+      assets inspection.
+-  DCP Checker:
+    -  SMPTE / Interop standard convention
+    -  Integrity (MIME type, size, hash) of all assets
+    -  Foreign file identification
+    -  XSD Schema validation for XML files (VOLINDEX, ASSETMAP, CPL, PKL)
+    -  Digital signature validation (CPL, PKL)
+    -  Intra / Inter Reels integrity and coherence
+    -  Metadata match between CPL assets and MXF headers
+    -  Re-link VF / OV
+    -  Picture tests : FrameRate, BitRate
+    -  Sound tests : Channels, Sampling
+    -  Subtitle : Deep inspection of Interop and SMPTE subtitles
+-  DSM / DCDM Checker:
+    - Basic image file sequence validation with some specific rules.
 
 Installation
 ------------
 
-Requirements :
+Requirements:
 
--  Python :
+-  Python: 3.6 or later
+-  Platform: Windows (with limitations), macOS, Linux
+-  External (non-python) dependencies:
+    -  asdcplib
+    -  mediainfo (opt)
+    -  sox (opt)
 
-   -  Should work on python 2.7 and python 3.4+
-   -  Tested on : python 2.7, python 3.6
+Install from PyPI package (this does not install external dependencies):
 
--  Platform :
-
-   -  Should work on Windows, macOS, Linux
-   -  Tested on : macOS 10.12
-
--  External (non-python) dependencies :
-
-   -  asdcplib
-   -  mediainfo (opt)
-   -  sox (opt)
-
-Install from PyPI package (reminder : this does not install external dependencies):
-
-::
+.. code-block:: bash
 
     pip install clairmeta
 
-Install from Debian package (all requirements will be automatically installed):
+If you need help installing the external dependencies, you can have a look at
+our continuous integration system, specifically the **.github** folder.
 
-**Note that Bintray now seems to have reached it's end of life, so the below will probably not work anymore.**
-
-::
-
-    # Optional : add Bintray public key
-    apt-get install dirmngr
-    gpg --keyserver hkp://keyserver.ubuntu.com:80 --recv 379CE192D401AB61
-    gpg --export --armor 379CE192D401AB61 | apt-key add -
-
-    # Add Clairmeta repository to apt sources
-    # Replace <distro> appropriately
-    # Ubuntu 14.04 : use trusty
-    # Ubuntu 16.04 : use xenial
-    # Ubuntu 17.04 : use artful
-    # Ubuntu 18.04 : use bionic
-    echo "deb https://dl.bintray.com/ymagis/Clairmeta <distro> main" | sudo tee /etc/apt/sources.list.d/clairmeta.list
-
-    sudo apt-get update
-    sudo apt-get install python3-clairmeta
 
 Usage
 -----
@@ -84,55 +55,63 @@ Usage
 General
 ~~~~~~~
 
-As a command line tool :
+As a command line tool:
 
-::
+.. code-block:: python
 
+    # Probing
     python3 -m clairmeta.cli probe -type dcp path/to/dcp
     python3 -m clairmeta.cli probe -type dcp path/to/dcp -format json > dcp.json
     python3 -m clairmeta.cli probe -type dcp path/to/dcp -format xml > dcp.xml
+
+    # Checking
     python3 -m clairmeta.cli check -type dcp path/to/dcp
     python3 -m clairmeta.cli check -type dcp path/to/dcp -format json > check.json
     python3 -m clairmeta.cli check -type dcp path/to/dcp -format xml > check.xml
     python3 -m clairmeta.cli check -type dcp path/to/dcp -kdm /path/to/kdm -key /path/to/privatekey
     python3 -m clairmeta.cli check -type dcp path/to/dcp -progress
 
-As a python library :
+As a python library:
 
-::
+.. code-block:: python
 
     from clairmeta import DCP
 
     dcp = DCP("path/to/dcp")
-    # Parse DCP
     dcp.parse()
-    # Check DCP
     status, report = dcp.check()
+
+.. code-block:: python
+
     # Check DCP VF against OV
     status, report = dcp.check(ov_path="/path/to/dcp_ov")
     # Generating additional reports
     status, report = dcp.check_report(profile=my_profile)
 
-    # Check DCP with default console progression report
+.. code-block:: python
+
+    # DCP check with console progression report
     from clairmeta.utils.file import ConsoleProgress
+
     status, report = dcp.check(hash_callback=ConsoleProgress())
     # Alternatives
     # - function matching utils.file.ConsoleProgress.__call__ signature
     # - derived class from utils.file.ConsoleProgress
 
+
 Profiles
 ~~~~~~~~
 
 Check profile allow custom configuration of the DCP check process such
-as bypassing some unwanted tests or criteria specification. To
+as bypassing some unwanted tests or error level specification. To
 implement a check profile, simply write a JSON file derived from this
-template (actual content listed below is for demonstration purposes only) :
+template (actual content listed below is for demonstration purposes only):
 
 -  *criticality* key allow custom criteria level specification, check
    name can be incomplete to quickly ignore a bunch of tests, *default* is
    used if no other match where found.
 
-::
+.. code-block:: python
 
     {
         "criticality": {
@@ -144,13 +123,13 @@ template (actual content listed below is for demonstration purposes only) :
         }
     }
 
-Custom profile check :
+Custom profile check:
 
-::
+.. code-block:: python
 
     python3 -m clairmeta.cli check -type dcp path/to/dcp -profile path/to/profile.json
 
-::
+.. code-block:: python
 
     from clairmeta import DCP
     from clairmeta.profile import load_profile
@@ -162,10 +141,10 @@ Custom profile check :
 Logging
 ~~~~~~~
 
-Logging is customizable, see settings.py file or below. By default Clairmeta
-logs to stdout and a rotated log file.
+Logging is customizable, see the *settings.py* file or below. By default 
+ClairMeta logs to stdout and a rotated log file.
 
-::
+.. code-block:: python
 
     'level': 'INFO'  # Minimum log level
     'enable_console': True  # Enable / Disable stdout logging
@@ -177,24 +156,20 @@ logs to stdout and a rotated log file.
 Contributing
 ------------
 
--  To setup your environment, use pipenv :
+-  To setup your environment follow these steps:
 
-::
+.. code-block:: bash
 
-   pip install pipenv
    git clone https://github.com/Ymagis/ClairMeta.git
    cd clairmeta
-   pipenv install --dev [--two]
-   pipenv check
-   # Enter virtual environment
-   pipenv shell
-   # Code...
-   # Get tests resources
    git clone https://github.com/Ymagis/ClairMeta_Data tests/resources
-   # Run tests
-   nosetests --nocapture --with-doctest --doctest-options=+ELLIPSIS --with-coverage --cover-package=clairmeta
-   # Leave virtual environment
-   exit
+
+   pip install pipenv
+   pipenv install --dev
+   pipenv shell
+
+   # Code... and tests
+   pytest --doctest-modules
 
 -  Open a Pull Request
 -  Open an Issue
@@ -208,15 +183,15 @@ https://github.com/Ymagis/ClairMeta/releases
 References
 ----------
 
-The following sources / software were used :
+The following sources / software were used:
 
--  asdcp-lib : http://www.cinecert.com/asdcplib/
--  sox : http://sox.sourceforge.net/
--  mediainfo : https://mediaarea.net/
--  SMPTE Digital Cinema standards : https://www.smpte.org/
--  Interop Digital Cinema specifications : https://cinepedia.com/interop/
--  Digital Cinema Initiative specifications : http://www.dcimovies.com/specification/index.html
--  ISDCF Naming Convention : http://isdcf.com/dcnc/
+-  asdcp-lib: http://www.cinecert.com/asdcplib/
+-  sox: http://sox.sourceforge.net/
+-  mediainfo: https://mediaarea.net/
+-  SMPTE Digital Cinema standards: https://www.smpte.org/
+-  Interop Digital Cinema specifications: https://cinepedia.com/interop/
+-  Digital Cinema Initiative specifications: http://www.dcimovies.com/specification/index.html
+-  ISDCF Naming Convention: http://isdcf.com/dcnc/
 -  Texas Instrument Digital Cinema Subtitles specifications
 
 About
