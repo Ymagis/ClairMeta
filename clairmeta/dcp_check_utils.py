@@ -18,7 +18,7 @@ def get_schema(name):
             return v
 
 
-def check_xml_constraints(xml_path):
+def check_xml_constraints(checker, xml_path):
     """ Check D-Cinema XML Contraints
 
         References:
@@ -27,45 +27,45 @@ def check_xml_constraints(xml_path):
             SMPTE ST 429-17:2017
             W3C Extensible Markup Language v (1.0)
     """
-
     # Follow the XML spec precicely for the definition of XMLDecl, except for:
     # VersionNum := '1.0'
     # EncName    := 'UTF-8'
     # EncodingDecl not optional
     # SDDecl must have 'no'
-    RE_XML_S             = '([\x20\x09\x0D\x0A])'
+    RE_XML_S             = r'([\x20\x09\x0D\x0A])'
     RE_XML_Eq            = '(' + RE_XML_S + '?=' + RE_XML_S + '?)'
-    RE_XML_SDDecl        = '(' + RE_XML_S + 'standalone' + RE_XML_Eq + '(\'no\'|"no"))'
-    RE_XML_EncName       = '(UTF\-8)'
-    RE_XML_EncodingDecl  = '(' + RE_XML_S + 'encoding' + RE_XML_Eq + '("' + RE_XML_EncName + '"|\'' + RE_XML_EncName + '\'))'
-    RE_XML_VersionNum    = '(1\.0)'
-    RE_XML_VersionInfo   = '(' + RE_XML_S + 'version' + RE_XML_Eq + '(\'' + RE_XML_VersionNum + '\'|"' + RE_XML_VersionNum + '"))'
-    RE_XML_XMLDecl       = '<\?xml' + RE_XML_VersionInfo + RE_XML_EncodingDecl + RE_XML_SDDecl + '?' + RE_XML_S + '?' + '\?>'
+    RE_XML_SDDecl        = '(' + RE_XML_S + 'standalone' + RE_XML_Eq + r'(\'no\'|"no"))'
+    RE_XML_EncName       = r'(UTF\-8)'
+    RE_XML_EncodingDecl  = '(' + RE_XML_S + 'encoding' + RE_XML_Eq + '("' + RE_XML_EncName + r'"|\'' + RE_XML_EncName + r'\'))'
+    RE_XML_VersionNum    = r'(1\.0)'
+    RE_XML_VersionInfo   = '(' + RE_XML_S + 'version' + RE_XML_Eq + r'(\'' + RE_XML_VersionNum + r'\'|"' + RE_XML_VersionNum + '"))'
+    RE_XML_XMLDecl       = r'<\?xml' + RE_XML_VersionInfo + RE_XML_EncodingDecl + RE_XML_SDDecl + '?' + RE_XML_S + '?' + r'\?>'
 
     try:
         with open(xml_path) as file:
             xml_file = file.read()
+            newlines = file.newlines
     except IOError as e:
-        get_log().info("Error opening XML file {} : {}".format(xml_path, str(e)))
+        get_log().error("Error opening XML file {} : {}".format(xml_path, str(e)))
         return
 
-    errors = []
-
     if re.match('\ufeff', xml_file):
-        errors.append("BOM not allowed in XML file")
+        checker.error("BOM not allowed in XML file", "constraints_bom")
 
     if not (re.match(RE_XML_XMLDecl, xml_file) or re.match('\ufeff' + RE_XML_XMLDecl, xml_file)):
-        errors.append("Invalid XML Declaration")
+        checker.error("Invalid XML Declaration", "constraints_declaration")
 
-    if xml_file[-2:] != '>\n' and xml_file[-3:] != '>\r\n':
-        errors.append("XML file has invalid ending")
-
-    if errors:
-        raise CheckException('\n'.join(errors))
+    # Some files might not have newlines at all (single line)
+    if not newlines in ['\n', '\r\n', None]:
+        checker.error(
+            "XML file has invalid ending: {}".format(repr(file.newlines)),
+            "constraints_line_ending"
+        )
 
 
 def check_xml(checker, xml_path, xml_ns, schema_type, schema_dcp):
-    check_xml_constraints(xml_path)
+    # XML constraints
+    check_xml_constraints(checker, xml_path)
 
     # Correct namespace
     schema_id = get_schema(xml_ns)
@@ -93,8 +93,8 @@ def check_xml(checker, xml_path, xml_ns, schema_type, schema_dcp):
 def check_issuedate(checker, date):
     # As a reminder, date should be already correctly formatted as checked
     # by XSD validation.
-    parse_date = parser.parse(date)
-    now_date = datetime.now().replace(tzinfo=parse_date.tzinfo)
+    parse_date = parser.parse(date).astimezone(tz=None)
+    now_date = datetime.now().astimezone(tz=None)
 
     if parse_date > now_date:
         checker.error("IssueDate is post dated : {}".format(parse_date))

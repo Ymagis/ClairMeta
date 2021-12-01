@@ -60,6 +60,23 @@ class Checker(CheckerBase):
                 "Invalid Sound ChannelCount, should be an even number, got {}"
                 "".format(cc))
 
+    def check_sound_cpl_channel_assignments(self, playlist, asset):
+        """ Sound channel configuration shall be Wild Track (4).
+
+            References:
+                ISDCF Doc 04
+                SMPTE RDD 52:2020 10.3.1
+                SMPTE ST 429-2:2013 A.1.2
+        """
+        configurations = DCP_SETTINGS['sound']['configuration_channels']
+        _, asset = asset
+        cf = asset['Probe']['ChannelFormat']
+
+        if cf in configurations and cf != 4:
+            self.error(
+                "Detected channel assignments \"{}\", but expected \"{}\""
+                .format(configurations[cf][0], configurations[4][0]))
+
     def check_sound_cpl_format(self, playlist, asset):
         """ Sound channels count coherence with format.
 

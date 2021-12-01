@@ -102,6 +102,9 @@ class CheckReport(object):
 
             asset['msg'] = asset.get('msg', []) + ["\n".join(lines)]
 
+        # Ignore silenced checks
+        status_map.pop('SILENT', None)
+
         for status, vals in six.iteritems(status_map):
             out_stack = []
             for k, v in six.iteritems(vals):
@@ -114,7 +117,8 @@ class CheckReport(object):
         bypassed = "\n".join(set(
             ['  . ' + c.short_desc() for c in self.checks_bypassed()]))
         if bypassed:
-            report += "{}\n{}\n".format(self.pretty_status['BYPASS'] + ':', bypassed)
+            report += "{}\n{}\n".format(
+                self.pretty_status['BYPASS'] + ':', bypassed)
 
         return report
 

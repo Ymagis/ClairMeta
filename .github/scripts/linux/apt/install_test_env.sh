@@ -7,8 +7,6 @@ sudo apt-get -y update
 
 sudo apt-get -y install libssl-dev libxerces-c-dev libexpat-dev
 
-brew install openssl xerces-c
-
 BASE_DIR=`pwd`
 WORK_DIR=`mktemp -d`
 cd "$WORK_DIR"

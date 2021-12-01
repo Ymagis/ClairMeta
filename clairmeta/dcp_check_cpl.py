@@ -135,15 +135,22 @@ class Checker(CheckerBase):
             References: N/A
         """
         fields = ['Creator', 'Issuer', 'AnnotationText']
+        madatory_fields = ['Creator']
         empty_fields = []
+        missing_fields = []
 
         for f in fields:
             am_f = am['Info']['CompositionPlaylist'].get(f)
             if am_f == '':
                 empty_fields.append(f)
+            elif am_f is None and f in madatory_fields:
+                missing_fields.append(f)
 
         if empty_fields:
             self.error("Empty {} field(s)".format(", ".join(empty_fields)))
+        if missing_fields:
+            self.error("Missing {} field(s)".format(
+                ", ".join(missing_fields)), "missing")
 
     def check_cpl_issuedate(self, playlist):
         """ CPL Issue Date validation.
@@ -269,7 +276,6 @@ cause issue for some equipements in the field.
         cpl_position = 0
         cut_keys = ['CPLEntryPoint', 'CPLOutPoint', 'Duration']
 
-        errors = []
         for reel in playlist['Info']['CompositionPlaylist']['ReelList']:
             assets = [
                 v for k, v in six.iteritems(reel['Assets'])
@@ -295,9 +301,6 @@ cause issue for some equipements in the field.
 
             cpl_position += assets[0]['Duration']
 
-        if errors:
-            raise CheckException("\n".join(errors))
-
     def check_cpl_reels_timed_text_coherence(self, playlist):
         """ Timed text track coherence.
 
@@ -308,7 +311,7 @@ cause issue for some equipements in the field.
             present on all reels.
 
             Reference :
-                SMPTE RDD 52-2020 8.3.1
+                SMPTE RDD 52:2020 8.3.1
         """
         errors = []
         reels_subtitle = []
@@ -318,11 +321,8 @@ cause issue for some equipements in the field.
 
         if any(reels_subtitle) and not all(reels_subtitle):
             bad_reels = [str(i) for i, r in enumerate(reels_subtitle) if not r]
-            errors.append("Missing Subtitle track on reel(s) : {}".format(
+            self.error("Missing Subtitle track on reel(s) : {}".format(
                 ", ".join(bad_reels)))
-
-        if errors:
-            raise CheckException("\n".join(errors))
 
     def check_assets_cpl_missing_from_vf(self, playlist, asset):
         """ CPL assets referencing external package.
