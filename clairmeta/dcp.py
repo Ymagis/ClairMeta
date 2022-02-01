@@ -55,7 +55,9 @@ class DCP(object):
         self._probeb = False
         self._parsed = False
         self._checked = False
+
         self.checks = []
+        self.check_profile = None
 
     def init_package_files(self):
         """ List all files present in DCP. """
@@ -293,16 +295,14 @@ class DCP(object):
         profile=DCP_CHECK_PROFILE,
         ov_path=None,
         hash_callback=None,
-        bypass_list=None
     ):
         """ Check validity.
 
             Args:
-                profile (dict): Checker profile.
+                profile (dict, optional): Checker profile.
                 ov_path (str, optional): Absolute path of OriginalVersion DCP.
                 hash_callback (function, optional): Callback function to report
                     file hash progression.
-                bypass_list (list, optional): List of checks to bypass.
 
             Returns:
                 Tuple (boolean, CheckReport) of DCP check status and report.
@@ -311,41 +311,15 @@ class DCP(object):
         if not self._parsed or not self._probeb:
             self.parse()
         if not self._checked:
-            if isinstance(profile, dict) and profile.get("bypass"):
-                bypass_list = profile.get("bypass")
-                self.log.warning(
-                    "Deprecation warning: please use ``bypass_list`` argument"
-                    " instead of profile ``bypass`` key to specify bypassed"
-                    " checks. Ignoring ``bypass_list`` parameter."
-                )
-
             self.checker = CheckerBase(
                 self,
                 ov_path=ov_path,
                 hash_callback=hash_callback,
-                bypass_list=bypass_list
+                bypass_list=profile.get("bypass")
             )
             self.checks = self.checker.check()
+            self.check_profile = profile
             self._checked = True
-
-        return self.check_report(profile)
-
-    def check_report(self, profile=DCP_CHECK_PROFILE):
-        """ Generate additional check reports.
-
-            Args:
-                profile (dict): Checker profile.
-
-            Returns:
-                Tuple (boolean, CheckReport) of DCP check status and report.
-
-            Raises:
-                ClairMetaException: when this DCP has not yet been checked.
-
-        """
-        if not self._checked:
-            raise ClairMetaException(
-                "DCP has not been checked, can't generate report")
 
         report = CheckReport(self, profile)
         self.log.info("Check report:\n\n" + report.pretty_str())

@@ -42,7 +42,10 @@ DCP_CHECK_PROFILE = {
         'check_sound_cpl_channel_assignments': 'WARNING',
         'check_atmos_cpl_channels': 'WARNING',
         'check_atmos_cpl_objects': 'WARNING',
-    }
+    },
+    # Checker options
+    # Bypass is a list of check names (function names)
+    'bypass': [],
 }
 
 
@@ -83,6 +86,7 @@ def load_profile(file_path):
 
     profile_format = {
         'criticality': dict,
+        'bypass': list
     }
 
     try:

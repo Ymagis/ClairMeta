@@ -18,6 +18,7 @@ class CheckerTestBase(unittest.TestCase):
         super(CheckerTestBase, self).__init__(*args, **kwargs)
         disable_log()
         self.profile = get_default_profile()
+        self.profile['bypass'] = ['check_assets_pkl_hash']
 
     def get_dcp_folder(self):
         return os.path.join(
@@ -42,7 +43,6 @@ class CheckerTestBase(unittest.TestCase):
         self.status, self.report = self.dcp.check(
             profile=self.profile,
             ov_path=self.get_dcp_path(ov_id),
-            bypass_list=['check_assets_pkl_hash']
         )
         return self.status
 
@@ -205,26 +205,6 @@ class DCPCheckReportTest(CheckerTestBase):
         self.assertTrue("Picture maximum bitrate DCI compliance." in report)
 
         self.assertTrue(self.report.to_dict())
-
-
-class DCPCheckMultiReportTest(CheckerTestBase):
-
-    def __init__(self, *args, **kwargs):
-        super(DCPCheckMultiReportTest, self).__init__(*args, **kwargs)
-
-    def test_report_metadata(self):
-        self.assertFalse(self.check(25))
-        first_duration = self.report.duration
-
-        self.profile['criticality']['check_picture_cpl_max_bitrate'] = 'SILENT'
-        status, report = self.dcp.check_report(self.profile)
-        self.assertTrue(status)
-        self.assertEqual(first_duration, report.duration)
-
-        del self.profile['criticality']['check_picture_cpl_max_bitrate']
-        status, report = self.dcp.check_report(self.profile)
-        self.assertFalse(status)
-        self.assertEqual(first_duration, report.duration)
 
 
 if __name__ == '__main__':
