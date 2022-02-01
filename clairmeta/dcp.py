@@ -54,10 +54,6 @@ class DCP(object):
 
         self._probeb = False
         self._parsed = False
-        self._checked = False
-
-        self.checks = []
-        self.check_profile = None
 
     def init_package_files(self):
         """ List all files present in DCP. """
@@ -310,16 +306,14 @@ class DCP(object):
         """
         if not self._parsed or not self._probeb:
             self.parse()
-        if not self._checked:
-            self.checker = CheckerBase(
-                self,
-                ov_path=ov_path,
-                hash_callback=hash_callback,
-                bypass_list=profile.get("bypass")
-            )
-            self.checks = self.checker.check()
-            self.check_profile = profile
-            self._checked = True
+
+        self.checker = CheckerBase(
+            self,
+            ov_path=ov_path,
+            hash_callback=hash_callback,
+            bypass_list=profile.get("bypass")
+        )
+        self.checks = self.checker.check()
 
         report = CheckReport(self, profile)
         self.log.info("Check report:\n\n" + report.pretty_str())

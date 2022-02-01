@@ -85,8 +85,6 @@ As a python library:
 
     # Check DCP VF against OV
     status, report = dcp.check(ov_path="/path/to/dcp_ov")
-    # Generating additional reports
-    status, report = dcp.check_report(profile=my_profile)
 
 .. code-block:: python
 
