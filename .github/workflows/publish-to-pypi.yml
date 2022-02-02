@@ -2,14 +2,12 @@ name: Publish package to PyPI
 
 on:
   push:
-    # Only push to master branch
-    branches: [master]
+    tags:
+      - '*'
 
 jobs:
   build-n-publish:
     runs-on: ubuntu-20.04
-    # Only publish on tags
-    if: startsWith(github.event.ref, 'refs/tags/v')
     steps:
       - uses: actions/checkout@master
       - name: Set up Python 3.9
