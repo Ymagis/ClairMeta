@@ -85,8 +85,6 @@ As a python library:
 
     # Check DCP VF against OV
     status, report = dcp.check(ov_path="/path/to/dcp_ov")
-    # Generating additional reports
-    status, report = dcp.check_report(profile=my_profile)
 
 .. code-block:: python
 
@@ -110,6 +108,7 @@ template (actual content listed below is for demonstration purposes only):
 -  *criticality* key allow custom criteria level specification, check
    name can be incomplete to quickly ignore a bunch of tests, *default* is
    used if no other match where found.
+-  *bypass* key allow specific test bypass, incomplete names are not allowed.
 
 .. code-block:: python
 
@@ -120,7 +119,8 @@ template (actual content listed below is for demonstration purposes only):
             "check_cpl_reel_duration_picture_subtitles": "WARNING",
             "check_picture_cpl_avg_bitrate": "WARNING",
             "check_picture_cpl_resolution": "WARNING"
-        }
+        },
+        "bypass": ["check_assets_pkl_hash"]
     }
 
 Custom profile check:
