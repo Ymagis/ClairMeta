@@ -5,7 +5,7 @@ import six
 import re
 import base64
 import hashlib
-from datetime import datetime
+from datetime import datetime, timedelta
 from OpenSSL import crypto
 from cryptography.hazmat.primitives import serialization
 from cryptography.x509.name import _ASN1Type
@@ -368,6 +368,27 @@ class Checker(CheckerBase):
 
             if validity_time < not_before or validity_time > not_after:
                 self.error("Certificate is not valid at this time")
+
+    def check_certif_date_overflow(self, cert, index):
+        """ Certificate date overflow check.
+
+            Field experience suggests some players do not support certificate
+            extending too long in the future.
+
+            References: N/A
+        """
+        not_after_str = cert.get_notAfter().decode("utf-8")
+        not_after = datetime.strptime(not_after_str, '%Y%m%d%H%M%SZ')
+
+        int32_overflow = datetime.fromtimestamp(2**32 / 2 - 1)
+        ten_years_past = datetime.now() + timedelta(days=365 * 10)
+
+        if not_after >= int32_overflow:
+            self.error("Certificate validity extends past unix timestamp"
+                       " int32 overflow ({})".format(not_after))
+        elif not_after >= ten_years_past:
+            self.error("Certificate validity extends past 10 years ({})"
+                       .format(not_after))
 
     def check_certif_signature_algorithm(self, cert, index):
         """ Certificate signature algorithm check.

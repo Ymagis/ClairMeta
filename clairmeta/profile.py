@@ -29,6 +29,7 @@ DCP_CHECK_PROFILE = {
         'check_assets_cpl_labels_schema': 'WARNING',
         'check_assets_cpl_filename_uuid': 'WARNING',
         'check_certif_multi_role': 'WARNING',
+        'check_certif_date_overflow': 'WARNING',
         'check_picture_cpl_avg_bitrate': 'WARNING',
         'check_picture_cpl_resolution': 'WARNING',
         'check_subtitle_cpl_reel_number': 'WARNING',
