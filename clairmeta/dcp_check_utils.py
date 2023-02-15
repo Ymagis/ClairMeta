@@ -42,7 +42,7 @@ def check_xml_constraints(checker, xml_path):
     RE_XML_XMLDecl       = r'<\?xml' + RE_XML_VersionInfo + RE_XML_EncodingDecl + RE_XML_SDDecl + '?' + RE_XML_S + '?' + r'\?>'
 
     try:
-        with open(xml_path) as file:
+        with open(xml_path, encoding='utf-8-sig') as file:
             xml_file = file.read()
             newlines = file.newlines
     except IOError as e:
