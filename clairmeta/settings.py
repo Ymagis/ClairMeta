@@ -163,8 +163,7 @@ DCP_CHECK_SETTINGS = {
         'sound': 'Sound essence checks',
         'subtitle': 'Subtitle essence checks',
         'atmos': 'Atmos essence checks',
-    },
-    'file_white_list': ['cs-md5.md5'],
+    }
 }
 
 IMP_SETTINGS = {
