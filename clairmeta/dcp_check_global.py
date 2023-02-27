@@ -60,11 +60,9 @@ class Checker(CheckerBase):
         list_asset_path += self.dcp._list_vol_path
         list_asset_path += self.dcp._list_am_path
 
-        allowed_foreign_files = DCP_CHECK_PROFILE['allowed_foreign_files']
-
         allowed_foreign_files_path = [
             os.path.join(self.dcp.path, a) 
-            for a in allowed_foreign_files]
+            for a in self.allowed_foreign_files]
 
         self.dcp.foreign_files = [
             os.path.relpath(a, self.dcp.path)
