@@ -47,6 +47,10 @@ DCP_CHECK_PROFILE = {
     # Checker options
     # Bypass is a list of check names (function names)
     'bypass': [],
+
+    # Allowed foreign files
+    # Paths are relative to the DCP root
+    'allowed_foreign_files' : [],
 }
 
 

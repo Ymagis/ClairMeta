@@ -26,7 +26,7 @@ class CheckerBase(object):
 
     ERROR_NAME_RE = re.compile(r"^\w+$")
 
-    def __init__(self, dcp, ov_path=None, hash_callback=None, bypass_list=None):
+    def __init__(self, dcp, ov_path=None, hash_callback=None, bypass_list=None, allowed_foreign_files=None):
         """ CheckerBase constructor.
 
             Args:
@@ -43,6 +43,7 @@ class CheckerBase(object):
         self.errors = []
         self.report = None
         self.bypass_list = bypass_list if bypass_list else []
+        self.allowed_foreign_files = allowed_foreign_files if allowed_foreign_files else []
         self.check_modules = {}
         self.ov_path = ov_path
         self.ov_dcp = None
@@ -66,6 +67,7 @@ class CheckerBase(object):
                 module = importlib.import_module(module_path)
                 checker = module.Checker(self.dcp)
                 checker.ov_path = self.ov_path
+                checker.allowed_foreign_files = self.allowed_foreign_files
                 checker.hash_callback = self.hash_callback
                 self.check_modules[v] = checker
             except (ImportError, Exception) as e:

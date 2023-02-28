@@ -311,7 +311,8 @@ class DCP(object):
             self,
             ov_path=ov_path,
             hash_callback=hash_callback,
-            bypass_list=profile.get("bypass")
+            bypass_list=profile.get("bypass"),
+            allowed_foreign_files=profile.get("allowed_foreign_files")
         )
         self.checks = self.checker.check()
 
