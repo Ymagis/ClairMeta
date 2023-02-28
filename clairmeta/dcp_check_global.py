@@ -7,7 +7,6 @@ import six
 from clairmeta.dcp_utils import list_cpl_assets, cpl_probe_asset
 from clairmeta.dcp_check import CheckerBase
 from clairmeta.utils.sys import all_keys_in_dict
-from clairmeta.profile import DCP_CHECK_PROFILE
 
 class Checker(CheckerBase):
     def __init__(self, dcp):
