@@ -109,6 +109,8 @@ template (actual content listed below is for demonstration purposes only):
    name can be incomplete to quickly ignore a bunch of tests, *default* is
    used if no other match where found.
 -  *bypass* key allow specific test bypass, incomplete names are not allowed.
+-  *allowed_foreign_files* key specify files that are allowed in the DCP
+   folder and should not trigger the foreign file check.
 
 .. code-block:: python
 
@@ -120,7 +122,8 @@ template (actual content listed below is for demonstration purposes only):
             "check_picture_cpl_avg_bitrate": "WARNING",
             "check_picture_cpl_resolution": "WARNING"
         },
-        "bypass": ["check_assets_pkl_hash"]
+        "bypass": ["check_assets_pkl_hash"],
+        "allowed_foreign_files": ["md5.md5"]
     }
 
 Custom profile check:
