@@ -26,7 +26,13 @@ class CheckerBase(object):
 
     ERROR_NAME_RE = re.compile(r"^\w+$")
 
-    def __init__(self, dcp, ov_path=None, hash_callback=None, bypass_list=None, allowed_foreign_files=None):
+    def __init__(
+            self,
+            dcp,
+            ov_path=None,
+            hash_callback=None,
+            bypass_list=None,
+            allowed_foreign_files=None):
         """ CheckerBase constructor.
 
             Args:
@@ -35,6 +41,8 @@ class CheckerBase(object):
                 hash_callback (function, optional): Callback function to report
                     file hash progression.
                 bypass_list (list, optional): List of checks to bypass.
+                allowed_foreign_files (list, optional): List of files allowed
+                    in the DCP folder (don't trigger foreign files check).
 
         """
         self.dcp = dcp
@@ -42,8 +50,8 @@ class CheckerBase(object):
         self.checks = []
         self.errors = []
         self.report = None
-        self.bypass_list = bypass_list if bypass_list else []
-        self.allowed_foreign_files = allowed_foreign_files if allowed_foreign_files else []
+        self.bypass_list = bypass_list or []
+        self.allowed_foreign_files = allowed_foreign_files or []
         self.check_modules = {}
         self.ov_path = ov_path
         self.ov_dcp = None
