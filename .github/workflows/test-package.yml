@@ -84,7 +84,7 @@ jobs:
     - name: Install python dependencies
       run: |
         pip install pipenv codecov
-        pipenv install --skip-lock --dev --python ${{ matrix.python-version }}
+        pipenv install --quiet --skip-lock --dev --python ${{ matrix.python-version }}
         pipenv graph
       shell: bash
     - name: Test
