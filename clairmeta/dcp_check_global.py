@@ -3,6 +3,7 @@
 
 import os
 import six
+import re
 
 from clairmeta.dcp_utils import list_cpl_assets, cpl_probe_asset
 from clairmeta.dcp_check import CheckerBase
@@ -60,14 +61,10 @@ class Checker(CheckerBase):
         list_asset_path += self.dcp._list_vol_path
         list_asset_path += self.dcp._list_am_path
 
-        allowed_paths = [
-            os.path.join(self.dcp.path, a) 
-            for a in self.allowed_foreign_files]
-
         self.dcp.foreign_files = [
             os.path.relpath(a, self.dcp.path)
             for a in self.dcp._list_files
-            if a not in list_asset_path and a not in allowed_paths]
+            if a not in list_asset_path and not any([re.search(i,a) for i in self.allowed_foreign_files])]
         if self.dcp.foreign_files:
             self.error('\n'.join(self.dcp.foreign_files))
 
