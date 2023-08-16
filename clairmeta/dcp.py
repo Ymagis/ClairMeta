@@ -22,6 +22,7 @@ from clairmeta.profile import DCP_CHECK_PROFILE
 from clairmeta.report import CheckReport
 from clairmeta.exception import ClairMetaException
 
+from clairmeta.utils.isdcf import parse_isdcf_string
 
 class DCP(object):
     """ Digital Cinema Package abstraction. """
@@ -234,6 +235,7 @@ class DCP(object):
     @property
     def metadata(self):
         """ All extracted package metadata Dictionnary. """
+        fields, errors = parse_isdcf_string(os.path.dirname(self.path))
         self.probe_dict = {
             'asset_list': self._list_asset,
             'volindex_list': self._list_vol,
@@ -243,6 +245,7 @@ class DCP(object):
             'kdm_list': self._list_kdm,
             'package_type': self.package_type,
             'path': self.path,
+            'path_analysis': fields,
             'size': human_size(self.size),
             'size_bytes': self.size,
             'count_file': len(self._list_asset),
