@@ -261,7 +261,7 @@ cause issue for some equipements in the field.
                     "Interop DCP")
         else:
             cmp_op = operator.ge
-            mess = ("MainSubtitle Duration must less than or equal that of "
+            mess = ("MainSubtitle Duration must less than or equal to that of "
                     "MainPicture for SMPTE DCP")
 
         self.metadata_cmp_pair(
