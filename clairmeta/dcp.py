@@ -17,6 +17,7 @@ from clairmeta.utils.xml import parse_xml
 from clairmeta.utils.sys import remove_key_dict
 from clairmeta.utils.file import folder_size, human_size
 from clairmeta.utils.crypto import decrypt_b64
+from clairmeta.utils.isdcf import parse_isdcf_string
 from clairmeta.settings import DCP_SETTINGS
 from clairmeta.profile import DCP_CHECK_PROFILE
 from clairmeta.report import CheckReport
@@ -243,6 +244,7 @@ class DCP(object):
             'kdm_list': self._list_kdm,
             'package_type': self.package_type,
             'path': self.path,
+            'path_naming_convention': self.path_isdcf_fields,
             'size': human_size(self.size),
             'size_bytes': self.size,
             'count_file': len(self._list_asset),
@@ -273,6 +275,9 @@ class DCP(object):
             self.init_cpl()
             self.init_kdm()
             self.cpl_parse_metadata()
+
+            self.path_isdcf_fields, _ = parse_isdcf_string(
+                os.path.basename(self.path))
             self._parsed = True
 
         # Probe file content
