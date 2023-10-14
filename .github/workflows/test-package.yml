@@ -24,13 +24,13 @@ jobs:
       run: .github/scripts/linux/apt/install_test_env.sh
     - name: Install python dependencies
       run: |
-        pip install pipenv codecov
-        pipenv install --skip-lock --dev --python ${{ matrix.python-version }}
-        pipenv graph
+        pip install poetry codecov
+        poetry install
+        poetry show --tree
     - name: Test
       run: |
-        pipenv run python -m compileall clairmeta
-        pipenv run pytest --doctest-modules
+        poetry run python -m compileall clairmeta
+        poetry run pytest --doctest-modules
 
   test-macos:
     runs-on: macos-12
@@ -53,13 +53,13 @@ jobs:
       run: .github/scripts/macos/install_test_env.sh
     - name: Install python dependencies
       run: |
-        pip install pipenv codecov
-        pipenv install --skip-lock --dev --python ${{ matrix.python-version }}
-        pipenv graph
+        pip install poetry codecov
+        poetry install
+        poetry show --tree
     - name: Test
       run: |
-        pipenv run python -m compileall clairmeta
-        pipenv run pytest --doctest-modules
+        poetry run python -m compileall clairmeta
+        poetry run pytest --doctest-modules
 
   test-windows:
     runs-on: windows-2022
@@ -83,13 +83,13 @@ jobs:
       shell: bash
     - name: Install python dependencies
       run: |
-        pip install pipenv codecov
-        pipenv install --skip-lock --dev --python ${{ matrix.python-version }}
-        pipenv graph
+        pip install poetry codecov
+        poetry install
+        poetry show --tree
       shell: bash
     - name: Test
       run: |
         export PATH="/c/vcpkg/installed/x64-windows/bin:$PATH"
-        pipenv run python -m compileall clairmeta
-        pipenv run pytest --doctest-modules
+        poetry run python -m compileall clairmeta
+        poetry run pytest --doctest-modules
       shell: bash

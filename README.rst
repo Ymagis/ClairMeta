@@ -167,9 +167,9 @@ Contributing
    cd clairmeta
    git clone https://github.com/Ymagis/ClairMeta_Data tests/resources
 
-   pip install pipenv
-   pipenv install --dev
-   pipenv shell
+   pip3 install poetry
+   poetry install
+   poetry shell
 
    # Code... and tests
    pytest --doctest-modules
