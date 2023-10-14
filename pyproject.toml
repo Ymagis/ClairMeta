@@ -4,10 +4,9 @@ version = "1.5.0"
 description = "ClairMeta is a python package for Digital Cinema Package (DCP) probing and checking."
 authors = ["Rémi Achard <remiachard@gmail.com>"]
 license = "BSD-3-Clause"
-readme = "README.md"
+readme = "README.rst"
 
 [tool.poetry.dependencies]
-python = "^3.11"
 lxml = "^4.9.3"
 dicttoxml = "^1.7.16"
 xmltodict = "^0.13.0"
