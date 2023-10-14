@@ -363,7 +363,7 @@ def probe_mediainfo(path):
                 metadata = track
             else:
                 metadata['Probe' + track_type] = track
-    except:
+    except Exception:
         raise CommandException('Cannot read file metadata')
 
     return {

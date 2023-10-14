@@ -17,7 +17,6 @@ class Checker(CheckerBase):
 
     def run_checks(self):
         for source in self.dcp._list_cpl:
-            asset_stack = []
 
             asset_checks = self.find_check('picture_cpl')
             [self.run_check(

@@ -148,9 +148,9 @@ class CheckerBase(object):
             start = time.time()
             check_res = None
             check_res = check(*args)
-        except CheckException as e:
+        except CheckException:
             pass
-        except Exception as e:
+        except Exception:
             error = CheckError("{}".format(traceback.format_exc()))
             error.name = "internal_error"
             error.parent_name = check_exec.name

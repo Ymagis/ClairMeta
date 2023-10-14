@@ -83,7 +83,8 @@ class CheckReport(object):
         report += "Total time : {:.2f} sec\n".format(self.duration)
         report += "\n"
 
-        nested_dict = lambda: defaultdict(nested_dict)
+        def nested_dict():
+            return defaultdict(nested_dict)
         status_map = nested_dict()
 
         # Accumulate all failed check and stack them by asset

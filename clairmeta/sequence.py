@@ -5,9 +5,8 @@ import os
 import six
 
 from clairmeta.sequence_check import check_sequence
-from clairmeta.settings import SEQUENCE_SETTINGS
 from clairmeta.utils.sys import key_by_path_dict
-from clairmeta.utils.probe import probe_folder, probe_mediainfo
+from clairmeta.utils.probe import probe_folder
 
 
 class Sequence(object):
@@ -72,7 +71,7 @@ class Sequence(object):
 
             if isinstance(expect_val, list):
                 if val not in expect_val:
-                    raise ValueError("{} - Invalid {}, got {} but expected"
+                    raise ValueError("{} - Invalid {}, got {} but expected {}"
                                      .format(folder, key, val, expect_val))
             else:
                 if val != expect_val:

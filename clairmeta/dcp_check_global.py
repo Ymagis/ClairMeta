@@ -64,7 +64,8 @@ class Checker(CheckerBase):
         self.dcp.foreign_files = [
             os.path.relpath(a, self.dcp.path)
             for a in self.dcp._list_files
-            if a not in list_asset_path and not any([re.search(i,a) for i in self.allowed_foreign_files])]
+            if a not in list_asset_path and not any(
+                [re.search(i,a) for i in self.allowed_foreign_files])]
         if self.dcp.foreign_files:
             self.error('\n'.join(self.dcp.foreign_files))
 

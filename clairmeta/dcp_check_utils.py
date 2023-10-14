@@ -27,6 +27,7 @@ def check_xml_constraints(checker, xml_path):
             SMPTE ST 429-17:2017
             W3C Extensible Markup Language v (1.0)
     """
+    # ruff: noqa: E501
     # Follow the XML spec precicely for the definition of XMLDecl, except for:
     # VersionNum := '1.0'
     # EncName    := 'UTF-8'
@@ -52,11 +53,12 @@ def check_xml_constraints(checker, xml_path):
     if re.match('\ufeff', xml_file):
         checker.error("BOM not allowed in XML file", "constraints_bom")
 
-    if not (re.match(RE_XML_XMLDecl, xml_file) or re.match('\ufeff' + RE_XML_XMLDecl, xml_file)):
+    if not (re.match(RE_XML_XMLDecl, xml_file)
+         or re.match('\ufeff' + RE_XML_XMLDecl, xml_file)):
         checker.error("Invalid XML Declaration", "constraints_declaration")
 
     # Some files might not have newlines at all (single line)
-    if not newlines in ['\n', '\r\n', None]:
+    if newlines not in ['\n', '\r\n', None]:
         checker.error(
             "XML file has invalid ending: {}".format(repr(file.newlines)),
             "constraints_line_ending"
@@ -81,7 +83,7 @@ def check_xml(checker, xml_path, xml_ns, schema_type, schema_dcp):
     # XSD schema validation
     try:
         validate_xml(xml_path, schema_id)
-    except LookupError as e:
+    except LookupError:
         get_log().info("Schema validation skipped : {}".format(xml_path))
     except Exception as e:
         message = (

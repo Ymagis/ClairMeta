@@ -4,7 +4,7 @@
 import os
 import re
 
-from clairmeta.utils.uuid import check_uuid, RFC4122_RE
+from clairmeta.utils.uuid import check_uuid
 from clairmeta.dcp_check import CheckerBase
 from clairmeta.dcp_check_utils import check_xml
 from clairmeta.dcp_utils import list_am_assets

@@ -49,8 +49,8 @@ def cli_copy(args):
         progress(args.source, dcp_size, dcp_size, elapsed)
         log.info("Total time : {:.2f} sec".format(time.time() - start))
 
-        dcp_dst = DCP(args.dest)
-        status, report = dcp.check(hash_callback=ConsoleProgress())
+        DCP(args.dest)
+        status, _ = dcp.check(hash_callback=ConsoleProgress())
 
         return status
 

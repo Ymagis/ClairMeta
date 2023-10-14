@@ -7,6 +7,7 @@ name = "pypi"
 coverage = "*"
 pytest = "*"
 pep8 = "*"
+ruff = "*"
 
 [packages]
 lxml = "*"

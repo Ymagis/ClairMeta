@@ -18,7 +18,7 @@ class LicenseTest(unittest.TestCase):
     def file_contain_license(self, path):
         with open(path, 'r') as fhandle:
             lines = fhandle.readlines()
-            lines = [l for l in lines if l != "" and not l.startswith('#!')]
+            lines = [ln for ln in lines if ln != "" and not ln.startswith('#!')]
             return all([a == b for a, b in zip(template_lines, lines)])
 
     def test_sources_have_license(self):

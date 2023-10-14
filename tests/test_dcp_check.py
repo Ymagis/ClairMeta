@@ -78,7 +78,7 @@ class DCPCheckTest(CheckerTestBase):
         self.assertTrue(self.check(28))
         self.assertTrue(self.check(38))
 
-    @unittest.skipIf(platform.system() == "Windows", "asdcp-unwrap on Windows doesn't properly unwrap resources files (including fonts) from MXF making check fails. Help wanted.")
+    @unittest.skipIf(platform.system() == "Windows", "asdcp-unwrap on Windows doesn't properly unwrap resources files (including fonts) from MXF making check fails. Help wanted.") # noqa: E501
     def test_smpte_vf(self):
         self.assertTrue(self.check(8))
         self.assertTrue(self.has_failed(DCPCheckTest.vf_missing))
@@ -171,12 +171,14 @@ class DCPCheckReportTest(CheckerTestBase):
         all_names = []
         for checks in [failed, success, bypass]:
             all_names += [c.name for c in checks]
-        self.assertEqual(sorted(all_names), sorted([c.name for c in self.report.checks]))
+        self.assertEqual(
+            sorted(all_names),
+            sorted([c.name for c in self.report.checks]))
         self.assertEqual(
             len(failed) + len(success) + len(bypass),
             len(self.report.checks))
 
-        errors = self.report.errors_by_criticality('ERROR')
+        self.report.errors_by_criticality('ERROR')
         self.assertEqual(3, len(self.report.checks_failed()))
         self.assertEqual(1, len(self.report.errors_by_criticality('ERROR')))
         self.assertEqual(2, len(self.report.errors_by_criticality('WARNING')))

@@ -208,7 +208,7 @@ def cpl_reels_parse(cpl_node):
             marker_list = []
             if marker.get('MarkerList'):
                 markers = marker['MarkerList'].get('Marker', [])
-                if not type(markers) is list:
+                if not isinstance(markers, list):
                     marker_list = [markers]
                 else:
                     marker_list = markers
@@ -294,7 +294,8 @@ def kdm_parse(path):
             root = req_ext['KDMRequiredExtensions']
 
             keys_pub = root['KeyIdList']['TypedKeyId']
-            keys_priv = in_dict['DCinemaSecurityMessage']['AuthenticatedPrivate']['EncryptedKey']
+            keys_priv = (in_dict['DCinemaSecurityMessage']
+                                ['AuthenticatedPrivate']['EncryptedKey'])
 
             for pub, priv in zip(keys_pub, keys_priv):
                 keys[pub['KeyId']] = {

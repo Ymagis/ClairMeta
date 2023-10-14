@@ -6,9 +6,6 @@ from clairmeta.dcp import DCP
 from clairmeta.sequence import Sequence
 from clairmeta.logger import get_log
 from clairmeta.utils.probe import check_command, PROBE_DEPS
-from clairmeta.dcp_parse import (volindex_parse, assetmap_parse, pkl_parse,
-                                 cpl_parse, kdm_parse)
-from clairmeta.exception import ClairMetaException
 
 
 __all__ = ['DCP', 'Sequence']

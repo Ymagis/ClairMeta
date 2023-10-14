@@ -1,4 +1,4 @@
-
+# ruff: noqa: E501
 
 DCP_MAP = {
     1: 'ECL01-SINGLE-CPL_TST_S_EN-XX_UK-U_71_2K_DI_20171218_ECL_IOP_OV',

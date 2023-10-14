@@ -313,7 +313,6 @@ cause issue for some equipements in the field.
             Reference :
                 SMPTE RDD 52:2020 8.3.1
         """
-        errors = []
         reels_subtitle = []
 
         for reel in playlist['Info']['CompositionPlaylist']['ReelList']:
@@ -462,7 +461,7 @@ cause issue for some equipements in the field.
             if k in asset and v in asset['Probe']:
                 cpl_val = asset[k]
                 mxf_val = asset['Probe'][v]
-                is_float = type(cpl_val) is float or type(mxf_val) is float
+                is_float = isinstance(cpl_val, float) or isinstance(mxf_val, float)
 
                 matching = is_float and compare_ratio(cpl_val, mxf_val)
                 matching = matching or not is_float and cpl_val == mxf_val
@@ -477,5 +476,5 @@ cause issue for some equipements in the field.
                     "missing_mxf")
             if k not in asset and v in asset['Probe']:
                 self.error(
-                    "Missing CPL Metadata {} for asset {}".format(k),
+                    "Missing CPL Metadata {}".format(k),
                     "missing_cpl")

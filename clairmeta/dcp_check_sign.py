@@ -679,5 +679,5 @@ class Checker(CheckerBase):
                 xml_sig,
                 c14n_sign,
                 self.sig_algorithm_map[self.dcp.schema])
-        except crypto.Error as e:
+        except crypto.Error:
             self.error("Signature validation failed")

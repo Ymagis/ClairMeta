@@ -63,7 +63,7 @@ class Checker(CheckerBase):
         if date_str:
             try:
                 date = datetime.strptime(date_str, '%Y%m%d')
-            except ValueError as e:
+            except ValueError:
                 self.fatal_error(
                     "Date can't be parsed, expecting YYYYMMDD : {}"
                     .format(date_str),
