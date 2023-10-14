@@ -24,7 +24,7 @@ freetype-py = "^2.4.0"
 coverage = "^7.3.2"
 pytest = "^7.4.2"
 ruff = { version = "^0.0.292", python = "^3.8" }
-black = "^23.9.1"
+black = { version = "^23.9.1", python = "^3.8" }
 
 [build-system]
 requires = ["poetry-core"]
