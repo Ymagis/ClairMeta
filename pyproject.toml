@@ -7,6 +7,7 @@ license = "BSD-3-Clause"
 readme = "README.rst"
 
 [tool.poetry.dependencies]
+python = "^3.7"
 lxml = "^4.9.3"
 dicttoxml = "^1.7.16"
 xmltodict = "^0.13.0"
@@ -22,7 +23,7 @@ freetype-py = "^2.4.0"
 [tool.poetry.group.dev.dependencies]
 coverage = "^7.3.2"
 pytest = "^7.4.2"
-ruff = "^0.0.292"
+ruff = { version = "^0.0.292", python = "^3.8" }
 black = "^23.9.1"
 
 [build-system]
