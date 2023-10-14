@@ -32,7 +32,7 @@ Installation
 
 Requirements:
 
--  Python: 3.6 or later
+-  Python: 3.7 or later
 -  Platform: Windows (with limitations), macOS, Linux
 -  External (non-python) dependencies:
     -  asdcplib
