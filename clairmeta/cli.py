@@ -21,22 +21,22 @@ from clairmeta.utils.file import ConsoleProgress
 
 
 package_type_map = {
-    'dcp': DCP,
-    'dcdm': Sequence,
-    'dsm': Sequence,
-    'scan': Sequence,
+    "dcp": DCP,
+    "dcdm": Sequence,
+    "dsm": Sequence,
+    "scan": Sequence,
 }
 
 package_check_settings = {
-    'dcdm': SEQUENCE_SETTINGS['DCDM'],
-    'dsm': SEQUENCE_SETTINGS['DSM'],
-    'scan': SEQUENCE_SETTINGS['SCAN'],
+    "dcdm": SEQUENCE_SETTINGS["DCDM"],
+    "dsm": SEQUENCE_SETTINGS["DSM"],
+    "scan": SEQUENCE_SETTINGS["SCAN"],
 }
 
 
 def cli_check(args):
     try:
-        if args.type == 'dcp':
+        if args.type == "dcp":
             check_profile = DCP_CHECK_PROFILE
             callback = None
 
@@ -44,28 +44,32 @@ def cli_check(args):
                 path = os.path.abspath(args.profile)
                 check_profile = load_profile(path)
             if args.log:
-                check_profile['log_level'] = args.log
+                check_profile["log_level"] = args.log
             if args.progress:
                 callback = ConsoleProgress()
-            if args.format != 'text':
+            if args.format != "text":
                 disable_log()
 
             status, report = DCP(args.path, kdm=args.kdm, pkey=args.key).check(
-                profile=check_profile, ov_path=args.ov, hash_callback=callback)
+                profile=check_profile, ov_path=args.ov, hash_callback=callback
+            )
 
             if args.format == "dict":
                 msg = pprint.pformat(report.to_dict())
             elif args.format == "json":
                 msg = json.dumps(
-                    report.to_dict(), sort_keys=True, indent=2,
-                    separators=(',', ': '))
+                    report.to_dict(), sort_keys=True, indent=2, separators=(",", ": ")
+                )
             elif args.format == "xml":
                 xml_str = dicttoxml.dicttoxml(
-                    report.to_dict(), custom_root='ClairmetaCheck',
-                    ids=False, attr_type=False)
+                    report.to_dict(),
+                    custom_root="ClairmetaCheck",
+                    ids=False,
+                    attr_type=False,
+                )
                 msg = prettyprint_xml(xml_str)
 
-            if args.format != 'text':
+            if args.format != "text":
                 return True, msg
 
         else:
@@ -78,7 +82,8 @@ def cli_check(args):
         print("Error : {}".format(e))
 
     msg = "{} - {} - Check {}".format(
-        args.type.upper(), args.path, "succeeded" if status else "failed")
+        args.type.upper(), args.path, "succeeded" if status else "failed"
+    )
     return status, msg
 
 
@@ -87,9 +92,9 @@ def cli_probe(args):
         disable_log()
         kwargs = {}
 
-        if args.type == 'dcp':
-            kwargs['kdm'] = args.kdm
-            kwargs['pkey'] = args.key
+        if args.type == "dcp":
+            kwargs["kdm"] = args.kdm
+            kwargs["pkey"] = args.key
 
         obj_type = package_type_map[args.type]
         res = obj_type(args.path, **kwargs).parse()
@@ -97,11 +102,11 @@ def cli_probe(args):
         if args.format == "dict":
             msg = pprint.pformat(res)
         elif args.format == "json":
-            msg = json.dumps(
-                res, sort_keys=True, indent=2, separators=(',', ': '))
+            msg = json.dumps(res, sort_keys=True, indent=2, separators=(",", ": "))
         elif args.format == "xml":
             xml_str = dicttoxml.dicttoxml(
-                res, custom_root='ClairmetaProbe', ids=False, attr_type=False)
+                res, custom_root="ClairmetaProbe", ids=False, attr_type=False
+            )
             msg = prettyprint_xml(xml_str)
 
         return True, msg
@@ -111,47 +116,48 @@ def cli_probe(args):
 
 def get_parser():
     global_parser = argparse.ArgumentParser(
-        description='Clairmeta Command Line Interface {}'
-        .format(__version__))
+        description="Clairmeta Command Line Interface {}".format(__version__)
+    )
     subparsers = global_parser.add_subparsers()
 
     # DCP
-    parser = subparsers.add_parser(
-        'check', help="Package validation")
-    parser.add_argument('path', help="absolute package path")
-    parser.add_argument('-log', default=None, help="logging level [dcp]")
-    parser.add_argument('-profile', default=None, help="json profile [dcp]")
-    parser.add_argument('-kdm', default=None,
-        help="kdm with encrypted keys [dcp]")
-    parser.add_argument('-key', default=None,
-        help="recipient private key [dcp]")
+    parser = subparsers.add_parser("check", help="Package validation")
+    parser.add_argument("path", help="absolute package path")
+    parser.add_argument("-log", default=None, help="logging level [dcp]")
+    parser.add_argument("-profile", default=None, help="json profile [dcp]")
+    parser.add_argument("-kdm", default=None, help="kdm with encrypted keys [dcp]")
+    parser.add_argument("-key", default=None, help="recipient private key [dcp]")
     parser.add_argument(
-        '-format', default="text", choices=['text', 'dict', 'xml', 'json'],
-        help="output format [dcp]")
+        "-format",
+        default="text",
+        choices=["text", "dict", "xml", "json"],
+        help="output format [dcp]",
+    )
     parser.add_argument(
-        '-progress', action='store_true', help="hash progress bar [dcp]")
-    parser.add_argument('-ov', default=None, help="ov package path [dcp]")
+        "-progress", action="store_true", help="hash progress bar [dcp]"
+    )
+    parser.add_argument("-ov", default=None, help="ov package path [dcp]")
     parser.add_argument(
-        '-type', choices=package_type_map.keys(),
-        required=True, help="package type")
+        "-type", choices=package_type_map.keys(), required=True, help="package type"
+    )
     parser.set_defaults(func=cli_check)
 
-    parser = subparsers.add_parser('probe', help="Package metadata extraction")
-    parser.add_argument('path', help="absolute package path")
-    parser.add_argument('-kdm', default=None, help="kdm with encrypted keys")
-    parser.add_argument('-key', default=None, help="recipient private key")
+    parser = subparsers.add_parser("probe", help="Package metadata extraction")
+    parser.add_argument("path", help="absolute package path")
+    parser.add_argument("-kdm", default=None, help="kdm with encrypted keys")
+    parser.add_argument("-key", default=None, help="recipient private key")
     parser.add_argument(
-        '-format', default="dict", choices=['dict', 'xml', 'json'],
-        help="output format")
+        "-format", default="dict", choices=["dict", "xml", "json"], help="output format"
+    )
     parser.add_argument(
-        '-type', choices=package_type_map.keys(),
-        required=True, help="package type")
+        "-type", choices=package_type_map.keys(), required=True, help="package type"
+    )
     parser.set_defaults(func=cli_probe)
 
     return global_parser
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     parser = get_parser()
     args = parser.parse_args()
     if len(sys.argv) == 1:

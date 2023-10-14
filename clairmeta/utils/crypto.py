@@ -9,17 +9,17 @@ from cryptography.hazmat.primitives.asymmetric import padding
 
 
 def decrypt_b64(cipher, key):
-    """ Decrypt encoded cipher with specified private key.
+    """Decrypt encoded cipher with specified private key.
 
-        Args:
-            cipher (str): Base64 encoded message.
-            key (str): Absolute path to PEM private key.
+    Args:
+        cipher (str): Base64 encoded message.
+        key (str): Absolute path to PEM private key.
 
-        Returns:
-            Decoded message.
+    Returns:
+        Decoded message.
 
-        Raises:
-            ValueError: If ``key`` is not a valid file.
+    Raises:
+        ValueError: If ``key`` is not a valid file.
 
     """
     if not os.path.isfile(key):
@@ -27,15 +27,14 @@ def decrypt_b64(cipher, key):
 
     with open(key, "rb") as f:
         key = serialization.load_pem_private_key(
-            f.read(),
-            password=None,
-            backend=default_backend())
+            f.read(), password=None, backend=default_backend()
+        )
 
         return key.decrypt(
             base64.b64decode(cipher),
             padding.OAEP(
                 mgf=padding.MGF1(algorithm=hashes.SHA1()),
                 algorithm=hashes.SHA1(),
-                label=None
-            )
+                label=None,
+            ),
         )

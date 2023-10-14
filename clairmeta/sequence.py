@@ -10,16 +10,16 @@ from clairmeta.utils.probe import probe_folder
 
 
 class Sequence(object):
-    """ Image file sequence abstraction. """
+    """Image file sequence abstraction."""
 
     def __init__(self, path):
-        """ Sequence constructor.
+        """Sequence constructor.
 
-            Args:
-                path (str): Absolute path to directory.
+        Args:
+            path (str): Absolute path to directory.
 
-            Raises:
-                ValueError: ``path`` directory not found.
+        Raises:
+            ValueError: ``path`` directory not found.
 
         """
         if not os.path.isdir(path):
@@ -29,28 +29,28 @@ class Sequence(object):
         self.probe_folder = probe_folder(path)
 
     def parse(self):
-        """ Extract metadata. """
+        """Extract metadata."""
         return self.probe_folder
 
     def check(self, setting):
-        """ Check validity.
+        """Check validity.
 
-            Raises:
-                ValueError: Validity check failure.
+        Raises:
+            ValueError: Validity check failure.
 
         """
         check_sequence(
             self.path,
-            setting['allowed_extensions'],
-            setting['file_white_list'],
-            setting['directory_white_list']
+            setting["allowed_extensions"],
+            setting["file_white_list"],
+            setting["directory_white_list"],
         )
 
         for folder, seqs in six.iteritems(self.probe_folder):
             for seq, keys in six.iteritems(seqs):
-                ext = keys.get('Extension')
-                check_keys = setting['allowed_extensions'].get('.' + ext)
-                probe_keys = keys.get('Probe')
+                ext = keys.get("Extension")
+                check_keys = setting["allowed_extensions"].get("." + ext)
+                probe_keys = keys.get("Probe")
 
                 if not probe_keys or not check_keys:
                     continue
@@ -60,10 +60,10 @@ class Sequence(object):
         return True
 
     def _check_keys(self, check_keys, probe_keys, folder):
-        """ Compare expected and detected file probe informations.
+        """Compare expected and detected file probe informations.
 
-            Raises:
-                ValueError: Mismatch.
+        Raises:
+            ValueError: Mismatch.
 
         """
         for key, expect_val in six.iteritems(check_keys):
@@ -71,9 +71,15 @@ class Sequence(object):
 
             if isinstance(expect_val, list):
                 if val not in expect_val:
-                    raise ValueError("{} - Invalid {}, got {} but expected {}"
-                                     .format(folder, key, val, expect_val))
+                    raise ValueError(
+                        "{} - Invalid {}, got {} but expected {}".format(
+                            folder, key, val, expect_val
+                        )
+                    )
             else:
                 if val != expect_val:
-                    raise ValueError("{} - Invalid {}, got {} but expected {}"
-                                     .format(folder, key, val, expect_val))
+                    raise ValueError(
+                        "{} - Invalid {}, got {} but expected {}".format(
+                            folder, key, val, expect_val
+                        )
+                    )

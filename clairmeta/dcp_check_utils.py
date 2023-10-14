@@ -13,21 +13,23 @@ from clairmeta.settings import DCP_SETTINGS
 
 
 def get_schema(name):
-    for k, v in six.iteritems(DCP_SETTINGS['xmlns']):
+    for k, v in six.iteritems(DCP_SETTINGS["xmlns"]):
         if name == k or name == v:
             return v
 
 
 def check_xml_constraints(checker, xml_path):
-    """ Check D-Cinema XML Contraints
+    """Check D-Cinema XML Contraints
 
-        References:
-            TI Subtitle Operational Recommendation for DLP Cinema Projectors (Draft A)
-            https://web.archive.org/web/20140924153620/http://dlp.com/downloads/pdf_dlp_cinema_subtitle_operational_recommendation_rev_a.pdf
-            SMPTE ST 429-17:2017
-            W3C Extensible Markup Language v (1.0)
+    References:
+        TI Subtitle Operational Recommendation for DLP Cinema Projectors (Draft A)
+        https://web.archive.org/web/20140924153620/http://dlp.com/downloads/pdf_dlp_cinema_subtitle_operational_recommendation_rev_a.pdf
+        SMPTE ST 429-17:2017
+        W3C Extensible Markup Language v (1.0)
     """
     # ruff: noqa: E501
+    # fmt: off
+
     # Follow the XML spec precicely for the definition of XMLDecl, except for:
     # VersionNum := '1.0'
     # EncName    := 'UTF-8'
@@ -42,26 +44,30 @@ def check_xml_constraints(checker, xml_path):
     RE_XML_VersionInfo   = '(' + RE_XML_S + 'version' + RE_XML_Eq + r'(\'' + RE_XML_VersionNum + r'\'|"' + RE_XML_VersionNum + '"))'
     RE_XML_XMLDecl       = r'<\?xml' + RE_XML_VersionInfo + RE_XML_EncodingDecl + RE_XML_SDDecl + '?' + RE_XML_S + '?' + r'\?>'
 
+    # fmt: on
+
     try:
-        with open(xml_path, encoding='utf-8-sig') as file:
+        with open(xml_path, encoding="utf-8-sig") as file:
             xml_file = file.read()
             newlines = file.newlines
     except IOError as e:
         get_log().error("Error opening XML file {} : {}".format(xml_path, str(e)))
         return
 
-    if re.match('\ufeff', xml_file):
+    if re.match("\ufeff", xml_file):
         checker.error("BOM not allowed in XML file", "constraints_bom")
 
-    if not (re.match(RE_XML_XMLDecl, xml_file)
-         or re.match('\ufeff' + RE_XML_XMLDecl, xml_file)):
+    if not (
+        re.match(RE_XML_XMLDecl, xml_file)
+        or re.match("\ufeff" + RE_XML_XMLDecl, xml_file)
+    ):
         checker.error("Invalid XML Declaration", "constraints_declaration")
 
     # Some files might not have newlines at all (single line)
-    if newlines not in ['\n', '\r\n', None]:
+    if newlines not in ["\n", "\r\n", None]:
         checker.error(
             "XML file has invalid ending: {}".format(repr(file.newlines)),
-            "constraints_line_ending"
+            "constraints_line_ending",
         )
 
 
@@ -77,7 +83,8 @@ def check_xml(checker, xml_path, xml_ns, schema_type, schema_dcp):
     # Coherence with package schema
     if schema_type != schema_dcp:
         message = "Schema is not valid got {} but was expecting {}".format(
-            schema_type, schema_dcp)
+            schema_type, schema_dcp
+        )
         checker.error(message, "schema_coherence")
 
     # XSD schema validation
@@ -86,9 +93,9 @@ def check_xml(checker, xml_path, xml_ns, schema_type, schema_dcp):
     except LookupError:
         get_log().info("Schema validation skipped : {}".format(xml_path))
     except Exception as e:
-        message = (
-            "Schema validation error : {}\n"
-            "Using schema : {}".format(str(e), schema_id))
+        message = "Schema validation error : {}\n" "Using schema : {}".format(
+            str(e), schema_id
+        )
         checker.error(message, "schema_validation")
 
 
@@ -109,5 +116,6 @@ def compare_uuid(checker, uuid_to_check, uuid_reference):
     if not check_uuid(uuid):
         checker.error("Invalid {} uuid found : {}".format(name, uuid))
     if uuid.lower() != uuid_ref.lower():
-        checker.error("Uuid {} ({}) not equal to {} ({})".format(
-            name, uuid, name_ref, uuid_ref))
+        checker.error(
+            "Uuid {} ({}) not equal to {} ({})".format(name, uuid, name_ref, uuid_ref)
+        )

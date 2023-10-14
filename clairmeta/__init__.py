@@ -8,7 +8,7 @@ from clairmeta.logger import get_log
 from clairmeta.utils.probe import check_command, PROBE_DEPS
 
 
-__all__ = ['DCP', 'Sequence']
+__all__ = ["DCP", "Sequence"]
 __license__ = __license__
 __author__ = __author__
 __version__ = __version__
