@@ -7,7 +7,7 @@ jobs:
     runs-on: ubuntu-22.04
     strategy:
       matrix:
-        python-version: ["3.7", "3.8", "3.9", "3.10", "3.11", "3.12"]
+        python-version: ["3.8", "3.9", "3.10", "3.11", "3.12"]
     steps:
     - name: Clone repository
       uses: actions/checkout@v4
@@ -37,7 +37,7 @@ jobs:
     runs-on: macos-12
     strategy:
       matrix:
-        python-version: ["3.7", "3.12"]
+        python-version: ["3.8", "3.12"]
     steps:
     - name: Clone repository
       uses: actions/checkout@v4
@@ -67,7 +67,7 @@ jobs:
     runs-on: windows-2022
     strategy:
       matrix:
-        python-version: ["3.7", "3.12"]
+        python-version: ["3.8", "3.12"]
     steps:
     - name: Clone repository
       uses: actions/checkout@v4

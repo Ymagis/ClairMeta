@@ -31,7 +31,6 @@ setup(
         "Topic :: Software Development :: Libraries :: Python Modules",
         "License :: OSI Approved :: BSD License",
         "Programming Language :: Python :: 3",
-        "Programming Language :: Python :: 3.7",
         "Programming Language :: Python :: 3.8",
         "Programming Language :: Python :: 3.9",
         "Programming Language :: Python :: 3.10",
@@ -51,7 +50,7 @@ setup(
         "shutilwhich",
         "freetype-py",
     ],
-    python_requires=">=3.7",
+    python_requires=">=3.8",
     package_data={
         "clairmeta": ["xsd/*"],
     },
