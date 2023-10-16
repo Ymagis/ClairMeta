@@ -9,40 +9,41 @@ from clairmeta.settings import LOG_SETTINGS
 
 
 def init_log():
-    """ Initialize logging utilities.
+    """Initialize logging utilities.
 
-        Returns:
-            logging.Logger object with appropriate handler initialized.
+    Returns:
+        logging.Logger object with appropriate handler initialized.
 
     """
-    log = logging.getLogger('Clairmeta')
+    log = logging.getLogger("Clairmeta")
 
     formatter = logging.Formatter(
-        '%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+        "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
+    )
 
     stream_handler = logging.NullHandler()
     stream_handler.setFormatter(formatter)
     log.addHandler(stream_handler)
 
-    if LOG_SETTINGS['enable_console'] == 'ON':
+    if LOG_SETTINGS["enable_console"] == "ON":
         init_console(log, formatter)
-    if LOG_SETTINGS['enable_file'] == 'ON' and LOG_SETTINGS['file_name']:
+    if LOG_SETTINGS["enable_file"] == "ON" and LOG_SETTINGS["file_name"]:
         init_file(log, formatter)
 
     return log
 
 
 def init_console(log, formatter):
-    """ Initialize console stream handler. """
+    """Initialize console stream handler."""
     stream_handler = logging.StreamHandler()
     stream_handler.setFormatter(formatter)
     log.addHandler(stream_handler)
 
 
 def init_file(log, formatter):
-    """ Initialize file handler. """
+    """Initialize file handler."""
     try:
-        log_dir = os.path.expanduser(LOG_SETTINGS['file_name'])
+        log_dir = os.path.expanduser(LOG_SETTINGS["file_name"])
         log_file = log_dir
         log_dir = os.path.dirname(log_dir)
         if not os.path.exists(log_dir):
@@ -50,8 +51,9 @@ def init_file(log, formatter):
 
         file_handler = RotatingFileHandler(
             log_file,
-            maxBytes=LOG_SETTINGS['file_size'],
-            backupCount=LOG_SETTINGS['file_count'])
+            maxBytes=LOG_SETTINGS["file_size"],
+            backupCount=LOG_SETTINGS["file_count"],
+        )
         file_handler.setFormatter(formatter)
         log.addHandler(file_handler)
     except Exception as e:
@@ -67,16 +69,16 @@ def disable_log():
 
 
 def get_log():
-    """ Returns package logging.Logger global object. """
+    """Returns package logging.Logger global object."""
     return cm_log
 
 
 def set_level(level):
-    """ Set logging threshold level.
+    """Set logging threshold level.
 
-        Args:
-            level (str): Minimum level for a log event to be recorded. List
-             include : CRITICAL, ERROR, WARNING, INFO, DEBUG, NOTSET.
+    Args:
+        level (str): Minimum level for a log event to be recorded. List
+         include : CRITICAL, ERROR, WARNING, INFO, DEBUG, NOTSET.
 
     """
     cm_log.setLevel(level)
@@ -84,4 +86,4 @@ def set_level(level):
 
 
 cm_log = init_log()
-set_level(LOG_SETTINGS['level'])
+set_level(LOG_SETTINGS["level"])

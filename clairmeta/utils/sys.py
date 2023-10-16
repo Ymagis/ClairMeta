@@ -8,16 +8,16 @@ import re
 
 @contextlib.contextmanager
 def modified_dict(in_dict, *remove, **update):
-    """ Temporarily updates the ``in_dict`` dictionary in-place.
+    """Temporarily updates the ``in_dict`` dictionary in-place.
 
-        The ``in_dict`` dictionary is updated in-place so that the modification
-        is sure to work in all situations.
-        Source : https://stackoverflow.com/a/34333710/4814046
+    The ``in_dict`` dictionary is updated in-place so that the modification
+    is sure to work in all situations.
+    Source : https://stackoverflow.com/a/34333710/4814046
 
-        Args:
-            in_dict (dict): Input dict.
-            remove: Environment variables to remove.
-            update: Dict of environment variables and values to add/update.
+    Args:
+        in_dict (dict): Input dict.
+        remove: Environment variables to remove.
+        update: Dict of environment variables and values to add/update.
 
     """
     env = in_dict
@@ -41,67 +41,67 @@ def modified_dict(in_dict, *remove, **update):
 
 
 def all_keys_in_dict(in_dict, keys):
-    """ Check that all keys are present in a dictionary.
+    """Check that all keys are present in a dictionary.
 
-        Args:
-            in_dict (dict): Input dict.
-            keys (list): Keys that must be present in ``in_dict``.
+    Args:
+        in_dict (dict): Input dict.
+        keys (list): Keys that must be present in ``in_dict``.
 
-        Returns:
-            True if all ``keys`` are in ``in_dict``, False otherwise.
+    Returns:
+        True if all ``keys`` are in ``in_dict``, False otherwise.
 
-        >>> all_keys_in_dict(
-        ... {'key1': '', 'key2': '', 'key3': ''}, ['key1', 'key2'])
-        True
-        >>> all_keys_in_dict(
-        ... {'key1': '', 'key2': '', 'key3': ''}, ['key1', 'key4'])
-        False
+    >>> all_keys_in_dict(
+    ... {'key1': '', 'key2': '', 'key3': ''}, ['key1', 'key2'])
+    True
+    >>> all_keys_in_dict(
+    ... {'key1': '', 'key2': '', 'key3': ''}, ['key1', 'key4'])
+    False
 
     """
     return all(k in in_dict for k in keys)
 
 
 def any_keys_in_dict(in_dict, keys):
-    """ Check that at least one key is present in a dictionary.
+    """Check that at least one key is present in a dictionary.
 
-        Args:
-            in_dict (dict): Input dict.
-            keys (list): Keys that can be present in ``in_dict``.
+    Args:
+        in_dict (dict): Input dict.
+        keys (list): Keys that can be present in ``in_dict``.
 
-        Returns:
-            True if at least one key in ``keys`` is in ``in_dict``, False
-            otherwise.
+    Returns:
+        True if at least one key in ``keys`` is in ``in_dict``, False
+        otherwise.
 
-        >>> any_keys_in_dict(
-        ... {'key1': '', 'key2': '', 'key3': ''}, ['key1', 'key2'])
-        True
-        >>> any_keys_in_dict(
-        ... {'key1': '', 'key2': '', 'key3': ''}, ['key1', 'key4'])
-        True
-        >>> any_keys_in_dict(
-        ... {'key1': '', 'key2': '', 'key3': ''}, ['key4'])
-        False
+    >>> any_keys_in_dict(
+    ... {'key1': '', 'key2': '', 'key3': ''}, ['key1', 'key2'])
+    True
+    >>> any_keys_in_dict(
+    ... {'key1': '', 'key2': '', 'key3': ''}, ['key1', 'key4'])
+    True
+    >>> any_keys_in_dict(
+    ... {'key1': '', 'key2': '', 'key3': ''}, ['key4'])
+    False
 
     """
     return any(k in in_dict for k in keys)
 
 
 def key_by_value_dict(in_dict, value):
-    """ Reverse dictionary lookup.
+    """Reverse dictionary lookup.
 
-        Args:
-            in_dict (dict): Input dict.
-            value: Lookup value.
+    Args:
+        in_dict (dict): Input dict.
+        value: Lookup value.
 
-        Returns:
-            Key in ``in_dict`` containing ``value`` if found.
+    Returns:
+        Key in ``in_dict`` containing ``value`` if found.
 
-        >>> key_by_value_dict({'key1': 42, 'key2': 'forty-two'}, 42)
-        'key1'
-        >>> key_by_value_dict({'key1': 42, 'key2': 'forty-two'}, 'forty-two')
-        'key2'
-        >>> key_by_value_dict({'key1': 42, 'key2': 'forty-two'}, '1') is None
-        True
+    >>> key_by_value_dict({'key1': 42, 'key2': 'forty-two'}, 42)
+    'key1'
+    >>> key_by_value_dict({'key1': 42, 'key2': 'forty-two'}, 'forty-two')
+    'key2'
+    >>> key_by_value_dict({'key1': 42, 'key2': 'forty-two'}, '1') is None
+    True
 
     """
     for k, v in six.iteritems(in_dict):
@@ -110,29 +110,29 @@ def key_by_value_dict(in_dict, value):
 
 
 def key_by_path_dict(in_dict, path):
-    """ Path-based dictionary lookup.
+    """Path-based dictionary lookup.
 
-        Args:
-            in_dict (dict): Input dict.
-            path (str): Full path to the key (key.subkey1.subkey2).
+    Args:
+        in_dict (dict): Input dict.
+        path (str): Full path to the key (key.subkey1.subkey2).
 
-        Returns:
-            Value for key at ``path`` if found in ``in_dict``.
+    Returns:
+        Value for key at ``path`` if found in ``in_dict``.
 
-        >>> key_by_path_dict(
-        ...     {'key1': {'subkey1': {'subkey2': 42}}},
-        ...     'key1.subkey1.subkey2'
-        ... )
-        42
-        >>> key_by_path_dict(
-        ...     {'key1': {'subkey1': {'subkey2': 42}}},
-        ...     'key1.subkey2.subkey1'
-        ... ) is None
-        True
+    >>> key_by_path_dict(
+    ...     {'key1': {'subkey1': {'subkey2': 42}}},
+    ...     'key1.subkey1.subkey2'
+    ... )
+    42
+    >>> key_by_path_dict(
+    ...     {'key1': {'subkey1': {'subkey2': 42}}},
+    ...     'key1.subkey2.subkey1'
+    ... ) is None
+    True
 
     """
     node = in_dict
-    node_path = path.split('.')
+    node_path = path.split(".")
 
     while True:
         k = node_path.pop(0)
@@ -148,23 +148,23 @@ def key_by_path_dict(in_dict, path):
 
 
 def keys_by_name_dict(in_dict, name, matchs=None):
-    """ Recursive dictionary lookup by name.
+    """Recursive dictionary lookup by name.
 
-        Args:
-            in_dict (dict): Input dict.
-            name (str): Lookup key name.
-            matchs (list): Match accumulator (recursive call only).
+    Args:
+        in_dict (dict): Input dict.
+        name (str): Lookup key name.
+        matchs (list): Match accumulator (recursive call only).
 
-        Returns:
-            List of Value for each key found in ``in_dict``.
+    Returns:
+        List of Value for each key found in ``in_dict``.
 
-        >>> sorted(
-        ...  keys_by_name_dict(
-        ...   {'key1': {'mykey': 1}, 'key2': {'mykey': 2}, 'mykey': 3},
-        ...   'mykey'
-        ...  )
-        ... )
-        [1, 2, 3]
+    >>> sorted(
+    ...  keys_by_name_dict(
+    ...   {'key1': {'mykey': 1}, 'key2': {'mykey': 2}, 'mykey': 3},
+    ...   'mykey'
+    ...  )
+    ... )
+    [1, 2, 3]
 
     """
     p = r"^{}$".format(name)
@@ -172,23 +172,23 @@ def keys_by_name_dict(in_dict, name, matchs=None):
 
 
 def keys_by_pattern_dict(in_dict, patterns, matchs=None):
-    """ Recursive dictionary lookup by regex pattern.
+    """Recursive dictionary lookup by regex pattern.
 
-        Args:
-            in_dict (dict): Input dict.
-            patterns (list): Lookup regex pattern list.
-            matchs (list): Match accumulator (recursive call only).
+    Args:
+        in_dict (dict): Input dict.
+        patterns (list): Lookup regex pattern list.
+        matchs (list): Match accumulator (recursive call only).
 
-        Returns:
-            List of Value for each key found in ``in_dict``.
+    Returns:
+        List of Value for each key found in ``in_dict``.
 
-        >>> sorted(
-        ...  keys_by_pattern_dict(
-        ...   {'key1': {'mykey': 1}, 'key2': {'mykey': 2}, 'mykey': 3},
-        ...   [r'^[A-Za-z]*$']
-        ...  )
-        ... )
-        [1, 2, 3]
+    >>> sorted(
+    ...  keys_by_pattern_dict(
+    ...   {'key1': {'mykey': 1}, 'key2': {'mykey': 2}, 'mykey': 3},
+    ...   [r'^[A-Za-z]*$']
+    ...  )
+    ... )
+    [1, 2, 3]
 
     """
     matchs = [] if matchs is None else matchs
@@ -205,79 +205,79 @@ def keys_by_pattern_dict(in_dict, patterns, matchs=None):
 
 
 def remove_key_dict(in_dict, patterns):
-    """ Recursive key remove by pattern from dictionary.
+    """Recursive key remove by pattern from dictionary.
 
-        Args:
-            in_dict (dict): Input dict.
-            patterns (list): Lookup regex pattern list.
+    Args:
+        in_dict (dict): Input dict.
+        patterns (list): Lookup regex pattern list.
 
-        Returns:
-            New dictionary with all key matching ``patterns`` removed.
+    Returns:
+        New dictionary with all key matching ``patterns`` removed.
 
-        >>> remove_key_dict(
-        ...     {'key1': {'mykey': 1}, 'key2': {'mykey': 2}, 'mykey': 3},
-        ...     [r'^.*\\d$']
-        ... )
-        {'mykey': 3}
+    >>> remove_key_dict(
+    ...     {'key1': {'mykey': 1}, 'key2': {'mykey': 2}, 'mykey': 3},
+    ...     [r'^.*\\d$']
+    ... )
+    {'mykey': 3}
 
     """
     if isinstance(in_dict, dict):
         in_dict = {
             key: remove_key_dict(value, patterns)
             for key, value in six.iteritems(in_dict)
-            if not any([re.search(p, key) for p in patterns])}
+            if not any([re.search(p, key) for p in patterns])
+        }
     elif isinstance(in_dict, list):
-        in_dict = [
-            remove_key_dict(item, patterns)
-            for item in in_dict]
+        in_dict = [remove_key_dict(item, patterns) for item in in_dict]
 
     return in_dict
 
 
 def transform_keys_dict(in_dict, func):
-    """ Recursively transform all keys in dictionary.
+    """Recursively transform all keys in dictionary.
 
-        Args:
-            in_dict (dict): Input dict.
-            func (callable): Callable object that take one argument.
+    Args:
+        in_dict (dict): Input dict.
+        func (callable): Callable object that take one argument.
 
-        Returns :
-            New dictionary with keys transformed according to ``func``.
+    Returns :
+        New dictionary with keys transformed according to ``func``.
 
-        >>> sorted(
-        ...     transform_keys_dict(
-        ...         {'A_key': 1, 'BKey': {'c_key': 3} }, camelize
-        ...     ).items()
-        ... )
-        [('AKey', 1), ('BKey', {'cKey': 3})]
+    >>> sorted(
+    ...     transform_keys_dict(
+    ...         {'A_key': 1, 'BKey': {'c_key': 3} }, camelize
+    ...     ).items()
+    ... )
+    [('AKey', 1), ('BKey', {'cKey': 3})]
 
     """
     return {
         func(key): transform_keys_dict(value, func)
-        if isinstance(value, dict) else value
+        if isinstance(value, dict)
+        else value
         for key, value in six.iteritems(in_dict)
     }
 
 
 def try_convert_number(in_val):
-    """ String to number conversion with automatic fallback.
+    """String to number conversion with automatic fallback.
 
-        Args:
-            in_val (str): Input String.
+    Args:
+        in_val (str): Input String.
 
-        Returns:
-            Integer or float representation of ``in_val``.
+    Returns:
+        Integer or float representation of ``in_val``.
 
-        >>> try_convert_number('2.0')
-        2
-        >>> try_convert_number('2.39')
-        2.39
-        >>> try_convert_number('2.2')
-        2.2
-        >>> try_convert_number('2.2.2')
-        '2.2.2'
-        >>> try_convert_number('3346518668994909089')
-        3346518668994909089
+    >>> try_convert_number('2.0')
+    2
+    >>> try_convert_number('2.39')
+    2.39
+    >>> try_convert_number('2.2')
+    2.2
+    >>> try_convert_number('2.2.2')
+    '2.2.2'
+    >>> try_convert_number('3346518668994909089')
+    3346518668994909089
 
     """
     if not isinstance(in_val, six.string_types):
@@ -301,31 +301,31 @@ def try_convert_number(in_val):
 
 
 def number_is_close(a, b, rtol=1e-05, atol=1e-08):
-    """ Return True if the values a and b are close to each other and False
-        otherwise.
+    """Return True if the values a and b are close to each other and False
+    otherwise.
 
-        Args:
-            rtol (float): Relative tolerance - it is the maximum allowed
-            difference between a and b, relative to the larger absolute value
-            of a or b.
-            atol (float): Minimum absolute tolerance - useful for comparisons
-            near zero. atol must be at least zero.
+    Args:
+        rtol (float): Relative tolerance - it is the maximum allowed
+        difference between a and b, relative to the larger absolute value
+        of a or b.
+        atol (float): Minimum absolute tolerance - useful for comparisons
+        near zero. atol must be at least zero.
 
-        >>> number_is_close(10000, 10001, rtol=1e-04)
-        True
-        >>> number_is_close(10000, 10002, rtol=1e-04)
-        False
+    >>> number_is_close(10000, 10001, rtol=1e-04)
+    True
+    >>> number_is_close(10000, 10002, rtol=1e-04)
+    False
     """
     return abs(a - b) <= max(rtol * max(abs(a), abs(b)), atol)
 
 
 def camelize(string):
-    """ Convert string to CamelCase notation (leave first character upper).
+    """Convert string to CamelCase notation (leave first character upper).
 
-        >>> camelize('Color_space')
-        'ColorSpace'
-        >>> camelize('ColorSpace')
-        'ColorSpace'
+    >>> camelize('Color_space')
+    'ColorSpace'
+    >>> camelize('ColorSpace')
+    'ColorSpace'
 
     """
-    return re.sub(r'_([a-zA-Z])', lambda x: x.group(1).upper(), string)
+    return re.sub(r"_([a-zA-Z])", lambda x: x.group(1).upper(), string)

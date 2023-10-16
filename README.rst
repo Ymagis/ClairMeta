@@ -32,7 +32,7 @@ Installation
 
 Requirements:
 
--  Python: 3.6 or later
+-  Python: 3.8 or later
 -  Platform: Windows (with limitations), macOS, Linux
 -  External (non-python) dependencies:
     -  asdcplib
@@ -167,9 +167,9 @@ Contributing
    cd clairmeta
    git clone https://github.com/Ymagis/ClairMeta_Data tests/resources
 
-   pip install pipenv
-   pipenv install --dev
-   pipenv shell
+   pip3 install poetry
+   poetry install
+   poetry shell
 
    # Code... and tests
    pytest --doctest-modules

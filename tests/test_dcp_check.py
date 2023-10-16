@@ -11,18 +11,18 @@ from clairmeta.logger import disable_log
 from clairmeta.profile import get_default_profile
 from clairmeta.dcp import DCP
 
+# ruff: noqa: E501
+
 
 class CheckerTestBase(unittest.TestCase):
-
     def __init__(self, *args, **kwargs):
         super(CheckerTestBase, self).__init__(*args, **kwargs)
         disable_log()
         self.profile = get_default_profile()
-        self.profile['bypass'] = ['check_assets_pkl_hash']
+        self.profile["bypass"] = ["check_assets_pkl_hash"]
 
     def get_dcp_folder(self):
-        return os.path.join(
-            os.path.dirname(__file__), 'resources', 'DCP', 'ECL-SET')
+        return os.path.join(os.path.dirname(__file__), "resources", "DCP", "ECL-SET")
 
     def get_dcp_path(self, dcp_id):
         if dcp_id in DCP_MAP:
@@ -55,8 +55,7 @@ class CheckerTestBase(unittest.TestCase):
 
 
 class DCPCheckTest(CheckerTestBase):
-
-    vf_missing = 'check_assets_cpl_missing_from_vf'
+    vf_missing = "check_assets_cpl_missing_from_vf"
 
     def __init__(self, *args, **kwargs):
         super(DCPCheckTest, self).__init__(*args, **kwargs)
@@ -78,7 +77,10 @@ class DCPCheckTest(CheckerTestBase):
         self.assertTrue(self.check(28))
         self.assertTrue(self.check(38))
 
-    @unittest.skipIf(platform.system() == "Windows", "asdcp-unwrap on Windows doesn't properly unwrap resources files (including fonts) from MXF making check fails. Help wanted.")
+    @unittest.skipIf(
+        platform.system() == "Windows",
+        "asdcp-unwrap on Windows doesn't properly unwrap resources files (including fonts) from MXF making check fails. Help wanted.",
+    )
     def test_smpte_vf(self):
         self.assertTrue(self.check(8))
         self.assertTrue(self.has_failed(DCPCheckTest.vf_missing))
@@ -97,20 +99,20 @@ class DCPCheckTest(CheckerTestBase):
     def test_over_bitrate(self):
         self.check(25)
         self.assertFalse(self.has_succeeded())
-        self.assertTrue(self.has_failed('check_picture_cpl_max_bitrate'))
-        self.assertTrue(self.has_failed('check_picture_cpl_avg_bitrate'))
+        self.assertTrue(self.has_failed("check_picture_cpl_max_bitrate"))
+        self.assertTrue(self.has_failed("check_picture_cpl_avg_bitrate"))
 
         self.check(42)
         self.assertFalse(self.has_succeeded())
-        self.assertTrue(self.has_failed('check_picture_cpl_max_bitrate'))
-        self.assertTrue(self.has_failed('check_picture_cpl_avg_bitrate'))
+        self.assertTrue(self.has_failed("check_picture_cpl_max_bitrate"))
+        self.assertTrue(self.has_failed("check_picture_cpl_avg_bitrate"))
 
     def test_nondci_resolution(self):
         self.assertTrue(self.check(26))
-        self.assertTrue(self.has_failed('check_picture_cpl_resolution'))
+        self.assertTrue(self.has_failed("check_picture_cpl_resolution"))
 
         self.assertTrue(self.check(27))
-        self.assertTrue(self.has_failed('check_picture_cpl_resolution'))
+        self.assertTrue(self.has_failed("check_picture_cpl_resolution"))
 
     def test_encrypted(self):
         self.assertTrue(self.check(29))
@@ -122,18 +124,18 @@ class DCPCheckTest(CheckerTestBase):
 
     def test_noncoherent_encryption(self):
         self.assertFalse(self.check(31))
-        self.assertTrue(self.has_failed('check_cpl_reel_coherence'))
+        self.assertTrue(self.has_failed("check_cpl_reel_coherence"))
         self.assertFalse(self.check(32))
-        self.assertTrue(self.has_failed('check_cpl_reel_coherence'))
+        self.assertTrue(self.has_failed("check_cpl_reel_coherence"))
 
     def test_iop_subtitle_png(self):
         self.assertTrue(self.check(33))
-        self.assertFalse(self.has_failed('check_subtitle_cpl_image'))
+        self.assertFalse(self.has_failed("check_subtitle_cpl_image"))
 
     def test_noncoherent_jp2k(self):
         self.assertFalse(self.check(39))
-        self.assertTrue(self.has_failed('check_picture_cpl_encoding'))
-        self.assertTrue(self.has_failed('check_cpl_reel_coherence'))
+        self.assertTrue(self.has_failed("check_picture_cpl_encoding"))
+        self.assertTrue(self.has_failed("check_cpl_reel_coherence"))
 
     def test_mpeg(self):
         self.assertFalse(self.check(40))
@@ -150,7 +152,6 @@ class DCPCheckTest(CheckerTestBase):
 
 
 class DCPCheckReportTest(CheckerTestBase):
-
     def __init__(self, *args, **kwargs):
         super(DCPCheckReportTest, self).__init__(*args, **kwargs)
         self.check(25)
@@ -161,8 +162,7 @@ class DCPCheckReportTest(CheckerTestBase):
         self.assertGreaterEqual(self.report.duration, 0)
 
     def test_report_checks(self):
-        self.assertGreaterEqual(
-            len(self.report.checks), self.report.checks_count())
+        self.assertGreaterEqual(len(self.report.checks), self.report.checks_count())
 
         failed = self.report.checks_failed()
         success = self.report.checks_succeeded()
@@ -171,30 +171,36 @@ class DCPCheckReportTest(CheckerTestBase):
         all_names = []
         for checks in [failed, success, bypass]:
             all_names += [c.name for c in checks]
-        self.assertEqual(sorted(all_names), sorted([c.name for c in self.report.checks]))
         self.assertEqual(
-            len(failed) + len(success) + len(bypass),
-            len(self.report.checks))
+            sorted(all_names), sorted([c.name for c in self.report.checks])
+        )
+        self.assertEqual(
+            len(failed) + len(success) + len(bypass), len(self.report.checks)
+        )
 
-        errors = self.report.errors_by_criticality('ERROR')
+        self.report.errors_by_criticality("ERROR")
         self.assertEqual(3, len(self.report.checks_failed()))
-        self.assertEqual(1, len(self.report.errors_by_criticality('ERROR')))
-        self.assertEqual(2, len(self.report.errors_by_criticality('WARNING')))
+        self.assertEqual(1, len(self.report.errors_by_criticality("ERROR")))
+        self.assertEqual(2, len(self.report.errors_by_criticality("WARNING")))
 
-        check = self.report.checks_by_criticality('ERROR')[0]
+        check = self.report.checks_by_criticality("ERROR")[0]
         self.assertEqual(check.name, "check_picture_cpl_max_bitrate")
         self.assertFalse(check.is_valid())
         self.assertFalse(check.bypass)
         self.assertGreaterEqual(check.seconds_elapsed, 0)
-        self.assertEqual(check.asset_stack, [
-            'CPL_ECL25SingleCPL_TST-48-600_S_EN-XX_UK-U_51_2K_DI_20180301_ECL_SMPTE_OV.xml',
-            'ECL25SingleCPL_TST-48-600_S_EN-XX_UK-U_51_2K_DI_20180301_ECL_SMPTE_OV_01.mxf'])
+        self.assertEqual(
+            check.asset_stack,
+            [
+                "CPL_ECL25SingleCPL_TST-48-600_S_EN-XX_UK-U_51_2K_DI_20180301_ECL_SMPTE_OV.xml",
+                "ECL25SingleCPL_TST-48-600_S_EN-XX_UK-U_51_2K_DI_20180301_ECL_SMPTE_OV_01.mxf",
+            ],
+        )
 
         error = check.errors[0]
         self.assertEqual(error.full_name(), "check_picture_cpl_max_bitrate")
         self.assertEqual(
-            error.message,
-            "Exceed DCI maximum bitrate (250.05 Mb/s) : 358.25 Mb/s")
+            error.message, "Exceed DCI maximum bitrate (250.05 Mb/s) : 358.25 Mb/s"
+        )
         self.assertTrue(error.criticality == "ERROR")
 
     def test_report_output(self):
@@ -207,5 +213,5 @@ class DCPCheckReportTest(CheckerTestBase):
         self.assertTrue(self.report.to_dict())
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     unittest.main()
