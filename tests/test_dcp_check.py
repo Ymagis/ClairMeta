@@ -181,7 +181,8 @@ class DCPCheckReportTest(CheckerTestBase):
         self.report.errors_by_criticality("ERROR")
         self.assertEqual(3, len(self.report.checks_failed()))
         self.assertEqual(1, len(self.report.errors_by_criticality("ERROR")))
-        self.assertEqual(2, len(self.report.errors_by_criticality("WARNING")))
+        self.assertEqual(1, len(self.report.errors_by_criticality("WARNING")))
+        self.assertEqual(1, len(self.report.errors_by_criticality("INFO")))
 
         check = self.report.checks_by_criticality("ERROR")[0]
         self.assertEqual(check.name, "check_picture_cpl_max_bitrate")

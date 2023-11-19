@@ -12,7 +12,15 @@ from clairmeta.utils.file import human_size
 class CheckReport(object):
     """Check report listing all checks executions."""
 
-    pretty_status = {
+    ORDERED_STATUS = [
+        "ERROR",
+        "WARNING",
+        "INFO",
+        "SILENT",
+        "BYPASS",
+    ]
+
+    PRETTY_STATUS = {
         "ERROR": "Error(s)",
         "WARNING": "Warning(s)",
         "INFO": "Info(s)",
@@ -109,20 +117,20 @@ class CheckReport(object):
         # Ignore silenced checks
         status_map.pop("SILENT", None)
 
-        for status, vals in six.iteritems(status_map):
+        for status in self.ORDERED_STATUS:
             out_stack = []
-            for k, v in six.iteritems(vals):
+            for k, v in six.iteritems(status_map[status]):
                 out_stack += [self._dump_stack("", k, v, indent_level=0)]
             if out_stack:
                 report += "{}\n{}\n".format(
-                    self.pretty_status[status] + ":", "\n".join(out_stack)
+                    self.PRETTY_STATUS[status] + ":", "\n".join(out_stack)
                 )
 
         bypassed = "\n".join(
             set(["  . " + c.short_desc() for c in self.checks_bypassed()])
         )
         if bypassed:
-            report += "{}\n{}\n".format(self.pretty_status["BYPASS"] + ":", bypassed)
+            report += "{}\n{}\n".format(self.PRETTY_STATUS["BYPASS"] + ":", bypassed)
 
         return report
 

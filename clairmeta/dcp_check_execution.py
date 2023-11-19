@@ -79,7 +79,7 @@ class CheckExecution(object):
 
     def short_desc(self):
         """Returns first line of the docstring or function name."""
-        docstring_lines = self.doc.split("\n")
+        docstring_lines = self.doc.split("\n") if self.doc else ""
         return docstring_lines[0].strip() if docstring_lines else self.name
 
     def is_valid(self, criticality="ERROR"):

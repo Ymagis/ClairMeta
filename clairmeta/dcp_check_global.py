@@ -7,7 +7,6 @@ import re
 
 from clairmeta.dcp_utils import list_cpl_assets, cpl_probe_asset
 from clairmeta.dcp_check import CheckerBase
-from clairmeta.utils.sys import all_keys_in_dict
 
 
 class Checker(CheckerBase):
@@ -99,25 +98,29 @@ class Checker(CheckerBase):
                 )
 
     def check_dcp_signed(self):
-        """DCP with encrypted content must be digitally signed.
+        """Encrypted DCP must be digitally signed (XMLs include Signer and Signature).
 
         References:
             DCI DCSS (v1.3) 5.4.3.7
             DCI DCSS (v1.3) 5.5.2.3
         """
         for cpl in self.dcp._list_cpl:
+            cpl_name = cpl["FileName"]
             cpl_node = cpl["Info"]["CompositionPlaylist"]
+            if not cpl_node["Encrypted"]:
+                continue
+
             xmls = [
-                pkl["Info"]["PackingList"]
+                (pkl["FileName"], pkl["Info"]["PackingList"])
                 for pkl in self.dcp._list_pkl
                 if pkl["Info"]["PackingList"]["Id"] == cpl_node.get("PKLId")
             ]
-            xmls.append(cpl_node)
+            xmls.append((cpl_name, cpl_node))
 
-            for xml in xmls:
-                signed = all_keys_in_dict(xml, ["Signer", "Signature"])
-                if not signed and cpl_node["Encrypted"] is True:
-                    self.error("Encrypted DCP must be signed")
+            for name, xml in xmls:
+                for field in ["Signer", "Signature"]:
+                    if field not in xml.keys():
+                        self.error("Missing {} element in {}".format(field, name))
 
     def check_link_ov_coherence(self):
         """Relink OV/VF sanity checks.
