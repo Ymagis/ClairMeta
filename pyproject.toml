@@ -29,3 +29,9 @@ black = "^23.9.1"
 [build-system]
 requires = ["poetry-core"]
 build-backend = "poetry.core.masonry.api"
+
+[tool.black]
+extend-exclude = '''(clairmeta/ext/*)'''
+
+[tool.ruff]
+exclude = ["clairmeta/ext"]
