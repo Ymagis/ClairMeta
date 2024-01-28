@@ -203,8 +203,8 @@ About
 
 http://www.ymagis.com/
 
-.. |Build Status| image:: https://travis-ci.org/Ymagis/ClairMeta.svg?branch=1.0.0b1
-   :target: https://travis-ci.org/Ymagis/ClairMeta
+.. |Build Status| image:: https://github.com/Ymagis/ClairMeta/actions/workflows/test-package.yml/badge.svg
+   :target: https://github.com/Ymagis/ClairMeta/actions/workflows/test-package.yml
 .. |PyPI version| image:: https://badge.fury.io/py/clairmeta.svg
    :target: https://badge.fury.io/py/clairmeta
 .. |Code coverage| image:: https://codecov.io/gh/Ymagis/ClairMeta/branch/develop/graph/badge.svg
