@@ -76,6 +76,7 @@ class CheckerBase(object):
                 checker = module.Checker(self.dcp)
                 checker.ov_path = self.ov_path
                 checker.allowed_foreign_files = self.allowed_foreign_files
+                checker.bypass_list = self.bypass_list
                 checker.hash_callback = self.hash_callback
                 self.check_modules[v] = checker
             except (ImportError, Exception) as e:
