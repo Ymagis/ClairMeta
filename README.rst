@@ -70,6 +70,7 @@ As a command line tool:
     python3 -m clairmeta.cli check -type dcp path/to/dcp -format xml > check.xml
     python3 -m clairmeta.cli check -type dcp path/to/dcp -kdm /path/to/kdm -key /path/to/privatekey
     python3 -m clairmeta.cli check -type dcp path/to/dcp -progress
+    python3 -m clairmeta.cli check -type dcp path/to/dcp_vf -ov path/to/dcp_ov
 
 As a python library:
 
