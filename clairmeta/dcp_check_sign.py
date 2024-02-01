@@ -6,6 +6,7 @@ import re
 import base64
 import hashlib
 from datetime import datetime, timedelta
+from dateutil import parser
 from OpenSSL import crypto
 from cryptography.hazmat.primitives import serialization
 from cryptography.x509.name import _ASN1Type
@@ -121,6 +122,11 @@ class Checker(CheckerBase):
 
             if not all_keys_in_dict(source_xml, ["Signer", "Signature"]):
                 continue
+
+            # See check_certif_date documentation note for rational.
+            if "IssueDate" in source_xml:
+                issue_date = parser.parse(source_xml["IssueDate"])
+                self.context_time = datetime.strftime(issue_date, "%Y%m%d%H%M%SZ")
 
             self.cert_list = []
             self.cert_store = crypto.X509Store()
@@ -350,8 +356,12 @@ class Checker(CheckerBase):
     def check_certif_date(self, cert, index):
         """Certificate date validation.
 
+        Note that as per DCI specification, the context time is set to that of
+        the IssueDate.
+
         References:
             SMPTE ST 430-2:2017 6.2 9
+            DCI DCSS (v1.4.4) 9.4.3.5 4.c
         """
         # 9. Check time validity
         # Note : Date are formatted in ASN.1 Time YYYYMMDDhhmmssZ
