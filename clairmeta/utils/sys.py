@@ -252,9 +252,9 @@ def transform_keys_dict(in_dict, func):
 
     """
     return {
-        func(key): transform_keys_dict(value, func)
-        if isinstance(value, dict)
-        else value
+        func(key): (
+            transform_keys_dict(value, func) if isinstance(value, dict) else value
+        )
         for key, value in six.iteritems(in_dict)
     }
 
