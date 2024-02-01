@@ -35,17 +35,7 @@
             <xs:choice maxOccurs="unbounded">
                 <xs:element name="Text" type="TextType"/>
                 <xs:element name="Image" type="ImageType"/>
-                <xs:element name="Font">
-                    <xs:complexType>
-                        <xs:complexContent>
-                            <xs:extension base="FontTypeSubtitleLevel">
-                                <xs:sequence>
-                                    <xs:element name="Text" type="TextType" maxOccurs="unbounded"/>
-                                </xs:sequence>
-                            </xs:extension>
-                        </xs:complexContent>
-                    </xs:complexType>
-                </xs:element>
+                <xs:element name="Font" type="FontTypeSubtitleLevel"/>
             </xs:choice>
         </xs:sequence>
         <xs:attribute name="SpotNumber" type="NonEmptyType" use="required"/>

@@ -172,7 +172,10 @@ Contributing
    poetry install
    poetry shell
 
-   # Code... and tests
+   # Code...
+
+   ruff check
+   black .
    pytest --doctest-modules
 
 -  Open a Pull Request
