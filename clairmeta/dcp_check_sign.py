@@ -6,6 +6,7 @@ import re
 import base64
 import hashlib
 from datetime import datetime, timedelta
+from dateutil import parser
 from OpenSSL import crypto
 from cryptography.hazmat.primitives import serialization
 from cryptography.x509.name import _ASN1Type
@@ -121,6 +122,11 @@ class Checker(CheckerBase):
 
             if not all_keys_in_dict(source_xml, ["Signer", "Signature"]):
                 continue
+
+            # See check_certif_date documentation note for rational.
+            if "IssueDate" in source_xml:
+                issue_date = parser.parse(source_xml["IssueDate"])
+                self.context_time = datetime.strftime(issue_date, "%Y%m%d%H%M%SZ")
 
             self.cert_list = []
             self.cert_store = crypto.X509Store()
@@ -350,8 +356,12 @@ class Checker(CheckerBase):
     def check_certif_date(self, cert, index):
         """Certificate date validation.
 
+        Note that as per DCI specification, the context time is set to that of
+        the IssueDate.
+
         References:
             SMPTE ST 430-2:2017 6.2 9
+            DCI DCSS (v1.4.4) 9.4.3.5 4.c
         """
         # 9. Check time validity
         # Note : Date are formatted in ASN.1 Time YYYYMMDDhhmmssZ
@@ -366,10 +376,42 @@ class Checker(CheckerBase):
             not_before_str = cert.get_notBefore().decode("utf-8")
             not_before = datetime.strptime(not_before_str, time_format)
             not_after_str = cert.get_notAfter().decode("utf-8")
-            not_after = datetime.strptime(not_after_str, "%Y%m%d%H%M%SZ")
+            not_after = datetime.strptime(not_after_str, time_format)
 
             if validity_time < not_before or validity_time > not_after:
-                self.error("Certificate is not valid at this time")
+                self.error(
+                    "IssueDate ({}) outside certificate validity (from {} to {})".format(
+                        validity_time, not_before, not_after
+                    )
+                )
+
+    def check_certif_date_expired(self, cert, index):
+        """Certificate date expiration.
+
+        This is an informative note, when trying to play a CPL with an expired
+        certificate may fail on older / non-updated systems not compliant with
+        DCI specification 1.4.4.
+
+        References:
+            https://www.isdcf.com/certs-expiring/
+        """
+        # 9. Check time validity
+        # Note : Date are formatted in ASN.1 Time YYYYMMDDhhmmssZ
+        time_format = "%Y%m%d%H%M%SZ"
+        validity_time = datetime.now()
+
+        not_before_str = cert.get_notBefore().decode("utf-8")
+        not_before = datetime.strptime(not_before_str, time_format)
+        not_after_str = cert.get_notAfter().decode("utf-8")
+        not_after = datetime.strptime(not_after_str, time_format)
+
+        if validity_time < not_before or validity_time > not_after:
+            self.error(
+                "Certificate validity expired (from {} to {}).\n"
+                "Playback may fail on non DCI 1.4.4 compliant systems.".format(
+                    not_before, not_after
+                )
+            )
 
     def check_certif_date_overflow(self, cert, index):
         """Certificate date overflow check.
