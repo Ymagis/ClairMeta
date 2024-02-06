@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "clairmeta"
-version = "1.5.1"
+version = "1.5.2"
 description = "ClairMeta is a python package for Digital Cinema Package (DCP) probing and checking."
 authors = ["Rémi Achard <remiachard@gmail.com>"]
 license = "BSD-3-Clause"
