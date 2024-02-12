@@ -1,12 +1,16 @@
 # Clairmeta - (C) YMAGIS S.A.
 # See LICENSE for more information
 
+import os
 import six
 
 from clairmeta.utils.time import compare_ratio
 from clairmeta.dcp_check import CheckerBase
-from clairmeta.dcp_utils import list_cpl_assets
+from clairmeta.dcp_utils import list_cpl_assets, get_contentkey_for_asset
 from clairmeta.settings import DCP_SETTINGS
+from clairmeta.logger import get_log
+from clairmeta.utils.probe import unwrap_mxf
+from clairmeta.ext.note_1_validator_main.validate import validate as rdd52_compat_1
 
 
 class Checker(CheckerBase):
@@ -264,3 +268,51 @@ class Checker(CheckerBase):
 
         if not is_stereo and editrate != framerate:
             self.error("2D FrameRate must be equal to EditRate")
+
+    def check_picture_cpl_codestream(self, playlist, asset):
+        """Inspection and validation of J2C files codestream.
+
+        References:
+            SMPTE RDD 52 Compatibility Note 1 https://github.com/SMPTE/rdd52/issues/8
+        """
+        _, asset = asset
+        path = os.path.join(self.dcp.path, asset["Path"])
+        can_unwrap = path.endswith(".mxf") and os.path.isfile(path)
+
+        if can_unwrap:
+            unwrap_args = []
+
+            try:
+                if asset["Encrypted"]:
+                    k = get_contentkey_for_asset(self.dcp, asset)
+                    unwrap_args += ["-k", k]
+            except Exception as e:
+                get_log().info("Picture inspection skipped : {}".format(str(e)))
+                return
+
+            total_frames = asset["Duration"]
+            remaining_frames = total_frames
+            frames_chunk = 48
+
+            while remaining_frames:
+                first_frame = total_frames - remaining_frames
+                duration = min(frames_chunk, remaining_frames)
+                unwrap_args += ["-f", str(first_frame), "-d", str(duration)]
+
+                with unwrap_mxf(path, args=unwrap_args) as folder:
+                    for idx, filename in enumerate(sorted(os.listdir(folder))):
+                        filepath = os.path.join(folder, filename)
+                        frame_idx = first_frame + idx
+
+                        # Run RDD52 compatibility script
+                        try:
+                            rdd52_compat_1(filepath, False)
+                        except Exception as e:
+                            self.error(
+                                "Failed validating J2C codestream (SMPTE RDD 52"
+                                " Compatibility Note 1) for frame {}: {}".format(
+                                    frame_idx, str(e)
+                                )
+                            )
+
+                remaining_frames -= duration
