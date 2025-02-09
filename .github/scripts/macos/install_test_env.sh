@@ -12,13 +12,15 @@ WORK_DIR=`mktemp -d`
 cd "$WORK_DIR"
 
 git clone https://github.com/cinecert/asdcplib.git && cd asdcplib
-git checkout rel_2_10_35
+git checkout rel_2_13_0
 mkdir build && cd build
 
 # Hombrew OpenSSL is keg-only, need to help asdcplib's find_library
 cmake \
-    -DOpenSSLLib_PATH=/usr/local/opt/openssl/lib/libcrypto.dylib \
-    -DOpenSSLLib_include_DIR=/usr/local/opt/openssl/include \
+    # -DOpenSSLLib_PATH=/usr/local/opt/openssl/lib/libcrypto.dylib \
+    # -DOpenSSLLib_include_DIR=/usr/local/opt/openssl/include \
+    # https://github.com/cinecert/asdcplib/pull/132
+    -DCMAKE_MACOSX_RPATH=ON \
     ..
 sudo cmake --build . --target install --config Release -- -j$(sysctl -n hw.ncpu)
 
