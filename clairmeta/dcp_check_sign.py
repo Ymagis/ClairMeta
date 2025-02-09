@@ -2,14 +2,13 @@
 # See LICENSE for more information
 
 import six
-import re
 import base64
 import hashlib
-from datetime import datetime, timedelta
-from dateutil import parser
-from OpenSSL import crypto
-from cryptography.hazmat.primitives import serialization
-from cryptography.x509.name import _ASN1Type
+from datetime import datetime, timedelta, UTC
+from cryptography import x509
+from cryptography.hazmat.primitives import hashes, serialization
+from cryptography.hazmat.primitives.asymmetric import rsa
+from cryptography.hazmat.primitives.asymmetric.padding import PKCS1v15
 
 from clairmeta.settings import DCP_SETTINGS
 from clairmeta.utils.xml import canonicalize_xml
@@ -38,22 +37,22 @@ class Checker(CheckerBase):
         # Special values :
         # - Empty string : no time validity check
         # - 'NOW' : use current time
-        self.context_time = "NOW"
+        self.context_time = ""
         self.context_trusted_certificates = []
         self.context_revoked_certificates_id = []
         self.context_revoked_public_keys = []
 
         # Interop DCP can be signed with SMPTE compliant certificate
         self.certif_sig_algorithm_map = {
-            "SMPTE": ["sha256WithRSAEncryption"],
-            "Interop": ["sha256WithRSAEncryption", "sha1WithRSAEncryption"],
-            "Unknown": "sha256WithRSAEncryption",
+            "SMPTE": ["sha256"],
+            "Interop": ["sha256", "sha1"],
+            "Unknown": "sha256",
         }
 
         self.sig_algorithm_map = {
-            "SMPTE": "sha256WithRSAEncryption",
-            "Interop": "sha1WithRSAEncryption",
-            "Unknown": "sha256WithRSAEncryption",
+            "SMPTE": hashes.SHA256(),
+            "Interop": hashes.SHA1(),
+            "Unknown": hashes.SHA256(),
         }
 
         self.sig_func_map = {
@@ -70,44 +69,13 @@ class Checker(CheckerBase):
             "Unknown": DCP_SETTINGS["xmluri"]["smpte_sig"],
         }
 
-    def issuer_to_str(self, issuer):
-        """String representation of X509Name object."""
-        # Note : what are the escapes rule here ?
-        issuer_dn = issuer.dnQualifier.replace("+", r"\+")
-        return "dnQualifier={},CN={},OU={},O={}".format(
-            issuer_dn, issuer.CN, issuer.OU, issuer.O
-        )
-
-    def issuer_match(self, issuer_a, issuer_b):
-        """Compare two distinguished name."""
-        issuers = []
-        for issuer in [issuer_a, issuer_b]:
-            fields = {}
-            for field in issuer.split(","):
-                k, v = field.split("=", 1)
-                fields[k] = v
-            issuers.append(fields)
-
-        return issuers[0] == issuers[1]
-
     def certif_der_decoding(self, cert):
         """Certificate ASN.1 DER decoding."""
         try:
             certif = base64.b64decode(cert["X509Certificate"])
-            X509 = crypto.load_certificate(crypto.FILETYPE_ASN1, certif)
-            return X509
-        except crypto.Error as e:
+            return x509.load_der_x509_certificate(certif)
+        except ValueError as e:
             self.error("Invalid certificate encoding : {}".format(str(e)))
-
-    def certif_ext_map(self, cert):
-        extensions_map = {}
-
-        for ext_index in range(cert.get_extension_count()):
-            ext = cert.get_extension(ext_index)
-            ext_name = ext.get_short_name().decode("utf-8")
-            extensions_map[ext_name] = ext
-
-        return extensions_map
 
     def run_checks(self):
         sources = self.dcp._list_pkl + self.dcp._list_cpl
@@ -129,7 +97,6 @@ class Checker(CheckerBase):
                 self.context_time = datetime.strftime(issue_date, "%Y%m%d%H%M%SZ")
 
             self.cert_list = []
-            self.cert_store = crypto.X509Store()
             self.cert_chains = source_xml["Signature"]["KeyInfo"]["X509Data"]
 
             for index, cert in reversed(list(enumerate(self.cert_chains))):
@@ -137,12 +104,9 @@ class Checker(CheckerBase):
                 if not cert_x509:
                     continue
 
-                self.cert_store.add_cert(cert_x509)
                 self.cert_list.append(cert_x509)
 
-                stack = asset_stack + [
-                    "Certificate {}".format(cert_x509.get_serial_number())
-                ]
+                stack = asset_stack + ["Certificate {}".format(cert_x509.serial_number)]
 
                 [
                     self.run_check(check, cert_x509, index, stack=stack)
@@ -174,7 +138,7 @@ class Checker(CheckerBase):
         References:
             SMPTE ST 430-2:2017 6.2 2
         """
-        if cert.get_version() != crypto.x509.Version.v3.value:
+        if cert.version != x509.Version.v3:
             self.error("Invalid certificate version")
 
     def check_certif_extensions(self, cert, index):
@@ -183,26 +147,26 @@ class Checker(CheckerBase):
         References:
             SMPTE ST 430-2:2017 6.2 3
         """
-        extensions_map = self.certif_ext_map(cert)
-        required_extensions = [
-            "basicConstraints",
-            "keyUsage",
-            "subjectKeyIdentifier",
-            "authorityKeyIdentifier",
-        ]
+        required_extensions = {
+            x509.OID_BASIC_CONSTRAINTS: "basicConstraints",
+            x509.OID_KEY_USAGE: "keyUsage",
+            x509.OID_SUBJECT_KEY_IDENTIFIER: "subjectKeyIdentifier",
+            x509.OID_AUTHORITY_KEY_IDENTIFIER: "authorityKeyIdentifier",
+        }
 
         # 3.a Required extensions are present
-        for ext_name in required_extensions:
-            if ext_name not in extensions_map:
-                self.error("Missing required extension marked : {}".format(ext_name))
+        try:
+            for oid, name in six.iteritems(required_extensions):
+                cert.extensions.get_extension_for_oid(oid)
+        except x509.ExtensionNotFound:
+            self.error("Missing required extension marked : {}".format(name))
 
         # 3.b Unknown extensions marked critical
-        for ext_name, ext in six.iteritems(extensions_map):
-            is_known = ext_name in required_extensions
-            is_critical = ext.get_critical() != 0
-            if not is_known and is_critical:
+        for ext in cert.extensions:
+            is_known = ext.oid in required_extensions
+            if not is_known and ext.critical:
                 self.error(
-                    "Unknown extension marked as critical : " "{}".format(ext_name)
+                    "Unknown extension marked as critical : " "{}".format(ext._name)
                 )
 
     def check_certif_fields(self, cert, index):
@@ -217,9 +181,9 @@ class Checker(CheckerBase):
         # Fields : signed part
         # Version SerialNumber Signature Issuer Subject Validity
         # SubjectPublicKeyInfo AuthorityKeyIdentifier KeyUsage BasicConstraint
-        if not isinstance(cert.get_issuer(), crypto.X509Name):
+        if not cert.issuer:
             self.error("Missing Issuer field")
-        if not isinstance(cert.get_subject(), crypto.X509Name):
+        if not cert.subject:
             self.error("Missing Subject field")
 
     def check_certif_fields_encoding(self, cert, index):
@@ -230,12 +194,11 @@ class Checker(CheckerBase):
         References:
             SMPTE ST 430-2:2017 5.3.1, 5.3.2, 5.3.3, 5.3.4
         """
-        cert = cert.to_cryptography()
         fields = {"Subject": cert.subject, "Issuer": cert.issuer}
 
         for name, field in six.iteritems(fields):
             for a in field:
-                if a._type != _ASN1Type.PrintableString:
+                if a._type != x509.name._ASN1Type.PrintableString:
                     type_str = str(a._type).split(".")[-1]
                     self.error(
                         "{} {} field encoding should be PrintableString"
@@ -249,19 +212,18 @@ class Checker(CheckerBase):
             SMPTE ST 430-2:2017 6.2 5
         """
         # 5. Check BasicConstraint
-        extensions_map = self.certif_ext_map(cert)
-        bc = str(extensions_map["basicConstraints"])
+        bc = cert.extensions.get_extension_for_oid(x509.OID_BASIC_CONSTRAINTS).value
 
         is_ca = index > 0
         is_leaf = not is_ca
 
-        if re.search("CA:TRUE", bc) and is_leaf:
+        if bc.ca and is_leaf:
             self.error("CA True in leaf certificate")
-        if re.search("CA:FALSE", bc) and is_ca:
+        if not bc.ca and is_ca:
             self.error("CA False in authority certificate")
-        if re.search("CA:TRUE", bc) and not re.search(r"pathlen:\d+", bc):
+        if bc.ca and not bc.path_length:
             self.error("CA True and Pathlen absent or not >= 0")
-        if re.search("CA:FALSE", bc) and re.search(r"pathlen:[^0]", bc):
+        if not bc.ca and bc.path_length:
             self.error("CA False and Pathlen present or non-zero")
 
     def check_certif_key_usage(self, cert, index):
@@ -271,9 +233,29 @@ class Checker(CheckerBase):
             SMPTE ST 430-2:2017 6.2 6
         """
         # 6. Check KeyUsage
-        extensions_map = self.certif_ext_map(cert)
-        keyUsage = str(extensions_map["keyUsage"])
-        keys = [k for k in keyUsage.split(", ")]
+        keyUsage = cert.extensions.get_extension_for_oid(x509.OID_KEY_USAGE).value
+        keys = []
+
+        # Manually construct a list of all known keys found
+        # There is probably a better way of doing this.
+        if keyUsage.digital_signature:
+            keys.append("Digital Signature")
+        if keyUsage.content_commitment:
+            keys.append("Content Commitment")
+        if keyUsage.key_encipherment:
+            keys.append("Key Encipherment")
+        if keyUsage.data_encipherment:
+            keys.append("Data Encipherment")
+        if keyUsage.key_agreement:
+            keys.append("Key agreement")
+            if keyUsage.encipher_only:
+                keys.append("Encipher Only")
+            if keyUsage.decipher_only:
+                keys.append("Decipher Only")
+        if keyUsage.key_cert_sign:
+            keys.append("Certificate Sign")
+        if keyUsage.crl_sign:
+            keys.append("CRL Sign")
 
         is_ca = index > 0
         is_leaf = not is_ca
@@ -301,11 +283,20 @@ class Checker(CheckerBase):
             SMPTE ST 430-2:2017 6.2 7
         """
         # 7. Check OrganizationName
-        if cert.get_issuer().O == "":
+        if (
+            cert.issuer.get_attributes_for_oid(x509.OID_ORGANIZATION_NAME)[0].value
+            == ""
+        ):
             self.error("Missing OrganizationName in Issuer name")
-        if cert.get_subject().O == "":
+        if (
+            cert.subject.get_attributes_for_oid(x509.OID_ORGANIZATION_NAME)[0].value
+            == ""
+        ):
             self.error("Missing OrganizationName in Subject name")
-        if cert.get_subject().O != cert.get_issuer().O:
+        if (
+            cert.subject.get_attributes_for_oid(x509.OID_ORGANIZATION_NAME)[0].value
+            != cert.issuer.get_attributes_for_oid(x509.OID_ORGANIZATION_NAME)[0].value
+        ):
             self.error("OrganizationName mismatch for Issuer and Subject")
 
     def check_certif_role(self, cert, index):
@@ -315,7 +306,7 @@ class Checker(CheckerBase):
             SMPTE ST 430-2:2017 6.2 8
         """
         # 8. Check Role
-        cn = cert.get_subject().CN
+        cn = cert.subject.get_attributes_for_oid(x509.OID_COMMON_NAME)[0].value
         roles_str = cn.split(".", 1)[0]
         roles = roles_str.split()
 
@@ -342,7 +333,7 @@ class Checker(CheckerBase):
         References:
             DCI DCSS (v1.3) 9.4.3.5
         """
-        cn = cert.get_subject().CN
+        cn = cert.subject.get_attributes_for_oid(x509.OID_COMMON_NAME)[0].value
         roles_str = cn.split(".", 1)[0]
         roles = roles_str.split()
 
@@ -368,15 +359,13 @@ class Checker(CheckerBase):
         time_format = "%Y%m%d%H%M%SZ"
 
         if self.context_time == "NOW":
-            validity_time = datetime.now()
+            validity_time = datetime.now(UTC)
         elif self.context_time != "":
             validity_time = datetime.strptime(self.context_time, time_format)
 
         if self.context_time:
-            not_before_str = cert.get_notBefore().decode("utf-8")
-            not_before = datetime.strptime(not_before_str, time_format)
-            not_after_str = cert.get_notAfter().decode("utf-8")
-            not_after = datetime.strptime(not_after_str, time_format)
+            not_before = cert.not_valid_before_utc
+            not_after = cert.not_valid_after_utc
 
             if validity_time < not_before or validity_time > not_after:
                 self.error(
@@ -421,11 +410,9 @@ class Checker(CheckerBase):
 
         References: N/A
         """
-        not_after_str = cert.get_notAfter().decode("utf-8")
-        not_after = datetime.strptime(not_after_str, "%Y%m%d%H%M%SZ")
-
-        int32_overflow = datetime.fromtimestamp(2**32 / 2 - 1)
-        ten_years_past = datetime.now() + timedelta(days=365 * 10)
+        not_after = cert.not_valid_after_utc
+        int32_overflow = datetime.fromtimestamp(2**32 / 2 - 1, UTC)
+        ten_years_past = datetime.now(UTC) + timedelta(days=365 * 10)
 
         if not_after >= int32_overflow:
             self.error(
@@ -444,7 +431,7 @@ class Checker(CheckerBase):
             SMPTE ST 430-2:2017 6.2 10
         """
         # 10. Signature Algorithm
-        signature_algorithm = cert.get_signature_algorithm().decode("utf-8")
+        signature_algorithm = cert.signature_hash_algorithm.name
         expected = self.certif_sig_algorithm_map[self.dcp.schema]
 
         if signature_algorithm not in expected:
@@ -461,15 +448,15 @@ class Checker(CheckerBase):
             SMPTE ST 430-2:2017 5.2, 6.2 11
         """
         # 11. Subject's PublicKey RSA validity
-        expected_type = crypto.TYPE_RSA
+        expected_type = rsa.RSAPublicKey
         expected_size = 2048
         expected_exp = 65537
 
-        key_type = cert.get_pubkey().type()
-        key_size = cert.get_pubkey().bits()
-        key_exp = cert.get_pubkey().to_cryptography_key().public_numbers().e
+        public_key = cert.public_key()
+        key_size = public_key.key_size
+        key_exp = public_key.public_numbers().e
 
-        if key_type != expected_type:
+        if not isinstance(public_key, expected_type):
             self.error("Subject's public key shall be an RSA key")
         if key_size != expected_size:
             self.error(
@@ -502,14 +489,12 @@ class Checker(CheckerBase):
             SMPTE ST 430-2:2017 6.2 13
         """
         # 13. Subject's public key thumb print match dnQualifier
-        dn_thumbprint = cert.get_subject().dnQualifier.encode("utf-8")
-        key_bits = (
-            cert.get_pubkey()
-            .to_cryptography_key()
-            .public_bytes(
-                encoding=serialization.Encoding.DER,
-                format=serialization.PublicFormat.PKCS1,
-            )
+        dn_thumbprint = cert.subject.get_attributes_for_oid(x509.OID_DN_QUALIFIER)[
+            0
+        ].value.encode("utf-8")
+        key_bits = cert.public_key().public_bytes(
+            encoding=serialization.Encoding.DER,
+            format=serialization.PublicFormat.PKCS1,
         )
         key_thumbprint = base64.b64encode(hashlib.sha1(key_bits).digest())
 
@@ -522,25 +507,36 @@ class Checker(CheckerBase):
                 )
             )
 
-    # def check_certif_authority(self, cert, index):
-    #     # 14. AuthorityKeyIdentifier
-    #     # Lookup issuer certificate using AuthorityKeyIdentifier Attribute
-    #     # Where to lookup ?
-    #     # (extensions_map['authorityKeyIdentifier'])
-
     def check_certif_signature(self, cert, index):
         """Certificate signature check.
 
         References:
+            SMPTE ST 430-2:2017 6.2 14
             SMPTE ST 430-2:2017 6.2 15
         """
+        # 14. AuthorityKeyIdentifier
+
+        # This follows SMPTE guidelines but produces errors on the DCP test set.
+        # Instead, we use the certificate's issuer field.
+        # aki_ext = cert.extensions.get_extension_for_oid(
+        #     x509.OID_AUTHORITY_KEY_IDENTIFIER
+        # ).value
+        # issuer_name = aki_ext.authority_cert_issuer[0].value
+
+        issuer_name = cert.issuer
+        issuer_cert = None
+        for c in self.cert_list:
+            if c.subject == issuer_name:
+                issuer_cert = c
+                break
+
+        if not issuer_cert:
+            self.error("Certificate issuer's certificate not found")
+
         # 15. Validate signature using local issuer
-        # Note : use openssl StoreContext object which should do this plus a
-        # bunch of other checks.
         try:
-            store_ctx = crypto.X509StoreContext(self.cert_store, cert)
-            store_ctx.verify_certificate()
-        except crypto.X509StoreContextError as e:
+            cert.verify_directly_issued_by(issuer_cert)
+        except Exception as e:
             self.error("Certificate signature check failure : {}".format(str(e)))
 
     def check_xml_certif_serial_coherence(self, cert, xml_cert):
@@ -550,10 +546,10 @@ class Checker(CheckerBase):
         """
         # i. Serial number check
         xml_serial = xml_cert["X509IssuerSerial"]["X509SerialNumber"]
-        if xml_serial != cert.get_serial_number():
+        if xml_serial != cert.serial_number:
             self.error(
                 "Serial number mismatch, expected {} but got {}".format(
-                    cert.get_serial_number(), xml_serial
+                    cert.serial_number, xml_serial
                 )
             )
 
@@ -564,8 +560,8 @@ class Checker(CheckerBase):
         """
         # ii. Issuer name check
         xml_issuer = xml_cert["X509IssuerSerial"]["X509IssuerName"]
-        issuer_str = self.issuer_to_str(cert.get_issuer())
-        if not self.issuer_match(xml_issuer, issuer_str):
+        issuer_str = cert.issuer.rfc4514_string({x509.OID_DN_QUALIFIER: "dnQualifier"})
+        if xml_issuer != issuer_str:
             self.error(
                 "IssuerName mismatch, expected {} but got {}".format(
                     issuer_str, xml_issuer
@@ -598,22 +594,14 @@ class Checker(CheckerBase):
             parent, child = self.cert_list[index - 1], self.cert_list[index]
 
             # 17. Child Issuer match parent Subject
-            if child.get_issuer() != parent.get_subject():
+            if child.issuer != parent.subject:
                 self.error("Certificate chain issuer / subject mismatch")
 
             # 18. Validity date of child contained in parent date
-            child_A = datetime.strptime(
-                child.get_notBefore().decode("utf-8"), "%Y%m%d%H%M%SZ"
-            )
-            child_B = datetime.strptime(
-                child.get_notAfter().decode("utf-8"), "%Y%m%d%H%M%SZ"
-            )
-            parent_A = datetime.strptime(
-                parent.get_notBefore().decode("utf-8"), "%Y%m%d%H%M%SZ"
-            )
-            parent_B = datetime.strptime(
-                parent.get_notAfter().decode("utf-8"), "%Y%m%d%H%M%SZ"
-            )
+            child_A = child.not_valid_before_utc
+            child_B = child.not_valid_after_utc
+            parent_A = parent.not_valid_before_utc
+            parent_B = parent.not_valid_after_utc
 
             if child_A < parent_A:
                 self.error(
@@ -638,7 +626,7 @@ class Checker(CheckerBase):
 
         References: N/A
         """
-        sign_alg_set = set([c.get_signature_algorithm() for c in self.cert_list])
+        sign_alg_set = set([c.signature_hash_algorithm.name for c in self.cert_list])
         if len(sign_alg_set) > 1:
             self.error(
                 "Certificate chain contains certificates "
@@ -702,8 +690,10 @@ class Checker(CheckerBase):
         """
         signer = source["Signer"]["X509Data"]["X509IssuerSerial"]
         # Signer Issuer Name
-        issuer_dn = self.issuer_to_str(self.cert_list[-1].get_issuer())
-        if not self.issuer_match(signer["X509IssuerName"], issuer_dn):
+        issuer_dn = self.cert_list[-1].issuer.rfc4514_string(
+            {x509.OID_DN_QUALIFIER: "dnQualifier"}
+        )
+        if signer["X509IssuerName"] != issuer_dn:
             self.error("Invalid Signer Issuer Name")
 
     def check_sign_issuer_serial(self, source):
@@ -713,7 +703,7 @@ class Checker(CheckerBase):
         """
         sig = source["Signer"]["X509Data"]["X509IssuerSerial"]
         # Signer Serial number
-        if sig["X509SerialNumber"] != self.cert_list[-1].get_serial_number():
+        if sig["X509SerialNumber"] != self.cert_list[-1].serial_number:
             self.error("Invalid Signer Serial Number")
 
     def check_document_signature(self, source, path):
@@ -747,11 +737,11 @@ class Checker(CheckerBase):
         xml_sig = base64.b64decode(xml_sig)
 
         try:
-            crypto.verify(
-                self.cert_list[-1],
-                xml_sig,
-                c14n_sign,
-                self.sig_algorithm_map[self.dcp.schema],
+            self.cert_list[-1].public_key().verify(
+                signature=xml_sig,
+                data=c14n_sign,
+                padding=PKCS1v15(),
+                algorithm=self.sig_algorithm_map[self.dcp.schema],
             )
-        except crypto.Error:
+        except Exception:
             self.error("Signature validation failed")
