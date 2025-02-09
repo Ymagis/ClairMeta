@@ -2,10 +2,27 @@
 name = "clairmeta"
 version = "1.5.2"
 description = "ClairMeta is a python package for Digital Cinema Package (DCP) probing and checking."
-authors = ["Rémi Achard <remiachard@gmail.com>"]
-license = "BSD-3-Clause"
+authors = [
+    { name = "Rémi Achard", email = "remiachard@gmail.com" },
+]
+license = { text = "BSD-3-Clause" }
 readme = "README.rst"
 requires-python = ">=3.8"
+classifiers = [
+    "Development Status :: 5 - Production/Stable",
+    "Intended Audience :: Developers",
+    "Topic :: Utilities",
+    "Topic :: Multimedia :: Video",
+    "Topic :: Software Development :: Libraries :: Python Modules",
+    "License :: OSI Approved :: BSD License",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.8",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+]
 dependencies = [
     "cryptography>=44.0.0",
     "dicttoxml>=1.7.16",
@@ -17,6 +34,10 @@ dependencies = [
     "six>=1.17.0",
     "xmltodict>=0.14.2",
 ]
+keywords = ["digital", "cinema", "dcp", "dcdm", "dsm", "check", "probe", "smpte", "interop"]
+
+[project.urls]
+Repository = "https://github.com/Ymagis/ClairMeta"
 
 [dependency-groups]
 dev = [
