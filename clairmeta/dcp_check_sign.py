@@ -4,6 +4,7 @@
 import base64
 import hashlib
 from datetime import datetime, timedelta, UTC
+from dateutil import parser
 from cryptography import x509
 from cryptography.hazmat.primitives import hashes, serialization
 from cryptography.hazmat.primitives.asymmetric import rsa
@@ -33,6 +34,7 @@ class Checker(CheckerBase):
         self.context_chain_length = 0
         self.context_role = "CS"
         # Time string (YYYYMMDDhhmmssZ)
+        self.time_format = "%Y%m%d%H%M%SZ"
         # Special values :
         # - Empty string : no time validity check
         # - 'NOW' : use current time
@@ -92,8 +94,9 @@ class Checker(CheckerBase):
 
             # See check_certif_date documentation note for rational.
             if "IssueDate" in source_xml:
+                # No timezone information seems to be encoded in IssueDate time format
                 issue_date = parser.parse(source_xml["IssueDate"])
-                self.context_time = datetime.strftime(issue_date, "%Y%m%d%H%M%SZ")
+                self.context_time = datetime.strftime(issue_date, self.time_format)
 
             self.cert_list = []
             self.cert_chains = source_xml["Signature"]["KeyInfo"]["X509Data"]
@@ -355,12 +358,12 @@ class Checker(CheckerBase):
         """
         # 9. Check time validity
         # Note : Date are formatted in ASN.1 Time YYYYMMDDhhmmssZ
-        time_format = "%Y%m%d%H%M%SZ"
 
         if self.context_time == "NOW":
             validity_time = datetime.now(UTC)
         elif self.context_time != "":
-            validity_time = datetime.strptime(self.context_time, time_format)
+            validity_time = datetime.strptime(self.context_time, self.time_format)
+            validity_time = validity_time.replace(tzinfo=UTC)
 
         if self.context_time:
             not_before = cert.not_valid_before_utc
@@ -384,14 +387,9 @@ class Checker(CheckerBase):
             https://www.isdcf.com/certs-expiring/
         """
         # 9. Check time validity
-        # Note : Date are formatted in ASN.1 Time YYYYMMDDhhmmssZ
-        time_format = "%Y%m%d%H%M%SZ"
-        validity_time = datetime.now()
-
-        not_before_str = cert.get_notBefore().decode("utf-8")
-        not_before = datetime.strptime(not_before_str, time_format)
-        not_after_str = cert.get_notAfter().decode("utf-8")
-        not_after = datetime.strptime(not_after_str, time_format)
+        validity_time = datetime.now(UTC)
+        not_before = cert.not_valid_before_utc
+        not_after = cert.not_valid_after_utc
 
         if validity_time < not_before or validity_time > not_after:
             self.error(
