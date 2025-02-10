@@ -1,7 +1,6 @@
 # Clairmeta - (C) YMAGIS S.A.
 # See LICENSE for more information
 
-import six
 import re
 from datetime import datetime
 from dateutil import parser
@@ -13,7 +12,7 @@ from clairmeta.settings import DCP_SETTINGS
 
 
 def get_schema(name):
-    for k, v in six.iteritems(DCP_SETTINGS["xmlns"]):
+    for k, v in DCP_SETTINGS["xmlns"].items():
         if name == k or name == v:
             return v
 

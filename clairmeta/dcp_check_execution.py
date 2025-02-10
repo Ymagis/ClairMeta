@@ -1,9 +1,6 @@
 # Clairmeta - (C) YMAGIS S.A.
 # See LICENSE for more information
 
-import six
-
-
 ERROR_SILENT = 0
 ERROR_INFO = 1
 ERROR_WARNING = 2
@@ -16,7 +13,7 @@ ERROR_FROM_STR = {
     "ERROR": ERROR_ERROR,
 }
 
-STR_FROM_ERROR = {v: k for k, v in six.iteritems(ERROR_FROM_STR)}
+STR_FROM_ERROR = {v: k for k, v in ERROR_FROM_STR.items()}
 
 
 def ErrorLevelFromString(error_str):

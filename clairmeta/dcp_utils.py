@@ -1,7 +1,6 @@
 # Clairmeta - (C) YMAGIS S.A.
 # See LICENSE for more information
 
-import six
 import os
 import base64
 import binascii
@@ -71,17 +70,17 @@ def list_cpl_assets(
     """
     for reel in cpl["Info"]["CompositionPlaylist"]["ReelList"]:
         assets = reel.get("Assets", {})
-        assets = {k: v for k, v in six.iteritems(assets) if k in filters}
+        assets = {k: v for k, v in assets.items() if k in filters}
 
         if required_keys:
             assets = {
                 k: v
-                for k, v in six.iteritems(assets)
+                for k, v in assets.items()
                 for req_k in required_keys
                 if req_k in v
             }
 
-        for k, v in six.iteritems(assets):
+        for k, v in assets.items():
             yield k, v
 
 
@@ -141,7 +140,7 @@ def get_type_for_asset(cpl, uuid):
     """
     for reel in cpl["Info"]["CompositionPlaylist"]["ReelList"]:
         assets = reel.get("Assets", [])
-        for asset_type, asset in six.iteritems(assets):
+        for asset_type, asset in assets.items():
             if uuid == asset["Id"]:
                 return asset_type
 
@@ -246,18 +245,18 @@ def cpl_extract_characteristics(cpl):
             presence_keys[pkey].append(pkey in reel["Assets"])
 
     unified_integrity_keys = {}
-    for k, v in six.iteritems(integrity_keys):
+    for k, v in integrity_keys.items():
         key = k.split(".")[-1]
         if key in unified_integrity_keys:
             unified_integrity_keys[key] += v
         else:
             unified_integrity_keys[key] = v
 
-    for k, v in six.iteritems(essence_keys):
+    for k, v in essence_keys.items():
         key = k.replace(".", "")
         unified_integrity_keys[key] = v
 
-    for k, v in six.iteritems(unified_integrity_keys):
+    for k, v in unified_integrity_keys.items():
         if len(set(v)) == 1:
             cpl_value = v[0]
         elif len(set(v)) > 1:
@@ -267,7 +266,7 @@ def cpl_extract_characteristics(cpl):
 
         cpl[k] = cpl_value
 
-    for k, v in six.iteritems(presence_keys):
+    for k, v in presence_keys.items():
         cpl_key = k.split(".")[-1]
         cpl[cpl_key] = any(v)
 

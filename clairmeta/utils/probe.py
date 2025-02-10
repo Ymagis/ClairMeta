@@ -2,7 +2,6 @@
 # See LICENSE for more information
 
 import os
-import six
 import platform
 import subprocess
 import xmltodict
@@ -143,7 +142,7 @@ def probe_mxf_clean(in_meta):
     out_meta = {}
 
     # Generic cleanup
-    for k, v in six.iteritems(in_meta):
+    for k, v in in_meta.items():
         # Remove BitRate unit suffix
         if v.endswith("Mb/s"):
             v = v[:-4]
@@ -426,7 +425,7 @@ def probe_folder(path):
     # Remove base folder path from keys
     rootpath = os.path.dirname(path) + "/"
     clean_metadata = {}
-    for key, val in six.iteritems(metadata):
+    for key, val in metadata.items():
         newkey = key.replace(rootpath, "")
         clean_metadata[newkey] = val
 

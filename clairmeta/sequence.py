@@ -2,7 +2,6 @@
 # See LICENSE for more information
 
 import os
-import six
 
 from clairmeta.sequence_check import check_sequence
 from clairmeta.utils.sys import key_by_path_dict
@@ -46,8 +45,8 @@ class Sequence(object):
             setting["directory_white_list"],
         )
 
-        for folder, seqs in six.iteritems(self.probe_folder):
-            for seq, keys in six.iteritems(seqs):
+        for folder, seqs in self.probe_folder.items():
+            for seq, keys in seqs.items():
                 ext = keys.get("Extension")
                 check_keys = setting["allowed_extensions"].get("." + ext)
                 probe_keys = keys.get("Probe")
@@ -66,7 +65,7 @@ class Sequence(object):
             ValueError: Mismatch.
 
         """
-        for key, expect_val in six.iteritems(check_keys):
+        for key, expect_val in check_keys.items():
             val = key_by_path_dict(probe_keys, key)
 
             if isinstance(expect_val, list):

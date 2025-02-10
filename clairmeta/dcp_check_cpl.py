@@ -3,7 +3,6 @@
 
 from __future__ import unicode_literals
 
-import six
 import operator
 from clairmeta.utils.sys import all_keys_in_dict
 from clairmeta.utils.uuid import check_uuid, extract_uuid, RFC4122_RE
@@ -49,7 +48,7 @@ class Checker(CheckerBase):
         for reel in playlist["Info"]["CompositionPlaylist"]["ReelList"]:
             metadatas = {
                 k: v[metadata]
-                for k, v in six.iteritems(reel["Assets"])
+                for k, v in reel["Assets"].items()
                 if v.get(metadata) and k in [type_a, type_b]
             }
 
@@ -282,7 +281,7 @@ cause issue for some equipements in the field.
         for reel in playlist["Info"]["CompositionPlaylist"]["ReelList"]:
             assets = [
                 v
-                for k, v in six.iteritems(reel["Assets"])
+                for k, v in reel["Assets"].items()
                 for key in cut_keys
                 if key in v.keys()
             ]
@@ -462,7 +461,7 @@ cause issue for some equipements in the field.
         if "Probe" not in asset:
             return
 
-        for k, v in six.iteritems(metadata_map):
+        for k, v in metadata_map.items():
             if k in asset and v in asset["Probe"]:
                 cpl_val = asset[k]
                 mxf_val = asset["Probe"][v]

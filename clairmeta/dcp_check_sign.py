@@ -1,7 +1,6 @@
 # Clairmeta - (C) YMAGIS S.A.
 # See LICENSE for more information
 
-import six
 import base64
 import hashlib
 from datetime import datetime, timedelta, UTC
@@ -156,7 +155,7 @@ class Checker(CheckerBase):
 
         # 3.a Required extensions are present
         try:
-            for oid, name in six.iteritems(required_extensions):
+            for oid, name in required_extensions.items():
                 cert.extensions.get_extension_for_oid(oid)
         except x509.ExtensionNotFound:
             self.error("Missing required extension marked : {}".format(name))
@@ -196,7 +195,7 @@ class Checker(CheckerBase):
         """
         fields = {"Subject": cert.subject, "Issuer": cert.issuer}
 
-        for name, field in six.iteritems(fields):
+        for name, field in fields.items():
             for a in field:
                 if a._type != x509.name._ASN1Type.PrintableString:
                     type_str = str(a._type).split(".")[-1]

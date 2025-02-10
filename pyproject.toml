@@ -30,7 +30,6 @@ dependencies = [
     "lxml>=5.3.0",
     "pycountry>=24.6.1",
     "python-dateutil>=2.9.0.post0",
-    "six>=1.17.0",
     "xmltodict>=0.14.2",
 ]
 keywords = ["digital", "cinema", "dcp", "dcdm", "dsm", "check", "probe", "smpte", "interop"]

@@ -1,7 +1,6 @@
 # Clairmeta - (C) YMAGIS S.A.
 # See LICENSE for more information
 
-import six
 import json
 import os
 import copy
@@ -98,7 +97,7 @@ def load_profile(file_path):
             "Load Profile {} : loading error - {}".format(file_path, str(e))
         )
 
-    for k, v in six.iteritems(profile_format):
+    for k, v in profile_format.items():
         if k not in profile:
             raise ClairMetaException(
                 "Load Profile {} : missing key {}".format(file_path, k)

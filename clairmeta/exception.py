@@ -1,8 +1,6 @@
 # Clairmeta - (C) YMAGIS S.A.
 # See LICENSE for more information
 
-import six
-
 
 class ClairMetaException(Exception):
     """Base class for all exception raised by this library."""
@@ -20,7 +18,7 @@ class ProbeException(ClairMetaException):
     """Raised when probing a DCP fails."""
 
     def __init__(self, msg):
-        super(ProbeException, self).__init__(six.ensure_str(msg))
+        super(ProbeException, self).__init__(str(msg))
 
 
 class CheckException(ClairMetaException):

@@ -2,7 +2,6 @@
 # See LICENSE for more information
 
 import os
-import six
 import time
 
 from clairmeta.logger import get_log
@@ -110,7 +109,7 @@ class DCP(object):
         self._list_asset = {
             k: v
             for _list_asset in self._list_asset
-            for k, v in six.iteritems(_list_asset)
+            for k, v in _list_asset.items()
         }
 
         # Schema (IOP or SMPTE) is assumed to be the one found for the Assetmap
