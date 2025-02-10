@@ -7,7 +7,7 @@ import platform
 import subprocess
 import xmltodict
 import contextlib
-from shutilwhich import which
+from shutil import which
 
 from clairmeta.utils.sys import transform_keys_dict, try_convert_number, camelize
 from clairmeta.utils.file import temporary_dir, parse_name
