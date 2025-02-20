@@ -3,7 +3,7 @@
 
 import base64
 import hashlib
-from datetime import datetime, timedelta, UTC
+from datetime import datetime, timedelta, timezone
 from dateutil import parser
 from cryptography import x509
 from cryptography.hazmat.primitives import hashes, serialization
@@ -360,10 +360,10 @@ class Checker(CheckerBase):
         # Note : Date are formatted in ASN.1 Time YYYYMMDDhhmmssZ
 
         if self.context_time == "NOW":
-            validity_time = datetime.now(UTC)
+            validity_time = datetime.now(timezone.utc)
         elif self.context_time != "":
             validity_time = datetime.strptime(self.context_time, self.time_format)
-            validity_time = validity_time.replace(tzinfo=UTC)
+            validity_time = validity_time.replace(tzinfo=timezone.utc)
 
         if self.context_time:
             not_before = cert.not_valid_before_utc
@@ -387,7 +387,7 @@ class Checker(CheckerBase):
             https://www.isdcf.com/certs-expiring/
         """
         # 9. Check time validity
-        validity_time = datetime.now(UTC)
+        validity_time = datetime.now(timezone.utc)
         not_before = cert.not_valid_before_utc
         not_after = cert.not_valid_after_utc
 
@@ -408,8 +408,8 @@ class Checker(CheckerBase):
         References: N/A
         """
         not_after = cert.not_valid_after_utc
-        int32_overflow = datetime.fromtimestamp(2**32 / 2 - 1, UTC)
-        ten_years_past = datetime.now(UTC) + timedelta(days=365 * 10)
+        int32_overflow = datetime.fromtimestamp(2**32 / 2 - 1, timezone.utc)
+        ten_years_past = datetime.now(timezone.utc) + timedelta(days=365 * 10)
 
         if not_after >= int32_overflow:
             self.error(
