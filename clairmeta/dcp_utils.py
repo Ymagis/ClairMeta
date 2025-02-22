@@ -74,10 +74,7 @@ def list_cpl_assets(
 
         if required_keys:
             assets = {
-                k: v
-                for k, v in assets.items()
-                for req_k in required_keys
-                if req_k in v
+                k: v for k, v in assets.items() for req_k in required_keys if req_k in v
             }
 
         for k, v in assets.items():

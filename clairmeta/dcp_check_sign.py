@@ -157,11 +157,11 @@ class Checker(CheckerBase):
         }
 
         # 3.a Required extensions are present
-        try:
-            for oid, name in required_extensions.items():
+        for oid, name in required_extensions.items():
+            try:
                 cert.extensions.get_extension_for_oid(oid)
-        except x509.ExtensionNotFound:
-            self.error("Missing required extension marked : {}".format(name))
+            except x509.ExtensionNotFound:
+                self.error("Missing required extension marked : {}".format(name))
 
         # 3.b Unknown extensions marked critical
         for ext in cert.extensions:

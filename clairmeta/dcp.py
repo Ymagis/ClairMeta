@@ -107,9 +107,7 @@ class DCP(object):
             {uuid: path for a in self._list_am for uuid, path, _ in list_am_assets(a)}
         ]
         self._list_asset = {
-            k: v
-            for _list_asset in self._list_asset
-            for k, v in _list_asset.items()
+            k: v for _list_asset in self._list_asset for k, v in _list_asset.items()
         }
 
         # Schema (IOP or SMPTE) is assumed to be the one found for the Assetmap

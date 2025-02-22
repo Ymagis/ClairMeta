@@ -168,6 +168,8 @@ Contributing
    cd clairmeta
    git clone https://github.com/Ymagis/ClairMeta_Data tests/resources
 
+   uv sync --all-extras --dev
+
    # Code...
 
    uv run ruff check

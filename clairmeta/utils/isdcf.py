@@ -131,9 +131,7 @@ def parse_isdcf_string(isdcf_str):
     # order is preserved so this is not needed, but not in python 2.7
     dcnc_version = DCP_SETTINGS["naming_convention"]
     rules = OrderedDict(
-        sorted(
-            RULES[dcnc_version].items(), key=lambda f: RULES_ORDER.index(f[0])
-        )
+        sorted(RULES[dcnc_version].items(), key=lambda f: RULES_ORDER.index(f[0]))
     )
 
     fields_dict = init_dict_isdcf(rules)
