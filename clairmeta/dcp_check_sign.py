@@ -73,10 +73,26 @@ class Checker(CheckerBase):
     def certif_der_decoding(self, cert):
         """Certificate ASN.1 DER decoding."""
         try:
-            certif = base64.b64decode(cert["X509Certificate"])
-            return x509.load_der_x509_certificate(certif)
-        except ValueError as e:
+            certif_bytes = base64.b64decode(cert["X509Certificate"])
+            certif = x509.load_der_x509_certificate(certif_bytes)
+        except Exception as e:
             self.error("Invalid certificate encoding : {}".format(str(e)))
+
+        try:
+            _ = certif.extensions
+            valid_extensions = True
+        except ValueError as e:
+            valid_extensions = False
+            self.error(
+                "Error while parsing extensions, skipping checks for certificate {}: {}".format(
+                    certif.serial_number, e
+                ),
+                "extensions",
+                "Encountered non-conformant extensions encoding.\n"
+                "  Has been observed on certificate's BasicConstraints extension, see https://github.com/pyca/cryptography/issues/3856",
+            )
+
+        return certif, valid_extensions
 
     def run_checks(self):
         sources = self.dcp._list_pkl + self.dcp._list_cpl
@@ -102,7 +118,7 @@ class Checker(CheckerBase):
             self.cert_chains = source_xml["Signature"]["KeyInfo"]["X509Data"]
 
             for index, cert in reversed(list(enumerate(self.cert_chains))):
-                cert_x509 = self.run_check(self.certif_der_decoding, cert)
+                cert_x509, cert_valid = self.run_check(self.certif_der_decoding, cert, stack=asset_stack)
                 if not cert_x509:
                     continue
 
@@ -110,15 +126,16 @@ class Checker(CheckerBase):
 
                 stack = asset_stack + ["Certificate {}".format(cert_x509.serial_number)]
 
-                [
-                    self.run_check(check, cert_x509, index, stack=stack)
-                    for check in self.find_check("certif")
-                ]
+                if cert_valid:
+                    [
+                        self.run_check(check, cert_x509, index, stack=stack)
+                        for check in self.find_check("certif")
+                    ]
 
-                [
-                    self.run_check(check, cert_x509, cert, stack=stack)
-                    for check in self.find_check("xml_certif")
-                ]
+                    [
+                        self.run_check(check, cert_x509, cert, stack=stack)
+                        for check in self.find_check("xml_certif")
+                    ]
 
             if not self.cert_list:
                 return self.checks
@@ -223,9 +240,9 @@ class Checker(CheckerBase):
             self.error("CA True in leaf certificate")
         if not bc.ca and is_ca:
             self.error("CA False in authority certificate")
-        if bc.ca and not bc.path_length:
+        if bc.ca and (bc.path_length < 0 or bc.path_length is None):
             self.error("CA True and Pathlen absent or not >= 0")
-        if not bc.ca and bc.path_length:
+        if not bc.ca and (bc.path_length != 0 and bc.path_length is not None):
             self.error("CA False and Pathlen present or non-zero")
 
     def check_certif_key_usage(self, cert, index):
@@ -532,7 +549,17 @@ class Checker(CheckerBase):
 
         # 15. Validate signature using local issuer
         try:
-            cert.verify_directly_issued_by(issuer_cert)
+            # Cryptography doesn't support SHA1 signatures
+            # https://github.com/pyca/cryptography/issues/10727
+            if cert.signature_algorithm_oid == x509.SignatureAlgorithmOID.RSA_WITH_SHA1:
+                issuer_cert.public_key().verify(
+                    signature=cert.signature,
+                    data=cert.tbs_certificate_bytes,
+                    padding=PKCS1v15(),
+                    algorithm=cert.signature_hash_algorithm
+                )
+            else:
+                cert.verify_directly_issued_by(issuer_cert)
         except Exception as e:
             self.error("Certificate signature check failure : {}".format(str(e)))
 

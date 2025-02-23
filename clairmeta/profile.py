@@ -16,6 +16,7 @@ DCP_CHECK_PROFILE = {
     # 4 levels : ERROR, WARNING, INFO and SILENT.
     "criticality": {
         "default": "ERROR",
+        "certif_der_decoding_extensions": "WARNING",
         "check_dcnc_": "INFO",
         "check_dcp_foreign_files": "WARNING",
         "check_assets_am_volindex_one": "WARNING",

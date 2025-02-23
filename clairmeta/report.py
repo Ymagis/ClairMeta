@@ -107,7 +107,7 @@ class CheckReport(object):
                 for filename in check.asset_stack:
                     asset = asset[filename]
 
-                desc = error.short_desc()
+                desc = error.doc
                 desc = ". {}\n".format(desc) if desc else ""
                 lines.append("{}{}".format(desc, error.message))
 
