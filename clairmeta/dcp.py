@@ -180,6 +180,7 @@ class DCP(object):
         self.package_type = "OV"
 
         for cpl in self._list_cpl:
+            cpl_type = "OV"
             for asset_type, asset in list_cpl_assets(cpl):
                 asset_id = asset["Id"]
                 asset["EssenceType"] = asset_type
@@ -192,7 +193,10 @@ class DCP(object):
                         self.path, self._list_asset[asset_id]
                     )
                 else:
+                    cpl_type = "VF"
                     self.package_type = "VF"
+
+            cpl["CPLType"] = cpl_type
 
     def cpl_probe_assets(self):
         """Probe mxf assets for each reel."""
