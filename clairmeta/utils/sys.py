@@ -2,7 +2,6 @@
 # See LICENSE for more information
 
 import contextlib
-import six
 import re
 
 
@@ -104,7 +103,7 @@ def key_by_value_dict(in_dict, value):
     True
 
     """
-    for k, v in six.iteritems(in_dict):
+    for k, v in in_dict.items():
         if value == v:
             return k
 
@@ -194,7 +193,7 @@ def keys_by_pattern_dict(in_dict, patterns, matchs=None):
     matchs = [] if matchs is None else matchs
 
     if isinstance(in_dict, dict):
-        for k, v in six.iteritems(in_dict):
+        for k, v in in_dict.items():
             if any([re.search(p, k) for p in patterns]):
                 matchs.append(in_dict[k])
             keys_by_pattern_dict(v, patterns, matchs)
@@ -224,7 +223,7 @@ def remove_key_dict(in_dict, patterns):
     if isinstance(in_dict, dict):
         in_dict = {
             key: remove_key_dict(value, patterns)
-            for key, value in six.iteritems(in_dict)
+            for key, value in in_dict.items()
             if not any([re.search(p, key) for p in patterns])
         }
     elif isinstance(in_dict, list):
@@ -252,10 +251,10 @@ def transform_keys_dict(in_dict, func):
 
     """
     return {
-        func(key): transform_keys_dict(value, func)
-        if isinstance(value, dict)
-        else value
-        for key, value in six.iteritems(in_dict)
+        func(key): (
+            transform_keys_dict(value, func) if isinstance(value, dict) else value
+        )
+        for key, value in in_dict.items()
     }
 
 
@@ -280,7 +279,7 @@ def try_convert_number(in_val):
     3346518668994909089
 
     """
-    if not isinstance(in_val, six.string_types):
+    if not isinstance(in_val, str):
         return in_val
 
     # We need to first try integer conversion because float representation

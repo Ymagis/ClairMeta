@@ -1,8 +1,6 @@
 # Clairmeta - (C) YMAGIS S.A.
 # See LICENSE for more information
 
-import six
-
 
 def compare_ratio(a, b, precision=0.05):
     """Compare decimal numbers up to a given precision."""
@@ -33,7 +31,7 @@ def format_ratio(in_str, separator="/"):
     1.77
 
     """
-    if not isinstance(in_str, six.string_types):
+    if not isinstance(in_str, str):
         return in_str
 
     try:

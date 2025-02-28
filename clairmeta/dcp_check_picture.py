@@ -1,8 +1,6 @@
 # Clairmeta - (C) YMAGIS S.A.
 # See LICENSE for more information
 
-import six
-
 from clairmeta.utils.time import compare_ratio
 from clairmeta.dcp_check import CheckerBase
 from clairmeta.dcp_utils import list_cpl_assets
@@ -126,7 +124,7 @@ class Checker(CheckerBase):
             if levels == 0:
                 return
 
-            for k, v in six.iteritems(resolutions):
+            for k, v in resolutions.items():
                 if resolution in v:
                     resolution_name = k
                     break

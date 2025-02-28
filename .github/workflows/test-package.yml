@@ -4,10 +4,10 @@ on: [push, pull_request]
 
 jobs:
   test-linux:
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-latest
     strategy:
       matrix:
-        python-version: ["3.8", "3.9", "3.10", "3.11", "3.12"]
+        python-version: ["3.8", "3.9", "3.10", "3.11", "3.12", "3.13"]
     steps:
     - name: Clone repository
       uses: actions/checkout@v4
@@ -16,6 +16,10 @@ jobs:
       with:
         repository: Ymagis/ClairMeta_Data
         path: tests/resources
+    - name: Install uv
+      uses: astral-sh/setup-uv@v5
+      with:
+        python-version: ${{ matrix.python-version }}
     - name: Set up Python ${{ matrix.python-version }}
       uses: actions/setup-python@v5
       with:
@@ -24,20 +28,18 @@ jobs:
       run: .github/scripts/linux/apt/install_test_env.sh
     - name: Install python dependencies
       run: |
-        pip install poetry codecov
-        poetry install
-        poetry env info
-        poetry show --tree
+        uv sync --all-extras --dev
+        uv tree
     - name: Test
       run: |
-        poetry run python -m compileall clairmeta
-        poetry run pytest --doctest-modules
+        uv run python -m compileall clairmeta
+        uv run pytest --doctest-modules
 
   test-macos:
-    runs-on: macos-12
+    runs-on: macos-latest
     strategy:
       matrix:
-        python-version: ["3.8", "3.12"]
+        python-version: ["3.8", "3.13"]
     steps:
     - name: Clone repository
       uses: actions/checkout@v4
@@ -46,6 +48,10 @@ jobs:
       with:
         repository: Ymagis/ClairMeta_Data
         path: tests/resources
+    - name: Install uv
+      uses: astral-sh/setup-uv@v5
+      with:
+        python-version: ${{ matrix.python-version }}
     - name: Set up Python ${{ matrix.python-version }}
       uses: actions/setup-python@v5
       with:
@@ -54,20 +60,18 @@ jobs:
       run: .github/scripts/macos/install_test_env.sh
     - name: Install python dependencies
       run: |
-        pip install poetry codecov
-        poetry install
-        poetry env info
-        poetry show --tree
+        uv sync --all-extras --dev
+        uv tree
     - name: Test
       run: |
-        poetry run python -m compileall clairmeta
-        poetry run pytest --doctest-modules
+        uv run python -m compileall clairmeta
+        uv run pytest --doctest-modules
 
   test-windows:
-    runs-on: windows-2022
+    runs-on: windows-latest
     strategy:
       matrix:
-        python-version: ["3.8", "3.12"]
+        python-version: ["3.8", "3.13"]
     steps:
     - name: Clone repository
       uses: actions/checkout@v4
@@ -76,6 +80,10 @@ jobs:
       with:
         repository: Ymagis/ClairMeta_Data
         path: tests/resources
+    - name: Install uv
+      uses: astral-sh/setup-uv@v5
+      with:
+        python-version: ${{ matrix.python-version }}
     - name: Set up Python ${{ matrix.python-version }}
       uses: actions/setup-python@v5
       with:
@@ -85,14 +93,12 @@ jobs:
       shell: bash
     - name: Install python dependencies
       run: |
-        pip install poetry codecov
-        poetry install
-        poetry env info
-        poetry show --tree
+        uv sync --all-extras --dev
+        uv tree
       shell: bash
     - name: Test
       run: |
         export PATH="/c/vcpkg/installed/x64-windows/bin:$PATH"
-        poetry run python -m compileall clairmeta
-        poetry run pytest --doctest-modules
+        uv run python -m compileall clairmeta
+        uv run pytest --doctest-modules
       shell: bash

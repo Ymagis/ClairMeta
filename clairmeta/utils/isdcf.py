@@ -2,7 +2,6 @@
 # See LICENSE for more information
 
 import re
-import six
 from collections import OrderedDict
 from itertools import islice
 
@@ -104,7 +103,7 @@ DEFAULTS = {
 # fmt: on
 
 
-def parse_isdcf_string(str):
+def parse_isdcf_string(isdcf_str):
     """Regex based check of ISDCF Naming convention.
 
     Digital Cinema Naming Convention as defined by ISDCF
@@ -113,7 +112,7 @@ def parse_isdcf_string(str):
     See : http://isdcf.com/dcnc/index.html
 
     Args:
-        str (str): ContentTitle to check.
+        isdcf_str (str): ContentTitle to check.
 
     Returns:
         Tuple consisting of a dictionary of all extracted fiels and a list
@@ -123,7 +122,7 @@ def parse_isdcf_string(str):
     fields_dict = {}
     error_list = []
 
-    if not isinstance(str, six.string_types):
+    if not isinstance(isdcf_str, str):
         error_list.append("ContentTitle invalid type")
         return fields_dict, error_list
 
@@ -132,13 +131,11 @@ def parse_isdcf_string(str):
     # order is preserved so this is not needed, but not in python 2.7
     dcnc_version = DCP_SETTINGS["naming_convention"]
     rules = OrderedDict(
-        sorted(
-            six.iteritems(RULES[dcnc_version]), key=lambda f: RULES_ORDER.index(f[0])
-        )
+        sorted(RULES[dcnc_version].items(), key=lambda f: RULES_ORDER.index(f[0]))
     )
 
     fields_dict = init_dict_isdcf(rules)
-    fields_list = str.split("_")
+    fields_list = isdcf_str.split("_")
 
     if len(fields_list) != 12:
         error_list.append(
@@ -157,7 +154,7 @@ def parse_isdcf_string(str):
     for idx_field, field in enumerate(fields_list):
         matched = False
 
-        for idx_rule, (name, regex) in enumerate(six.iteritems(rules)):
+        for idx_rule, (name, regex) in enumerate(rules.items()):
             pattern = re.compile(regex)
             match = re.match(pattern, field)
 
@@ -173,7 +170,7 @@ def parse_isdcf_string(str):
 
             fields_dict[name]["Value"] = field
             fields_matched.append(name)
-            sliced = islice(six.iteritems(rules), idx_rule + 1, None)
+            sliced = islice(rules.items(), idx_rule + 1, None)
             rules = OrderedDict(sliced)
             matched = True
             break
@@ -185,7 +182,7 @@ def parse_isdcf_string(str):
                 )
             )
 
-    for name, _ in six.iteritems(RULES[dcnc_version]):
+    for name, _ in RULES[dcnc_version].items():
         if name not in fields_matched:
             error_list.append("Field {} not found in ContentTitle".format(name))
 
@@ -201,7 +198,7 @@ def init_dict_isdcf(rules):
     """
     res = {}
 
-    for name, regex in six.iteritems(rules):
+    for name, regex in rules.items():
         pattern = re.compile(regex)
 
         res[name] = {}
@@ -219,8 +216,8 @@ def post_parse_isdcf(fields):
 
     """
     # Custom default values
-    for field, groups in six.iteritems(fields):
-        for key, value in six.iteritems(groups):
+    for field, groups in fields.items():
+        for key, value in groups.items():
             if value == DEFAULT and key in DEFAULTS:
                 fields[field][key] = DEFAULTS[key]
 

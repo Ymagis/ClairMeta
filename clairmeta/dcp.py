@@ -2,7 +2,6 @@
 # See LICENSE for more information
 
 import os
-import six
 import time
 
 from clairmeta.logger import get_log
@@ -108,9 +107,7 @@ class DCP(object):
             {uuid: path for a in self._list_am for uuid, path, _ in list_am_assets(a)}
         ]
         self._list_asset = {
-            k: v
-            for _list_asset in self._list_asset
-            for k, v in six.iteritems(_list_asset)
+            k: v for _list_asset in self._list_asset for k, v in _list_asset.items()
         }
 
         # Schema (IOP or SMPTE) is assumed to be the one found for the Assetmap
@@ -183,6 +180,7 @@ class DCP(object):
         self.package_type = "OV"
 
         for cpl in self._list_cpl:
+            cpl_type = "OV"
             for asset_type, asset in list_cpl_assets(cpl):
                 asset_id = asset["Id"]
                 asset["EssenceType"] = asset_type
@@ -195,7 +193,10 @@ class DCP(object):
                         self.path, self._list_asset[asset_id]
                     )
                 else:
+                    cpl_type = "VF"
                     self.package_type = "VF"
+
+            cpl["CPLType"] = cpl_type
 
     def cpl_probe_assets(self):
         """Probe mxf assets for each reel."""

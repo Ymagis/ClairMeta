@@ -2,7 +2,6 @@
 # See LICENSE for more information
 
 import re
-import six
 import time
 import importlib
 import inspect
@@ -69,7 +68,7 @@ class CheckerBase(object):
 
     def load_modules(self):
         prefix = DCP_CHECK_SETTINGS["module_prefix"]
-        for k, v in six.iteritems(DCP_CHECK_SETTINGS["modules"]):
+        for k, v in DCP_CHECK_SETTINGS["modules"].items():
             try:
                 module_path = "clairmeta." + prefix + k
                 module = importlib.import_module(module_path)
@@ -123,7 +122,7 @@ class CheckerBase(object):
         """Execute all checks."""
         self.log.info("Checking DCP : {}".format(self.dcp.path))
 
-        for _, checker in six.iteritems(self.check_modules):
+        for _, checker in self.check_modules.items():
             self.checks += checker.run_checks()
         return self.checks
 

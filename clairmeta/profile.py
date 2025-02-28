@@ -1,7 +1,6 @@
 # Clairmeta - (C) YMAGIS S.A.
 # See LICENSE for more information
 
-import six
 import json
 import os
 import copy
@@ -17,6 +16,7 @@ DCP_CHECK_PROFILE = {
     # 4 levels : ERROR, WARNING, INFO and SILENT.
     "criticality": {
         "default": "ERROR",
+        "certif_der_decoding_extensions": "WARNING",
         "check_dcnc_": "INFO",
         "check_dcp_foreign_files": "WARNING",
         "check_assets_am_volindex_one": "WARNING",
@@ -98,7 +98,7 @@ def load_profile(file_path):
             "Load Profile {} : loading error - {}".format(file_path, str(e))
         )
 
-    for k, v in six.iteritems(profile_format):
+    for k, v in profile_format.items():
         if k not in profile:
             raise ClairMetaException(
                 "Load Profile {} : missing key {}".format(file_path, k)

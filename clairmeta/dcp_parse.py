@@ -2,7 +2,6 @@
 # See LICENSE for more information
 
 import os
-import six
 
 from clairmeta.utils.isdcf import parse_isdcf_string
 from clairmeta.utils.xml import parse_xml
@@ -154,7 +153,7 @@ def cpl_reels_parse(cpl_node):
         }
 
         # Generic asset parsing
-        for key, val in six.iteritems(asset_mapping):
+        for key, val in asset_mapping.items():
             if key in assetlist:
                 out_reel["Assets"][val] = assetlist[key]
 

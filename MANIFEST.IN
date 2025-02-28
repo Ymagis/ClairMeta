@@ -1,2 +1,6 @@
-include             LICENSE CONTRIBUTORS MANIFEST.in *.rst
-recursive-include   tests           *
+include LICENSE CONTRIBUTORS MANIFEST.in *.rst
+graft clairmeta/xsd
+graft tests
+prune tests/resources
+global-exclude *.py[cod]
+global-exclude .DS_Store

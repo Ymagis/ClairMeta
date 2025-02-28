@@ -5,7 +5,6 @@ from __future__ import absolute_import
 import os
 import io
 import re
-import six
 import xmltodict
 from lxml import etree
 from xml.dom.minidom import parseString
@@ -142,7 +141,7 @@ def post_parse_attr(in_elem, parent_dict={}, parent_key=""):
     parent_dict = out_elem if parent_dict is None else parent_dict
 
     if isinstance(in_elem, dict):
-        for k, v in six.iteritems(in_elem):
+        for k, v in in_elem.items():
             if k.startswith("@"):
                 attrib_key = "{}@{}".format(parent_key, k[1:])
                 parent_dict[attrib_key] = v
@@ -194,7 +193,7 @@ def parse_xml(xml_path, namespaces={}, force_list=(), xml_attribs=True):
             readed_file = file.read()
 
             # Collapse these namespace
-            namespaces = {v: k for k, v in six.iteritems(namespaces)}
+            namespaces = {v: k for k, v in namespaces.items()}
 
             xml_dict = xmltodict.parse(
                 readed_file,

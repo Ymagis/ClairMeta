@@ -168,12 +168,13 @@ Contributing
    cd clairmeta
    git clone https://github.com/Ymagis/ClairMeta_Data tests/resources
 
-   pip3 install poetry
-   poetry install
-   poetry shell
+   uv sync --all-extras --dev
 
-   # Code... and tests
-   pytest --doctest-modules
+   # Code...
+
+   uv run ruff check
+   uv run black .
+   uv run pytest --doctest-modules
 
 -  Open a Pull Request
 -  Open an Issue

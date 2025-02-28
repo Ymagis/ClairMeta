@@ -2,7 +2,6 @@
 # See LICENSE for more information
 
 import os
-import six
 import re
 
 from clairmeta.dcp_utils import list_cpl_assets, cpl_probe_asset
@@ -79,7 +78,7 @@ class Checker(CheckerBase):
             "Assetmap": self.dcp._list_am,
         }
 
-        for k, v in six.iteritems(restricted_lists):
+        for k, v in restricted_lists.items():
             if len(v) == 0:
                 self.error("Missing {} file".format(k))
             if len(v) > 1:

@@ -3,7 +3,6 @@
 
 import os
 import re
-import six
 import freetype
 import pycountry
 
@@ -463,7 +462,7 @@ class Checker(CheckerBase):
             return
 
         face = freetype.Face(path)
-        font_chars = [six.unichr(c) for c, n in face.get_chars()]
+        font_chars = [chr(c) for c, n in face.get_chars()]
 
         missing_glyphs = []
         for char in unique_chars:

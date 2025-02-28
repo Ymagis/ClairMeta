@@ -1,31 +1,46 @@
-[tool.poetry]
+[project]
 name = "clairmeta"
 version = "1.5.2"
 description = "ClairMeta is a python package for Digital Cinema Package (DCP) probing and checking."
-authors = ["Rémi Achard <remiachard@gmail.com>"]
-license = "BSD-3-Clause"
+authors = [
+    { name = "Rémi Achard", email = "remiachard@gmail.com" },
+]
+license = { text = "BSD-3-Clause" }
 readme = "README.rst"
+requires-python = ">=3.8"
+classifiers = [
+    "Development Status :: 5 - Production/Stable",
+    "Intended Audience :: Developers",
+    "Topic :: Utilities",
+    "Topic :: Multimedia :: Video",
+    "Topic :: Software Development :: Libraries :: Python Modules",
+    "License :: OSI Approved :: BSD License",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.8",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+]
+dependencies = [
+    "cryptography>=44.0.0",
+    "dicttoxml>=1.7.16",
+    "freetype-py>=2.5.1",
+    "lxml>=5.3.0",
+    "pycountry>=24.6.1",
+    "python-dateutil>=2.9.0.post0",
+    "xmltodict>=0.14.2",
+]
+keywords = ["digital", "cinema", "dcp", "dcdm", "dsm", "check", "probe", "smpte", "interop"]
 
-[tool.poetry.dependencies]
-python = "^3.8"
-lxml = "^4.9.3"
-dicttoxml = "^1.7.16"
-xmltodict = "^0.13.0"
-python-dateutil = "^2.8.2"
-six = "^1.16.0"
-pyopenssl = "^23.2.0"
-pycountry = "^22.3.5"
-shutilwhich = "^1.1.0"
-cryptography = "^41.0.4"
-freetype-py = "^2.4.0"
+[project.urls]
+Repository = "https://github.com/Ymagis/ClairMeta"
 
-
-[tool.poetry.group.dev.dependencies]
-coverage = "^7.3.2"
-pytest = "^7.4.2"
-ruff = "^0.0.292"
-black = "^23.9.1"
-
-[build-system]
-requires = ["poetry-core"]
-build-backend = "poetry.core.masonry.api"
+[dependency-groups]
+dev = [
+    "black>=24.8.0",
+    "coverage>=7.6.1",
+    "pytest>=8.3.4",
+    "ruff>=0.9.5",
+]

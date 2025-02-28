@@ -2,7 +2,6 @@
 # See LICENSE for more information
 
 import re
-import six
 from collections import defaultdict
 from datetime import datetime
 
@@ -108,7 +107,7 @@ class CheckReport(object):
                 for filename in check.asset_stack:
                     asset = asset[filename]
 
-                desc = error.short_desc()
+                desc = error.doc
                 desc = ". {}\n".format(desc) if desc else ""
                 lines.append("{}{}".format(desc, error.message))
 
@@ -119,7 +118,7 @@ class CheckReport(object):
 
         for status in self.ORDERED_STATUS:
             out_stack = []
-            for k, v in six.iteritems(status_map[status]):
+            for k, v in status_map[status].items():
                 out_stack += [self._dump_stack("", k, v, indent_level=0)]
             if out_stack:
                 report += "{}\n{}\n".format(
@@ -139,12 +138,12 @@ class CheckReport(object):
         levels = self.profile["criticality"]
         default = levels.get("default", "ERROR")
         # Translate Perl like syntax to Python
-        levels = {k.replace("*", ".*"): v for k, v in six.iteritems(levels)}
+        levels = {k.replace("*", ".*"): v for k, v in levels.items()}
 
         for check in self.checks:
             for error in check.errors:
                 score_profile = {0: default}
-                for c_name, c_level in six.iteritems(levels):
+                for c_name, c_level in levels.items():
                     # Assumes python is internally caching regex compilation
                     if re.search(c_name, error.full_name()):
                         score_profile[len(c_name)] = c_level
@@ -186,7 +185,7 @@ class CheckReport(object):
             out_str += ("\n" + indent_char * (ind + 2)).join(m.split("\n"))
         ind -= indent_step
 
-        for k, v in six.iteritems(values):
+        for k, v in values.items():
             out_str += self._dump_stack(out_str, k, v, indent_level + indent_step)
 
         return out_str
